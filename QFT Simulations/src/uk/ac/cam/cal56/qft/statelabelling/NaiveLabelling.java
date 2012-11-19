@@ -38,16 +38,16 @@ public class NaiveLabelling {
         long result = Combinatorics.S(N, P(ls) - 1);
         for (int k = 0; k < (N - 1); k++) {
             long product = 1;
-            int divFactor = k + 1;
+            int divFactor = 2; // k + 1;
             for (int m = 0; m <= k; m++) {
                 int sum = 0;
                 for (int n = N - k - 1; n < N; n++)
                     sum += ls.get(n);
                 product *= (sum + m);
                 // continually divide by factors of dividing factorial to keep result from blowing up
-                while (divFactor > 1 && product % divFactor == 0) {
+                while (divFactor <= k+1 && product % divFactor == 0) {
                     product /= divFactor;
-                    divFactor--;
+                    divFactor++;
                 }
             }
             result += product;
@@ -67,7 +67,7 @@ public class NaiveLabelling {
         }
         return ls;
     }
-    
+
     private static int label(long i, int N) {
         if (N == 1)
             return (int) i; // type casting OK as this will be small

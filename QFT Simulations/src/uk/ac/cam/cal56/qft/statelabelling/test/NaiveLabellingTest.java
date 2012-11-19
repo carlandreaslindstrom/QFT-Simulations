@@ -1,6 +1,7 @@
 package uk.ac.cam.cal56.qft.statelabelling.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 
 import java.util.Arrays;
@@ -9,6 +10,7 @@ import java.util.List;
 import org.junit.Test;
 
 import uk.ac.cam.cal56.qft.statelabelling.NaiveLabelling;
+import uk.ac.cam.cal56.qft.util.Combinatorics;
 
 public class NaiveLabellingTest {
 
@@ -111,8 +113,8 @@ public class NaiveLabellingTest {
 
     @Test
     public void testLabelsGrandVerification() {
-        int maxN = 23;
-        int maxIndex = 1000;
+        int maxN = 100;
+        int maxIndex = 100;
         for (int N = 1; N <= maxN; N++) {
             for (int i = 0; i < maxIndex; i++) {
                 assertEquals(NaiveLabelling.index(NaiveLabelling.labels(i, N)), i);
@@ -121,11 +123,23 @@ public class NaiveLabellingTest {
     }
 
     @Test
+    public void speedTestLabels() {
+        // experimentally time scales exponentially with maxIndex
+        // almost constant time with N [if max index constant] (!!, due to lots of zeros)
+        int N = 50; // lattice points
+        int P = 4; // max particle number
+        long maxIndex = Combinatorics.S(N, P); // this number explodes with rising P
+        // System.out.println("Number of states: " + maxIndex);
+        for (int i = 0; i < maxIndex; i++)
+            assertNotNull(NaiveLabelling.labels(i, N));
+    }
+
+    @Test
     public void stressTestLabels() {
-        long i = 3;
-        int N = 24;
+        // can handle "any" i for N up to ~1000.
+        long i = 10000000000000L;
+        int N = 1000;
         List<Integer> ls = NaiveLabelling.labels(i, N);
-        assertEquals(ls, Arrays.asList(0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
         long iCalculated = NaiveLabelling.index(ls);
         assertEquals(i, iCalculated);
     }

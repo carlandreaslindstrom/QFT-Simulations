@@ -4,6 +4,7 @@ public class Combinatorics {
 
     // choose(n,r) = n!/(r!(n-r)!)
     public static long choose(int n, int r) {
+        if(r<0) return 0;
         long result = 1L;
         int divFactor = r;
         for (int multfactor = n; multfactor > (n - r); multfactor--) {

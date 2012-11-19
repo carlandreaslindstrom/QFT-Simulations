@@ -19,6 +19,9 @@ public class CombinatoricsTest {
         assertEquals(Combinatorics.choose(24, 23), 24);
         assertEquals(Combinatorics.choose(100, 2), 4950);
         assertEquals(Combinatorics.choose(100, 10), 17310309456440L);
+        assertEquals(Combinatorics.choose(100, 0), 1);
+        assertEquals(Combinatorics.choose(100, -10), 0);
+        assertEquals(Combinatorics.choose(90, 90), 1);
     }
 
     @Test
