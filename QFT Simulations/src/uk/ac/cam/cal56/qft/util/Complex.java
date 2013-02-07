@@ -1,5 +1,7 @@
 package uk.ac.cam.cal56.qft.util;
 
+import java.text.DecimalFormat;
+
 public class Complex {
 
     private static final double EPSILON = 1.0e-10;
@@ -23,9 +25,19 @@ public class Complex {
         return Complex.polar(1.0, arg);
     }
 
-    // constructor for zero
+    // constructor for 0
     public static Complex zero() {
         return new Complex(0.0, 0.0);
+    }
+
+    // constructor for 1
+    public static Complex one() {
+        return new Complex(1.0, 0.0);
+    }
+
+    // constructor for i
+    public static Complex i() {
+        return new Complex(0.0, 1.0);
     }
 
     // real and imaginary part getters
@@ -90,14 +102,28 @@ public class Complex {
             return Complex.polar(mod() / z.mod(), arg() - z.arg());
     }
 
+    public Complex timesi() {
+        return new Complex(-_imag, _real);
+    }
+
+    public Complex timesexpi(double arg) {
+        return new Complex(Math.cos(arg) * _real - Math.sin(arg) * _imag, Math.sin(arg) * _real + Math.cos(arg) * _imag);
+    }
+
     // equals operator
     public Boolean equals(Complex z) {
         return (Math.abs(z.real() - _real) < EPSILON && Math.abs(z.imag() - _imag) < EPSILON);
     }
 
+    // zero bool operator
+    public Boolean isZero() {
+        return equals(Complex.zero());
+    }
+
     // toString() override
     public String toString() {
-        return "(" + _real + "," + _imag + ")";
+        DecimalFormat df = new DecimalFormat("#.###");
+        return "(" + df.format(_real) + "," + df.format(_imag) + ")";
     }
 
 }

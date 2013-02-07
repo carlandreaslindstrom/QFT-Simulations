@@ -48,5 +48,35 @@ public class CombinatoricsTest {
         assertEquals(Combinatorics.S(27, 3), 4060);
         assertEquals(Combinatorics.S(27, 13), 12033222880L);
     }
+    
+    @Test
+    public void testF_p() {
+        double epsilon = 1.0e-9;
+        for(int l = 0; l < 200; l++) {
+            // F_p(l,n,0)
+            assertEquals(Combinatorics.F_p(l, 0, 0), 1, epsilon);
+            assertEquals(Combinatorics.F_p(l, 1, 0), Math.sqrt(l+1), epsilon);
+            assertEquals(Combinatorics.F_p(l, 2, 0), Math.sqrt((l+1)*(l+2)), epsilon);
+            assertEquals(Combinatorics.F_p(l, 3, 0), Math.sqrt((l+1)*(l+2)*(l+3)), epsilon);
+            assertEquals(Combinatorics.F_p(l, 4, 0), Math.sqrt((l+1)*(l+2)*(l+3)*(l+4)), epsilon);
+            assertEquals(Combinatorics.F_p(l, 9, 0), Math.sqrt((l+1)*(l+2)*(l+3)*(l+4)*(l+5)*(l+6)*(l+7)*(l+8)*(l+9)), epsilon);
+            
+            // F_p(l,0,m) as well as testing m<=l or else = 0
+            assertEquals(Combinatorics.F_p(l, 0, 1), Math.sqrt(l), epsilon);
+            assertEquals(Combinatorics.F_p(l, 0, 2), Math.sqrt(l*(l-1)), epsilon);
+            assertEquals(Combinatorics.F_p(l, 0, 3), Math.sqrt(l*(l-1)*(l-2)), epsilon);
+            assertEquals(Combinatorics.F_p(l, 0, 4), Math.sqrt(l*(l-1)*(l-2)*(l-3)), epsilon);
+            assertEquals(Combinatorics.F_p(l, 0, 9), Math.sqrt(l*(l-1)*(l-2)*(l-3)*(l-4)*(l-5)*(l-6)*(l-7)*(l-8)), epsilon);
+            
+            // other cases
+            assertEquals(Combinatorics.F_p(l, 1, 1), l, epsilon);
+            assertEquals(Combinatorics.F_p(l, 2, 1), l*Math.sqrt(l+1), epsilon);
+            assertEquals(Combinatorics.F_p(l, 1, 2), (l-1)*Math.sqrt(l), epsilon);
+            assertEquals(Combinatorics.F_p(l, 2, 2), (l-1)*l, epsilon);
+            assertEquals(Combinatorics.F_p(l, 1, 3), (l-2)*Math.sqrt(l*(l-1)), epsilon);
+            assertEquals(Combinatorics.F_p(l, 3, 1), l*Math.sqrt((l+1)*(l+2)), epsilon);
+        }
+        
+    }
 
 }

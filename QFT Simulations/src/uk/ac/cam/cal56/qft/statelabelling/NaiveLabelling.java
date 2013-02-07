@@ -30,8 +30,33 @@ public class NaiveLabelling {
             result += l;
         return result;
     }
+    
+    // p_tot({l_n}) = Sum(n*l_n,{n,0,N-1})
+    public static int momentumNumber(List<Integer> labels) {
+        int result = 0;
+        int N = labels.size();
+        for(int n = 1; n < N; n++) {
+            result += n*labels.get(n);
+            result %= N;
+        }
+        return result;
+    }
+    
+    public static int momentumNumber(long i, int N) {
+        int result = 0;
+        List<Long> js = new ArrayList<Long>();
+        for (int n = 0; n < N; n++) {
+            if (n > 0)
+                js.add(js.get(n - 1) - Combinatorics.S(N + 1 - n, P(js.get(n - 1), N + 1 - n) - 1));
+            else
+                js.add(i);
+            result += n*label(js.get(n), N - n);
+            result %= N;
+        }
+        return result;
+    }
+    
 
-    // something wrong here ...
     // i({l_n}) = S(N,P-1) + Sum(Product((Sum(l_n, {n,N-k-1,N-1})+m)/(m+1) ,{m,0,k}), {k,0,N-2})
     public static long index(List<Integer> ls) {
         int N = ls.size();
@@ -45,7 +70,7 @@ public class NaiveLabelling {
                     sum += ls.get(n);
                 product *= (sum + m);
                 // continually divide by factors of dividing factorial to keep result from blowing up
-                while (divFactor <= k+1 && product % divFactor == 0) {
+                while (divFactor <= k + 1 && product % divFactor == 0) {
                     product /= divFactor;
                     divFactor++;
                 }

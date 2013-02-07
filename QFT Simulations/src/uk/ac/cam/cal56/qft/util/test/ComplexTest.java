@@ -1,6 +1,7 @@
 package uk.ac.cam.cal56.qft.util.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 import org.junit.Test;
 
@@ -47,6 +48,14 @@ public class ComplexTest {
 
         Complex w = z.minus(x.times(2));
         assert (w.equals(new Complex(3, 0)));
+    }
+    
+    @Test
+    public void testIsZero() {
+        Complex x = new Complex(0, 0);
+        Complex y = new Complex(4, 2);
+        assert(x.isZero());
+        assertFalse(y.isZero());
     }
 
 }

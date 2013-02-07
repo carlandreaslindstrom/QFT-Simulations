@@ -143,4 +143,25 @@ public class NaiveLabellingTest {
         long iCalculated = NaiveLabelling.index(ls);
         assertEquals(i, iCalculated);
     }
+
+    @Test
+    public void testMomentumNumber() {
+        assertEquals(NaiveLabelling.momentumNumber(Arrays.asList(0, 0, 0, 0, 0)), 0);
+        assertEquals(NaiveLabelling.momentumNumber(Arrays.asList(3, 1, 1, 0, 0)), 3);
+        assertEquals(NaiveLabelling.momentumNumber(Arrays.asList(2, 1, 1, 2, 3)), 1);
+        assertEquals(NaiveLabelling.momentumNumber(Arrays.asList(1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1)),
+                     13);
+
+        assertEquals(NaiveLabelling.momentumNumber(17, 18), 16);
+        assertEquals(NaiveLabelling.momentumNumber(0, 100), 0);
+        
+        int N = 100;
+        int P = 3;
+        long maxIndex = Combinatorics.S(N, P); // this number explodes with rising P
+        for (int i = 0; i < maxIndex; i++)
+            assertEquals(NaiveLabelling.momentumNumber(i, N),
+                          NaiveLabelling.momentumNumber(NaiveLabelling.labels(i, N)));
+        
+        
+    }
 }
