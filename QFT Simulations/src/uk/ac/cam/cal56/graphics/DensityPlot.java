@@ -74,6 +74,7 @@ public class DensityPlot extends Canvas {
                 }
             }
         }
+        this.setBounds(0, 0, width, height);
     }
 
     // transforms a linear number scale to a rainbow color scale
@@ -87,6 +88,18 @@ public class DensityPlot extends Canvas {
         int green = (int) (scale * (1 + Math.sin(freq * num + (phase + 4.7) * Math.PI / 3)));
         int blue = (int) (scale * (1 + Math.sin(freq * num + phase * Math.PI / 3)));
         return new Color(red, green, blue);
+    }
+    
+    public void update(double[][] data) {
+        _data = data;
+        if (width < _data.length || height < _data[0].length) { // sampled
+            _pointsize = 1;
+            _sampling = Math.max((int) Math.ceil(_data.length / width), (int) Math.ceil(_data[0].length / height));
+        }
+        else { // scaled up
+            _sampling = 1;
+            _pointsize = Math.min(width / _data.length, height / _data[0].length);
+        }
     }
 
     // TEST CASE

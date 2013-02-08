@@ -68,6 +68,23 @@ public class Plot extends Canvas {
                     _max = value;
             }
         }
+        this.setBounds(0, 0, width, height);
+    }
+    
+    public void update(double[] data) {
+        _data = data;
+        if (width < _data.length) { // sampled
+            _pointsize = 1;
+            _sampling = (int) Math.ceil(_data.length / width);
+        }
+        else { // scaled up
+            _sampling = 1;
+            _pointsize = width / _data.length;
+        }
+    }
+    
+    public void update(double value) {
+        _data = new double[] {value};
     }
 
     // TEST CASE
