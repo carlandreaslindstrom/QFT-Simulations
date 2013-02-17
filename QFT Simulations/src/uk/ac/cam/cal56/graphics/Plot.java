@@ -70,7 +70,7 @@ public class Plot extends Canvas {
         }
         this.setBounds(0, 0, width, height);
     }
-    
+
     public void update(double[] data) {
         _data = data;
         if (width < _data.length) { // sampled
@@ -82,9 +82,9 @@ public class Plot extends Canvas {
             _pointsize = width / _data.length;
         }
     }
-    
+
     public void update(double value) {
-        _data = new double[] {value};
+        _data = new double[] { value };
     }
 
     // TEST CASE

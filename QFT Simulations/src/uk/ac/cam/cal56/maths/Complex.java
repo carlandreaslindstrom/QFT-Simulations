@@ -1,4 +1,4 @@
-package uk.ac.cam.cal56.qft.util;
+package uk.ac.cam.cal56.maths;
 
 import java.text.DecimalFormat;
 

@@ -1,10 +1,10 @@
-package uk.ac.cam.cal56.qft.util.test;
+package uk.ac.cam.cal56.maths.test;
 
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import uk.ac.cam.cal56.qft.util.Combinatorics;
+import uk.ac.cam.cal56.maths.Combinatorics;
 
 public class CombinatoricsTest {
 

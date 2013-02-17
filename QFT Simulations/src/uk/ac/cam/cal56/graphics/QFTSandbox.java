@@ -26,7 +26,7 @@ import com.jgoodies.forms.layout.RowSpec;
 public class QFTSandbox extends JFrame {
 
     private static final int    LATTICE_NUMBER_MIN         = 1;
-    private static final int    LATTICE_NUMBER_MAX         = 100;
+    private static final int    LATTICE_NUMBER_MAX         = 300;
     private static final int    LATTICE_NUMBER_DEFAULT     = 50;
 
     private static final String TIME_STEP_PREFIX           = "<html>10<sup>";
@@ -70,7 +70,7 @@ public class QFTSandbox extends JFrame {
 
     // Plots
     private Plot                _plot1D                    = new Plot(g(), 0.0, 1.0, 20, 200);
-    private Plot                _plot2D                    = new Plot(f(), 0.0, 1.0, 400, 200);
+    private Plot                _plot2D                    = new Plot(f(), 0.0, 1.0, 300, 200);
     private DensityPlot         _densityPlot               = new DensityPlot(h(), 0.0, 1.0, 300, 300);
 
     public QFTSandbox() {
@@ -189,14 +189,14 @@ public class QFTSandbox extends JFrame {
     private double[] f() {
         double[] data = new double[_N];
         for (int i = 0; i < _N; i++) {
-            double value = Math.cos(2 * Math.PI * (i + _number) / (2 * _N));
+            double value = Math.cos(Math.PI * (i + _number) / _N);
             data[i] = value * value;
         }
         return data;
     }
 
     private double g() {
-        double value = Math.cos(2 * Math.PI * _number / 100);
+        double value = Math.cos(Math.PI * _number / _N);
         return value * value;
     }
 
@@ -204,8 +204,7 @@ public class QFTSandbox extends JFrame {
         double[][] data = new double[_N][_N];
         for (int i = 0; i < _N; i++) {
             for (int j = 0; j < _N; j++) {
-                double value = Math.cos(2 * Math.PI * (i + _number) / (2 * _N)) *
-                               Math.cos(2 * Math.PI * (j - _number) / (2 * _N));
+                double value = Math.cos(Math.PI * (i + _number) / _N) * Math.cos(Math.PI * (j - _number) / _N);
                 data[i][j] = value * value;
             }
         }

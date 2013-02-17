@@ -1,13 +1,12 @@
 package uk.ac.cam.cal56.graphics;
 
-import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Graphics;
 
 import javax.swing.JFrame;
 
 @SuppressWarnings("serial")
-public class DensityPlot extends Canvas {
+public class DensityPlot extends DoubleBufferedCanvas {
 
     public final int   width;
     public final int   height;
@@ -30,8 +29,6 @@ public class DensityPlot extends Canvas {
                 g.fillRect(i * _pointsize, j * _pointsize, _pointsize, _pointsize);
             }
     }
-
-    // TODO: constructor with diagsym param
 
     // constructors with and without automatically set min and max
     public DensityPlot(double[][] data, int maxwidth, int maxheight) {
@@ -89,7 +86,7 @@ public class DensityPlot extends Canvas {
         int blue = (int) (scale * (1 + Math.sin(freq * num + phase * Math.PI / 3)));
         return new Color(red, green, blue);
     }
-    
+
     public void update(double[][] data) {
         _data = data;
         if (width < _data.length || height < _data[0].length) { // sampled
