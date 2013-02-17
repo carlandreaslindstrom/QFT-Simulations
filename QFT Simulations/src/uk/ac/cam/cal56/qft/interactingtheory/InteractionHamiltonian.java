@@ -2,7 +2,7 @@ package uk.ac.cam.cal56.qft.interactingtheory;
 
 import java.util.Map;
 
-import uk.ac.cam.cal56.qft.util.Complex;
+import uk.ac.cam.cal56.maths.Complex;
 
 public class InteractionHamiltonian {
 

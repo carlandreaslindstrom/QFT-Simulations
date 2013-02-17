@@ -3,7 +3,7 @@ package uk.ac.cam.cal56.qft.interactingtheory;
 import java.util.HashMap;
 import java.util.Map;
 
-import uk.ac.cam.cal56.qft.util.Combinatorics;
+import uk.ac.cam.cal56.maths.Combinatorics;
 
 public class FockState {
 
@@ -68,6 +68,8 @@ public class FockState {
         return true;
     }
 
+    
+    // DOESN'T WORK
     // gives label of the state which gives a nonzero contribution when
     // sandwiching a set of creation and annihilation operators.
     public Long sandwichLabel(Map<Integer, Integer> creationOps, Map<Integer, Integer> annihilationOps) {

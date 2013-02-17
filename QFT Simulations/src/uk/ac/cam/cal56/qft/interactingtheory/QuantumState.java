@@ -4,9 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import uk.ac.cam.cal56.maths.Combinatorics;
+import uk.ac.cam.cal56.maths.Complex;
 import uk.ac.cam.cal56.qft.statelabelling.NaiveLabelling;
-import uk.ac.cam.cal56.qft.util.Combinatorics;
-import uk.ac.cam.cal56.qft.util.Complex;
 
 public class QuantumState {
 

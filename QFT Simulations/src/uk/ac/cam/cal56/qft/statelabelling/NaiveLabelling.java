@@ -3,7 +3,7 @@ package uk.ac.cam.cal56.qft.statelabelling;
 import java.util.ArrayList;
 import java.util.List;
 
-import uk.ac.cam.cal56.qft.util.Combinatorics;
+import uk.ac.cam.cal56.maths.Combinatorics;
 
 // This labelling scheme steps through states by particle number,
 // but not by total momentum within particle number (hence "naive").

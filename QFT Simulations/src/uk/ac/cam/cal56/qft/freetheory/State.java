@@ -5,9 +5,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import uk.ac.cam.cal56.maths.Combinatorics;
+import uk.ac.cam.cal56.maths.Complex;
 import uk.ac.cam.cal56.qft.statelabelling.NaiveLabelling;
-import uk.ac.cam.cal56.qft.util.Combinatorics;
-import uk.ac.cam.cal56.qft.util.Complex;
 
 public class State {
 

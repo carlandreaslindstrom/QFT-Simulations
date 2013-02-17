@@ -9,8 +9,8 @@ import java.util.List;
 
 import org.junit.Test;
 
+import uk.ac.cam.cal56.maths.Combinatorics;
 import uk.ac.cam.cal56.qft.statelabelling.NaiveLabelling;
-import uk.ac.cam.cal56.qft.util.Combinatorics;
 
 public class NaiveLabellingTest {
 
