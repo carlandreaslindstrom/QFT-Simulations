@@ -1,84 +1,133 @@
 package uk.ac.cam.cal56.qft.interactingtheory;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 
 import uk.ac.cam.cal56.maths.Combinatorics;
 
-public class FockState {
+public class FockState implements Iterator<Integer>, Iterable<Integer> {
 
-    private Map<Integer, Integer> _exponents;
-    private int                   _N;
+    private List<Integer> _particles = new ArrayList<Integer>(); // particle entries
+    private int           _label     = -1;                      // starts at -1
+    private int           _N;
+    private double        _m;
+    private double        _dx;
+    private int           _S;
 
-    public FockState(int N) {
-        _exponents = new HashMap<Integer, Integer>();
+    public FockState(int N, int Pmax, double m, double dx) {
         _N = N;
+        _m = m;
+        _dx = dx;
+        _S = Combinatorics.S(N, Pmax);
     }
 
-    // total particle number in Fock state
-    public int particleNumber() {
-        int sum = 0;
-        for (int exponent : _exponents.values())
-            sum += exponent;
+    // total energy
+    public double getEnergy() {
+        double sum = 0;
+        for (int p : _particles)
+            sum += E_p(p); // E = Sum( E_p )
         return sum;
     }
 
-    // naive label of Fock State
-    public long label() {
-        long result = Combinatorics.S(_N, particleNumber() - 1);
-        for (int k = 0; k < (_N - 1); k++) {
-            long product = 1;
-            int divFactor = 2; // k + 1;
-            for (int m = 0; m <= k; m++) {
-                int sum = 0;
-                for (int n = _N - k - 1; n < _N; n++) {
-                    Integer value = _exponents.get(n);
-                    if (value != null)
-                        sum += value;
-                }
-                product *= (sum + m);
-                // continually divide by factors of dividing factorial to keep result from blowing up
-                while (divFactor <= k + 1 && product % divFactor == 0) {
-                    product /= divFactor;
-                    divFactor++;
-                }
+    // E_p = sqrt(m^2 + (2/dx)^2*sin(p*dx/2)^2 )
+    private double E_p(int i) { // i = momentum number
+        double pterm = (2.0 / _dx) * Math.sin(Math.PI * i / _N);
+        return Math.sqrt(_m * _m + pterm * pterm);
+    }
+
+    // total momentum number
+    public int getMomentumNumber() {
+        int sum = 0;
+        for (int p : _particles)
+            sum += p;
+        return sum % _N;
+    }
+
+    // particle number
+    public int getParticleNumber() {
+        return _particles.size();
+    }
+
+    // label
+    public int getLabel() {
+        return _label;
+    }
+
+    // ladder operator exponent for momentum p
+    public int l_p(int p) {
+        return Collections.frequency(_particles, p);
+    }
+
+    // UNIT TEST HELP FUNCTIONS
+
+    // particle entries as list (for unit testing)
+    public List<Integer> toList() {
+        return _particles;
+    }
+
+    // ladder operator exponents (for testing and printing)
+    public int[] exponents() {
+        int[] ls = new int[_N];
+        for (int p = 0; p < _N; p++)
+            ls[p] = l_p(p);
+        return ls;
+    }
+
+    // output string
+    public String toString() {
+        return _label + "=" + Arrays.toString(exponents());
+    }
+
+    // recursive function used in incrementing particle entries
+    private void particleIncrementer(int index) {
+        int particle = _particles.get(index);
+        particle++;
+        if (particle == _N) {
+            if (index == 0) {
+                particle = 0;
+                _particles.add(0);
             }
-            result += product;
+            else {
+                particleIncrementer(index - 1);
+                particle = _particles.get(index - 1);
+            }
+
         }
-        return result;
+        _particles.set(index, particle);
     }
 
-    // create particle of momentum number p
-    public void create(int p) {
-        Integer exponent = _exponents.get(p);
-        if (exponent == null)
-            exponent = 0;
-        _exponents.put(p, exponent + 1);
+    // ITERATOR FUNCTIONS
+
+    @Override
+    public Integer next() {
+        if (_label > -1) {
+            if (!hasNext())
+                return null;
+            if (getParticleNumber() == 0)
+                _particles.add(0);
+            else
+                particleIncrementer(getParticleNumber() - 1);
+        }
+        _label++;
+        return _label;
     }
 
-    // annihilate particle of momentum number p, return false if resulting state is 0
-    public boolean annihilate(int p) {
-        Integer exponent = _exponents.get(p);
-        if (exponent == null)
-            return false;
-        else if (exponent <= 0)
-            _exponents.remove(p);
-        else
-            _exponents.put(p, exponent - 1);
-        return true;
+    @Override
+    public boolean hasNext() {
+        return _label < (_S - 1);
     }
 
-    
-    // DOESN'T WORK
-    // gives label of the state which gives a nonzero contribution when
-    // sandwiching a set of creation and annihilation operators.
-    public Long sandwichLabel(Map<Integer, Integer> creationOps, Map<Integer, Integer> annihilationOps) {
-        try {
-            FockState bra = (FockState) this.clone();
-            return bra.label();
-        }
-        catch (CloneNotSupportedException e) {
-            return null;
-        }
+    @Override
+    public void remove() {
+        _particles.clear();
+        _label = -1;
+    }
+
+    @Override
+    public Iterator<Integer> iterator() {
+        return this;
     }
 }

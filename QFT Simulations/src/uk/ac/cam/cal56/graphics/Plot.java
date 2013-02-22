@@ -5,6 +5,8 @@ import java.awt.Graphics;
 
 import javax.swing.JFrame;
 
+import uk.ac.cam.cal56.maths.Complex;
+
 @SuppressWarnings("serial")
 public class Plot extends Canvas {
 
@@ -36,6 +38,21 @@ public class Plot extends Canvas {
     // constructors for data set
     public Plot(double[] data, int maxwidth, int maxheight) {
         this(data, null, null, maxwidth, maxheight);
+    }
+    
+    public Plot(Complex[] cdata, int maxwidth, int maxheight) {
+        this(modSquare(cdata), null, null, maxwidth, maxheight);
+    }
+    
+    public Plot(Complex[] cdata, Double min, Double max, int maxwidth, int maxheight) {
+        this(modSquare(cdata), min, max, maxwidth, maxheight);
+    }
+    
+    private static double[] modSquare(Complex[] cdata) {
+        int N = cdata.length;
+        double[] data = new double[N];
+        for(int i = 0; i < N; i++) data[i] = cdata[i].modSquared();
+        return data;
     }
 
     // ...
@@ -81,6 +98,10 @@ public class Plot extends Canvas {
             _sampling = 1;
             _pointsize = width / _data.length;
         }
+    }
+    
+    public void update(Complex[] cdata) {
+        update(modSquare(cdata));
     }
 
     public void update(double value) {

@@ -23,7 +23,7 @@ public class FourierTransformTest {
         int N = (int) Math.pow(2, 19);
         Complex[] f = new Complex[N];
         for (int i = 0; i < N; i++) {
-            double arg = 2 * (i + N / 2) / N;
+            double arg = 2 * (i - N / 2) / N;
             f[i] = Complex.one().times(Math.exp(-arg * arg));
         }
 
@@ -44,7 +44,7 @@ public class FourierTransformTest {
         int N = (int) Math.pow(2, 13);
         Complex[] f = new Complex[N];
         for (int i = 0; i < N; i++) {
-            double arg = 2 * (i + N / 2) / N;
+            double arg = 2 * (i - N / 2) / N;
             f[i] = Complex.one().times(Math.exp(-arg * arg));
         }
 

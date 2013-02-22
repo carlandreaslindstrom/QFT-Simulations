@@ -5,6 +5,8 @@ import java.awt.Graphics;
 
 import javax.swing.JFrame;
 
+import uk.ac.cam.cal56.maths.Complex;
+
 @SuppressWarnings("serial")
 public class DensityPlot extends DoubleBufferedCanvas {
 
@@ -33,6 +35,23 @@ public class DensityPlot extends DoubleBufferedCanvas {
     // constructors with and without automatically set min and max
     public DensityPlot(double[][] data, int maxwidth, int maxheight) {
         this(data, null, null, maxwidth, maxheight);
+    }
+    
+    public DensityPlot(Complex[][] cdata, int maxwidth, int maxheight) {
+        this(modSquare(cdata), null, null, maxwidth, maxheight);
+    }
+    
+    public DensityPlot(Complex[][] cdata, Double min, Double max, int maxwidth, int maxheight) {
+        this(modSquare(cdata), min, max, maxwidth, maxheight);
+    }
+    
+    private static double[][] modSquare(Complex[][] cdata) {
+        int N = cdata.length, M = cdata[0].length;
+        double[][] data = new double[N][M];
+        for(int i = 0; i < N; i++) 
+            for(int j = 0; j < M; j++)
+                data[i][j] = cdata[i][j].modSquared();
+        return data;
     }
 
     // ...
@@ -77,7 +96,7 @@ public class DensityPlot extends DoubleBufferedCanvas {
     // transforms a linear number scale to a rainbow color scale
     public static Color doubleToRainbowColor(double num) {
         if (num < 0.0 || num > 1.0)
-            return Color.BLACK;
+            return Color.WHITE;
         double freq = 5.5;
         double phase = 0.2;
         int scale = 127;
@@ -97,6 +116,10 @@ public class DensityPlot extends DoubleBufferedCanvas {
             _sampling = 1;
             _pointsize = Math.min(width / _data.length, height / _data[0].length);
         }
+    }
+    
+    public void update(Complex[][] cdata) {
+        update(modSquare(cdata));
     }
 
     // TEST CASE
