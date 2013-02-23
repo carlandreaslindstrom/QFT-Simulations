@@ -7,7 +7,7 @@ import uk.ac.cam.cal56.maths.Combinatorics;
 
 // This labelling scheme steps through states by particle number,
 // but not by total momentum within particle number (hence "naive").
-public class NaiveLabelling {
+public class StateLabelling {
 
     // particle number is the amount of times one can
     // subtract choose(N+m-1,m) from i with increasing m

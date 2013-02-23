@@ -7,7 +7,7 @@ import java.util.List;
 
 import uk.ac.cam.cal56.maths.Combinatorics;
 import uk.ac.cam.cal56.maths.Complex;
-import uk.ac.cam.cal56.qft.statelabelling.NaiveLabelling;
+import uk.ac.cam.cal56.qft.statelabelling.StateLabelling;
 
 public class State {
 
@@ -85,7 +85,7 @@ public class State {
     }
 
     private double energy(int index) {
-        int momnum = NaiveLabelling.momentumNumber(index, _N);
+        int momnum = StateLabelling.momentumNumber(index, _N);
         double pterm = (2 / _dx) * Math.sin(Math.PI * momnum / _N);
         return Math.sqrt(_m * _m + pterm * pterm);
     }

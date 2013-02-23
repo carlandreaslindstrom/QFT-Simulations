@@ -12,7 +12,7 @@ import org.junit.Test;
 import uk.ac.cam.cal56.maths.Combinatorics;
 import uk.ac.cam.cal56.qft.interactingtheory.Interaction;
 import uk.ac.cam.cal56.qft.interactingtheory.InteractionHamiltonian;
-import uk.ac.cam.cal56.qft.statelabelling.NaiveLabelling;
+import uk.ac.cam.cal56.qft.statelabelling.StateLabelling;
 
 public class InteractionHamiltonianTest {
 
@@ -77,9 +77,9 @@ public class InteractionHamiltonianTest {
                     // check if Hamiltonian is symmetric
                     assertEquals(value, ih.get(m, n));
                     // check if transitions are between equal momentum states
-                    assertEquals(NaiveLabelling.momentumNumber(n, N), NaiveLabelling.momentumNumber(m, N));
+                    assertEquals(StateLabelling.momentumNumber(n, N), StateLabelling.momentumNumber(m, N));
                     // check if transitions have the correct particle number differences (odd)
-                    assertTrue(InteractionHamiltonian.allowedTransition(NaiveLabelling.P(n, N), NaiveLabelling.P(m, N),
+                    assertTrue(InteractionHamiltonian.allowedTransition(StateLabelling.P(n, N), StateLabelling.P(m, N),
                                                                         interaction));
                 }
             }
