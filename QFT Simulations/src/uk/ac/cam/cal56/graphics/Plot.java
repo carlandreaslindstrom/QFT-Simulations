@@ -98,6 +98,7 @@ public class Plot extends Canvas {
             _sampling = 1;
             _pointsize = width / _data.length;
         }
+        repaint();
     }
     
     public void update(Complex[] cdata) {
@@ -106,6 +107,7 @@ public class Plot extends Canvas {
 
     public void update(double value) {
         _data = new double[] { value };
+        repaint();
     }
 
     // TEST CASE

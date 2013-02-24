@@ -2,6 +2,7 @@ package uk.ac.cam.cal56.maths.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
@@ -34,8 +35,8 @@ public class ComplexTest {
         Complex z = new Complex(4, -3);
         Complex w = new Complex(1, 2.5);
 
-        assert (w.conj().equals(new Complex(1, -2.5)));
-        assertEquals(z.toString(), "(4.0,-3.0)");
+        assertTrue(w.conj().equals(new Complex(1, -2.5)));
+        assertEquals(z.toString(), "(4,-3)");
     }
 
     @Test
@@ -44,18 +45,28 @@ public class ComplexTest {
         Complex y = new Complex(4, 2);
 
         Complex z = x.plus(y);
-        assert (z.equals(new Complex(5, 4)));
+        assertTrue(z.equals(new Complex(5, 4)));
 
         Complex w = z.minus(x.times(2));
-        assert (w.equals(new Complex(3, 0)));
+        assertTrue(w.equals(new Complex(3, 0)));
     }
-    
+
     @Test
     public void testIsZero() {
         Complex x = new Complex(0, 0);
         Complex y = new Complex(4, 2);
-        assert(x.isZero());
+        assert (x.isZero());
         assertFalse(y.isZero());
+    }
+
+    @Test
+    public void testNegative() {
+        Complex x = new Complex(1, 2);
+        Complex y = new Complex(4, -2);
+        Complex z = x.negative();
+        Complex w = y.negative();
+        assertTrue(z.equals(new Complex(-1, -2)));
+        assertTrue(w.equals(new Complex(-4, 2)));
     }
 
 }

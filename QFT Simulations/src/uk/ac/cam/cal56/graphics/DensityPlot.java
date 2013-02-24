@@ -116,6 +116,7 @@ public class DensityPlot extends DoubleBufferedCanvas {
             _sampling = 1;
             _pointsize = Math.min(width / _data.length, height / _data[0].length);
         }
+        repaint();
     }
     
     public void update(Complex[][] cdata) {

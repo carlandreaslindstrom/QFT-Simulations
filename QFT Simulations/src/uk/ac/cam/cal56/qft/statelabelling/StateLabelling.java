@@ -104,5 +104,11 @@ public class StateLabelling {
             }
         }
     }
+    
+    // TODO: Generalise this!
+    // label for 2-particle states of momenta p, q>=p
+    public static int index(int p, int q, int N) {
+        return 1 + N + (q-p) + p*N -p*(p-1)/2;
+    }
 
 }

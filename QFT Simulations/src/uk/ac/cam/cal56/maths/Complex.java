@@ -69,6 +69,10 @@ public class Complex {
         return new Complex(_real, -_imag);
     }
 
+    public Complex negative() {
+        return new Complex(-_real, -_imag);
+    }
+
     // addition and subtraction
     public Complex plus(Complex z) {
         return new Complex(_real + z.real(), _imag + z.imag());
@@ -104,6 +108,10 @@ public class Complex {
 
     public Complex timesi() {
         return new Complex(-_imag, _real);
+    }
+
+    public Complex timesi(double a) {
+        return new Complex(-a * _imag, a * _real);
     }
 
     public Complex timesexpi(double arg) {
