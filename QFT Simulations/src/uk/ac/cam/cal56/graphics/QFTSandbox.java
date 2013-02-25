@@ -20,6 +20,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import uk.ac.cam.cal56.qft.interactingtheory.QuantumState;
+import uk.ac.cam.cal56.qft.interactingtheory.State;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
@@ -71,7 +72,7 @@ public class QFTSandbox extends JFrame {
 
     /* QUANTUM STATE VARIABLES */
     // quantum state
-    private QuantumState        _state;
+    private State        _state;
 
     // system parameters
     private int                 _N                 = N_DEFAULT;
