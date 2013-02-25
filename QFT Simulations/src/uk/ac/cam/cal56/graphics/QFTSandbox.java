@@ -72,15 +72,15 @@ public class QFTSandbox extends JFrame {
 
     /* QUANTUM STATE VARIABLES */
     // quantum state
-    private State        _state;
+    protected State        _state;
 
     // system parameters
-    private int                 _N                 = N_DEFAULT;
-    private int                 _Pmax              = PMAX_DEFAULT;
-    private double              _dx                = DX_DEFAULT;
-    private double              _m                 = M_DEFAULT;
-    private double              _dt                = DT_DEFAULT;
-    private double              _lambda            = LAMBDA_DEFAULT;
+    protected int                 _N                 = N_DEFAULT;
+    protected int                 _Pmax              = PMAX_DEFAULT;
+    protected double              _dx                = DX_DEFAULT;
+    protected double              _m                 = M_DEFAULT;
+    protected double              _dt                = DT_DEFAULT;
+    protected double              _lambda            = LAMBDA_DEFAULT;
 
     /* PLOT DATA VARIABLES */
 
@@ -147,12 +147,12 @@ public class QFTSandbox extends JFrame {
     }
 
     // quantum state and plots representing it
-    private void setupQuantumState() {
+    protected void setupQuantumState() {
         _state = new QuantumState(_N, _Pmax, _m, _dx, _dt, _lambda);
         drawPlots();
     }
 
-    private void drawPlots() {
+    protected void drawPlots() {
         // make new plots if not visible
         if (!_plotsVisible) {
             _momPlotVacuum = new Plot(_state.get0P(), 0.0, 1.0, PLOT_1D_WIDTH, PLOT_HEIGHT);
