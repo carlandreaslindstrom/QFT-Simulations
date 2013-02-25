@@ -13,9 +13,8 @@ public class FreeHamiltonian {
         // calculate and store energies
         FockState phi = new FockState(N, Pmax, m, dx);
         double[] temp = new double[Combinatorics.S(N, Pmax)];
-        for (int i : phi) {
+        for (int i : phi)
             temp[i] = phi.getEnergy();
-        }
         energies = temp;
     }
 }

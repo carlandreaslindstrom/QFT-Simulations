@@ -3,38 +3,34 @@ package uk.ac.cam.cal56.qft.interactingtheory;
 import java.util.Arrays;
 import java.util.Map.Entry;
 
+import uk.ac.cam.cal56.graphics.DensityPlot;
+import uk.ac.cam.cal56.graphics.Plot;
 import uk.ac.cam.cal56.maths.Combinatorics;
 import uk.ac.cam.cal56.maths.Complex;
 import uk.ac.cam.cal56.maths.FFT;
 import uk.ac.cam.cal56.maths.FourierTransform;
 import uk.ac.cam.cal56.qft.statelabelling.StateLabelling;
 
-public class QuantumState {
+public class QuantumState implements State {
 
-    public final int                     N;              // number of lattice points
-    public final int                     Pmax;           // maximum number of particles in Fock states
-    public final double                  dt;             // time step
-    public final double                  dx;             // lattice spacing
-    public final double                  m;              // particle mass
-    public double                        lambda;         // interaction strength
-    private final FreeHamiltonian        _Hfree;
+    private final int                     N;              // number of lattice points
+    private final double                  dt;             // time step
+    private double                        _lambda;         // interaction strength
+    private final FreeHamiltonian        _Hfree;         // free theory Hamiltonian
     private final InteractionHamiltonian _Hint;          // interaction Hamiltonian
     private int                          _S;             // S(N,P) = total number of Fock state coefficients
 
     private double                       _time;
     private Complex[]                    _nextcoeffs;    // {c_n(t+dt)}
-    public Complex[]                     coeffs;         // {c_n(t)}
+    private Complex[]                    coeffs;         // {c_n(t)}
 
     private FourierTransform             _ft = new FFT();
 
     public QuantumState(int N, int Pmax, double m, double dx, double dt, double lambda) {
         // initialise parameters
         this.N = N;
-        this.Pmax = Pmax;
-        this.m = m;
         this.dt = dt;
-        this.dx = dx;
-        this.lambda = lambda;
+        this._lambda = lambda;
         _S = Combinatorics.S(N, Pmax);
 
         // set coefficients
@@ -55,18 +51,22 @@ public class QuantumState {
         for (int n = 0; n < _S; n++) { // loop over state labels
             Complex sum = coeffs[n].times(_Hfree.energies[n]);
             for (Entry<Integer, Double> h_mn : _Hint.getRow(n).entrySet())
-                sum = sum.plus(coeffs[h_mn.getKey()].times(lambda * h_mn.getValue()));
+                sum = sum.plus(coeffs[h_mn.getKey()].times(_lambda * h_mn.getValue()));
             // i*cdot_n(t) = E_n*c_n(t) + Sum(H_mn*c_m(t),{m})
             _nextcoeffs[n] = coeffs[n].plus(sum.timesi(-dt)); // c_n(t+dt) = c_n(t) + dt*cdot_n(t)
         }
     }
 
-    public void step2ndOrderNonSymplectic() {
+    public void step() {
+        step2ndOrderNonSymplectic();
+    }
+    
+    private void step2ndOrderNonSymplectic() {
         Complex[] tempcoeffs = _nextcoeffs; // temporary buffer for later swap-over
         for (int n = 0; n < _S; n++) { // loop over state labels
             Complex nextcdot = _nextcoeffs[n].timesi(-_Hfree.energies[n]); // cdot_n(t+dt) = -i*E_n*c_n(t+dt) + ...
             for (Entry<Integer, Double> h_mn : _Hint.getRow(n).entrySet())
-                nextcdot = nextcdot.plus(_nextcoeffs[h_mn.getKey()].timesi(-lambda * h_mn.getValue())); // ...-i*Sum(H_mn*c_m(t+dt),{m})
+                nextcdot = nextcdot.plus(_nextcoeffs[h_mn.getKey()].timesi(-_lambda * h_mn.getValue())); // ...-i*Sum(H_mn*c_m(t+dt),{m})
             Complex nextnextcoeff = coeffs[n].plus(nextcdot.times(2 * dt)); // c_n(t+2dt)=c_n(t)+2dt*cdot_n(t+dt)
             _nextcoeffs[n] = nextnextcoeff; // c_n(t+dt) -> c_n(t+2dt)
         }
@@ -152,5 +152,15 @@ public class QuantumState {
                     probs[q][p] = value;
             }
         return probs;
+    }
+
+    @Override
+    public void setInteractionStrength(double lambda) {
+        _lambda = lambda;
+    }
+
+    @Override
+    public void updatePlots(Plot p0m, Plot p0p, Plot p1m, Plot p1p, DensityPlot p2m, DensityPlot p2p) {
+        // TODO Auto-generated method stub
     }
 }

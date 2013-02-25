@@ -286,7 +286,7 @@ public class QFTSandbox extends JFrame {
             public void stateChanged(ChangeEvent e) {
                 _lambda = Math.pow(10, _lambdaSlider.getValue());
                 _lambdaValue.setText(format(_lambda));
-                _state.lambda = _lambda; // alter quantum state interaction strength
+                _state.setInteractionStrength(_lambda); // alter quantum state interaction strength
             }
         });
     }
@@ -358,7 +358,7 @@ public class QFTSandbox extends JFrame {
         _posPlot1P.update(_state.get1PPositions());
         _posDensityPlot2P.update(_state.get2PPositions());
 
-        _state.step2ndOrderNonSymplectic();
+        _state.step();
     }
 
     // [log10,tenToThe,format] are helper functions for slider input

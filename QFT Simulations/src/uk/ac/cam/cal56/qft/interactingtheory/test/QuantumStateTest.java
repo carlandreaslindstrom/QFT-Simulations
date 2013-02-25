@@ -58,7 +58,7 @@ public class QuantumStateTest {
             for (int q = 0; q < N; q++)
                 assertEquals(probs2P[p][q], 0.0, EPSILON);
 
-        state.step2ndOrderNonSymplectic();
+        state.step();
 
         // check if some amplitude has shifted into other states
         assertEquals(state.getTime(), dt, EPSILON);
@@ -77,7 +77,7 @@ public class QuantumStateTest {
             assertEquals(state.getTime(), t, EPSILON); // check if time increment works
             if (count++ % 100 == 0)
                 System.out.println(t + " => " + state.get0P());
-            state.step2ndOrderNonSymplectic();
+            state.step();
         }
 
     }

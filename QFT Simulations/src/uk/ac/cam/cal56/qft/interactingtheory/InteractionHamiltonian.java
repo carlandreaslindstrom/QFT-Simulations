@@ -12,15 +12,15 @@ import uk.ac.cam.cal56.maths.Combinatorics;
 // It is therefore heavily optimized (and possibly hard to read/understand).
 public class InteractionHamiltonian {
 
-    private List<Map<Integer, Double>> _elements = new ArrayList<Map<Integer, Double>>(); ;
+    private List<Map<Integer, Double>> _elements;
     private int                        _N;
     private double                     _m;
     private double                     _dx;
 
     private Interaction                _interaction;
 
-    private FockState                  _ket;                                             // used internally
-    private FockState                  _bra;                                             // for stepping
+    private FockState                  _ket;        // used internally
+    private FockState                  _bra;        // for stepping
 
     public InteractionHamiltonian(int N, int Pmax, double mass, double dx, Interaction interaction) {
         _N = N;
@@ -29,6 +29,7 @@ public class InteractionHamiltonian {
         _interaction = interaction;
         _ket = new FockState(N, Pmax, mass, dx);
         _bra = new FockState(N, Pmax, mass, dx);
+        _elements = new ArrayList<Map<Integer, Double>>(Combinatorics.S(_N, Pmax));
     }
 
     public void calculateElements() {
