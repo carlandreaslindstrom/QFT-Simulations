@@ -232,6 +232,7 @@ public class StateLabellingTest {
     }
 
     @Test
+    @SuppressWarnings("unused")
     public void testBraIndex() {
         assertEquals(StateLabelling.braIndex(Arrays.asList(0, 0), new int[] { 1 }, new int[] { 0 }, 5), (Integer) 7);
         assertEquals(StateLabelling.braIndex(Arrays.asList(0, 0), new int[] {}, new int[] { 1 }, 5), null);
@@ -240,16 +241,11 @@ public class StateLabellingTest {
         int N = 70, Pmax = 3;
         double mass = 1.0, dx = 0.1;
         FockState phi = new FockState(N, Pmax, mass, dx);
+
         for (int n : phi) {
             for (int p = 0; p < N; p++) {
                 Integer m = StateLabelling.braIndex(phi.toList(), new int[] {}, new int[] { p }, N);
                 assertEquals(phi.toList().contains(p), m != null);
-            }
-            for (int p = 0; p < N; p++) {
-                Integer m = StateLabelling.braIndex(phi.toList(), new int[] { p }, new int[] { p }, N);
-                System.out.println(n + " " + m);
-                //assertNotNull(m);
-                //assertEquals(n, (int) m);
             }
         }
 

@@ -5,7 +5,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import uk.ac.cam.cal56.qft.interactingtheory.QuantumState;
+import uk.ac.cam.cal56.qft.interactingtheory.impl.QuantumState;
 
 public class QuantumStateTest {
 

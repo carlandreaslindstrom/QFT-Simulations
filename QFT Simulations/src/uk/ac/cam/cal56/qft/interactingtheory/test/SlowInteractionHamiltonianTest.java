@@ -10,7 +10,7 @@ import org.junit.Test;
 import uk.ac.cam.cal56.maths.Combinatorics;
 import uk.ac.cam.cal56.qft.interactingtheory.Interaction;
 import uk.ac.cam.cal56.qft.interactingtheory.InteractionHamiltonian;
-import uk.ac.cam.cal56.qft.interactingtheory.SlowInteractionHamiltonian;
+import uk.ac.cam.cal56.qft.interactingtheory.impl.SlowInteractionHamiltonian;
 import uk.ac.cam.cal56.qft.statelabelling.StateLabelling;
 
 public class SlowInteractionHamiltonianTest {

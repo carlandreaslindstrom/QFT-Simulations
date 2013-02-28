@@ -1,4 +1,4 @@
-package uk.ac.cam.cal56.qft.interactingtheory;
+package uk.ac.cam.cal56.qft.interactingtheory.impl;
 
 import java.util.Arrays;
 import java.util.Map.Entry;
@@ -9,6 +9,10 @@ import uk.ac.cam.cal56.maths.Combinatorics;
 import uk.ac.cam.cal56.maths.Complex;
 import uk.ac.cam.cal56.maths.FFT;
 import uk.ac.cam.cal56.maths.FourierTransform;
+import uk.ac.cam.cal56.qft.interactingtheory.FreeHamiltonian;
+import uk.ac.cam.cal56.qft.interactingtheory.Interaction;
+import uk.ac.cam.cal56.qft.interactingtheory.InteractionHamiltonian;
+import uk.ac.cam.cal56.qft.interactingtheory.State;
 import uk.ac.cam.cal56.qft.statelabelling.StateLabelling;
 
 public class QuantumState implements State {
@@ -79,18 +83,19 @@ public class QuantumState implements State {
         _time = 0.0;
 
         // vacuum
-        // coeffs[0] = Complex.one();
-        // for (int i = 1; i < _S; i++) coeffs[i] = Complex.zero();
+        coeffs[0] = Complex.one();
+        for (int i = 1; i < _S; i++)
+            coeffs[i] = Complex.zero();
 
         // gaussian particle
-        coeffs[0] = Complex.zero();
-        double sigma = N / 5.0;
-        double mu = N / 2.0;
-        for (int p = 0; p < N; p++) {
-            double z = (p - mu) / sigma;
-            double gaussian = Math.exp(-z * z / 2.0) / sigma;
-            coeffs[p + 1] = Complex.one().times(gaussian);
-        }
+        // coeffs[0] = Complex.zero();
+        // double sigma = N / 5.0;
+        // double mu = N / 2.0;
+        // for (int p = 0; p < N; p++) {
+        // double z = (p - mu) / sigma;
+        // double gaussian = Math.exp(-z * z / 2.0) / sigma;
+        // coeffs[p + 1] = Complex.one().times(gaussian);
+        // }
 
         for (int i = N + 1; i < _S; i++)
             coeffs[i] = Complex.zero();

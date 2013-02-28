@@ -19,8 +19,8 @@ import javax.swing.border.LineBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import uk.ac.cam.cal56.qft.interactingtheory.QuantumState;
 import uk.ac.cam.cal56.qft.interactingtheory.State;
+import uk.ac.cam.cal56.qft.interactingtheory.impl.QuantumState;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
@@ -72,15 +72,15 @@ public class QFTSandbox extends JFrame {
 
     /* QUANTUM STATE VARIABLES */
     // quantum state
-    protected State        _state;
+    protected State             _state;
 
     // system parameters
-    protected int                 _N                 = N_DEFAULT;
-    protected int                 _Pmax              = PMAX_DEFAULT;
-    protected double              _dx                = DX_DEFAULT;
-    protected double              _m                 = M_DEFAULT;
-    protected double              _dt                = DT_DEFAULT;
-    protected double              _lambda            = LAMBDA_DEFAULT;
+    protected int               _N                 = N_DEFAULT;
+    protected int               _Pmax              = PMAX_DEFAULT;
+    protected double            _dx                = DX_DEFAULT;
+    protected double            _m                 = M_DEFAULT;
+    protected double            _dt                = DT_DEFAULT;
+    protected double            _lambda            = LAMBDA_DEFAULT;
 
     /* PLOT DATA VARIABLES */
 
