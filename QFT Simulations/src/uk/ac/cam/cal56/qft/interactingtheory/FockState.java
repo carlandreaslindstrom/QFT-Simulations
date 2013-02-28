@@ -1,7 +1,6 @@
 package uk.ac.cam.cal56.qft.interactingtheory;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -24,18 +23,18 @@ public class FockState implements Iterator<Integer>, Iterable<Integer> {
         _S = Combinatorics.S(N, Pmax);
     }
 
+    // E_p = sqrt(m^2 + (2/dx)^2*sin(p*dx/2)^2 )
+    public static double E_p(int n, int N, double m, double dx) { // i = momentum number
+        double pterm = (2.0 / dx) * Math.sin(Math.PI * n / N);
+        return Math.sqrt(m * m + pterm * pterm);
+    }
+
     // total energy
     public double getEnergy() {
         double sum = 0;
         for (int p : _particles)
-            sum += E_p(p); // E = Sum( E_p )
+            sum += E_p(p, _N, _m, _dx); // E = Sum( E_p )
         return sum;
-    }
-
-    // E_p = sqrt(m^2 + (2/dx)^2*sin(p*dx/2)^2 )
-    private double E_p(int i) { // i = momentum number
-        double pterm = (2.0 / _dx) * Math.sin(Math.PI * i / _N);
-        return Math.sqrt(_m * _m + pterm * pterm);
     }
 
     // total momentum number
@@ -61,42 +60,9 @@ public class FockState implements Iterator<Integer>, Iterable<Integer> {
         return Collections.frequency(_particles, p);
     }
 
-    // UNIT TEST HELP FUNCTIONS
-
     // particle entries as list (for unit testing)
     public List<Integer> toList() {
         return _particles;
-    }
-
-    // ladder operator exponents (for testing and printing)
-    public int[] exponents() {
-        int[] ls = new int[_N];
-        for (int p = 0; p < _N; p++)
-            ls[p] = l_p(p);
-        return ls;
-    }
-
-    // output string
-    public String toString() {
-        return _label + "=" + Arrays.toString(exponents());
-    }
-
-    // recursive function used in incrementing particle entries
-    private void particleIncrementer(int index) {
-        int particle = _particles.get(index);
-        particle++;
-        if (particle == _N) {
-            if (index == 0) {
-                particle = 0;
-                _particles.add(0);
-            }
-            else {
-                particleIncrementer(index - 1);
-                particle = _particles.get(index - 1);
-            }
-
-        }
-        _particles.set(index, particle);
     }
 
     // ITERATOR FUNCTIONS
@@ -129,5 +95,23 @@ public class FockState implements Iterator<Integer>, Iterable<Integer> {
     @Override
     public Iterator<Integer> iterator() {
         return this;
+    }
+
+    // recursive function used in incrementing particle entries
+    private void particleIncrementer(int index) {
+        int particle = _particles.get(index);
+        particle++;
+        if (particle == _N) {
+            if (index == 0) {
+                particle = 0;
+                _particles.add(0);
+            }
+            else {
+                particleIncrementer(index - 1);
+                particle = _particles.get(index - 1);
+            }
+
+        }
+        _particles.set(index, particle);
     }
 }

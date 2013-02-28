@@ -58,7 +58,7 @@ public class FockStateTest {
         int N = 4;
         double m = 1.0, dx = 0.1;
         FockState f = new FockState(N, 3, m, dx);
-
+        f.next();
         for (int i = 0; i < 18; i++)
             f.next();
         assertEquals(f.getLabel(), 18);

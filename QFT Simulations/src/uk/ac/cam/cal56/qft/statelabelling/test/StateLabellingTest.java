@@ -1,15 +1,20 @@
 package uk.ac.cam.cal56.qft.statelabelling.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.junit.Test;
 
 import uk.ac.cam.cal56.maths.Combinatorics;
+import uk.ac.cam.cal56.qft.interactingtheory.FockState;
 import uk.ac.cam.cal56.qft.statelabelling.StateLabelling;
 
 public class StateLabellingTest {
@@ -137,7 +142,7 @@ public class StateLabellingTest {
     @Test
     public void stressTestLabels() {
         // can handle "any" i for N up to ~1000.
-        long i = 10000000000000L;
+        int i = 100000000;
         int N = 1000;
         List<Integer> ls = StateLabelling.labels(i, N);
         long iCalculated = StateLabelling.index(ls);
@@ -154,14 +159,99 @@ public class StateLabellingTest {
 
         assertEquals(StateLabelling.momentumNumber(17, 18), 16);
         assertEquals(StateLabelling.momentumNumber(0, 100), 0);
-        
+
         int N = 100;
         int P = 3;
         long maxIndex = Combinatorics.S(N, P); // this number explodes with rising P
         for (int i = 0; i < maxIndex; i++)
             assertEquals(StateLabelling.momentumNumber(i, N),
-                          StateLabelling.momentumNumber(StateLabelling.labels(i, N)));
-        
-        
+                         StateLabelling.momentumNumber(StateLabelling.labels(i, N)));
+    }
+
+    @Test
+    public void testIndexFromEntries() {
+        int N = 130;
+        double m = 1.0, dx = 0.1;
+        int Pmax = 3;
+        assertEquals(Combinatorics.S(N, Pmax), 383306);
+        FockState phi = new FockState(N, Pmax, m, dx);
+        for (int i : phi)
+            assertEquals(i, StateLabelling.index(phi.toList(), N));
+        assertFalse(phi.getLabel() == -1); // fails if not stepped
+
+        N = 12;
+        Pmax = 10;
+        assertEquals(Combinatorics.S(N, Pmax), 646646);
+        phi = new FockState(N, Pmax, m, dx);
+        for (int i : phi)
+            assertEquals(i, StateLabelling.index(phi.toList(), N));
+        assertFalse(phi.getLabel() == -1); // fails if not stepped
+    }
+
+    @Test
+    public void testToLadderOpMap() {
+        int N = 10;
+
+        Map<Integer, int[]> calculated = StateLabelling.toLadderOpMap(new int[] { 0, 0 }, new int[] { 0 }, N);
+        Map<Integer, int[]> expected = new HashMap<Integer, int[]>();
+        expected.put(0, new int[] { 2, 1 });
+        for (Entry<Integer, int[]> c : calculated.entrySet()) {
+            int p = c.getKey();
+            int n_p = c.getValue()[0];
+            int m_p = c.getValue()[1];
+            assertEquals(n_p, expected.get(p)[0]);
+            assertEquals(m_p, expected.get(p)[1]);
+        }
+
+        calculated = StateLabelling.toLadderOpMap(new int[] { 0, 0, 1, 4 }, new int[] { 0, 0, 0, 0, 3, 4, 4 }, N);
+        expected = new HashMap<Integer, int[]>();
+        expected.put(0, new int[] { 2, 4 });
+        expected.put(1, new int[] { 1, 0 });
+        expected.put(3, new int[] { 0, 1 });
+        expected.put(4, new int[] { 1, 2 });
+        for (Entry<Integer, int[]> c : calculated.entrySet()) {
+            int p = c.getKey();
+            int n_p = c.getValue()[0];
+            int m_p = c.getValue()[1];
+            assertEquals(n_p, expected.get(p)[0]);
+            assertEquals(m_p, expected.get(p)[1]);
+        }
+
+        // test for momenta outside 0..<N (modulus function)
+        calculated = StateLabelling.toLadderOpMap(new int[] { 0, 5, -5 }, new int[] {}, N);
+        expected = new HashMap<Integer, int[]>();
+        expected.put(0, new int[] { 1, 0 });
+        expected.put(5, new int[] { 2, 0 });
+        for (Entry<Integer, int[]> c : calculated.entrySet()) {
+            int p = c.getKey();
+            int n_p = c.getValue()[0];
+            int m_p = c.getValue()[1];
+            assertEquals(n_p, expected.get(p)[0]);
+            assertEquals(m_p, expected.get(p)[1]);
+        }
+    }
+
+    @Test
+    public void testBraIndex() {
+        assertEquals(StateLabelling.braIndex(Arrays.asList(0, 0), new int[] { 1 }, new int[] { 0 }, 5), (Integer) 7);
+        assertEquals(StateLabelling.braIndex(Arrays.asList(0, 0), new int[] {}, new int[] { 1 }, 5), null);
+        assertEquals(StateLabelling.braIndex(Arrays.asList(0, 1), new int[] {}, new int[] { 1 }, 6), (Integer) 1);
+
+        int N = 70, Pmax = 3;
+        double mass = 1.0, dx = 0.1;
+        FockState phi = new FockState(N, Pmax, mass, dx);
+        for (int n : phi) {
+            for (int p = 0; p < N; p++) {
+                Integer m = StateLabelling.braIndex(phi.toList(), new int[] {}, new int[] { p }, N);
+                assertEquals(phi.toList().contains(p), m != null);
+            }
+            for (int p = 0; p < N; p++) {
+                Integer m = StateLabelling.braIndex(phi.toList(), new int[] { p }, new int[] { p }, N);
+                System.out.println(n + " " + m);
+                //assertNotNull(m);
+                //assertEquals(n, (int) m);
+            }
+        }
+
     }
 }

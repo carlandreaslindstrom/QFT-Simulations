@@ -13,9 +13,9 @@ import uk.ac.cam.cal56.qft.statelabelling.StateLabelling;
 
 public class QuantumState implements State {
 
-    private final int                     N;              // number of lattice points
-    private final double                  dt;             // time step
-    private double                        _lambda;         // interaction strength
+    private final int                    N;              // number of lattice points
+    private final double                 dt;             // time step
+    private double                       _lambda;        // interaction strength
     private final FreeHamiltonian        _Hfree;         // free theory Hamiltonian
     private final InteractionHamiltonian _Hint;          // interaction Hamiltonian
     private int                          _S;             // S(N,P) = total number of Fock state coefficients
@@ -39,7 +39,7 @@ public class QuantumState implements State {
 
         // calculate free theory energies and interaction amplitudes
         _Hfree = new FreeHamiltonian(N, Pmax, m, dx);
-        _Hint = new InteractionHamiltonian(N, Pmax, m, dx, Interaction.PHI_THIRD);
+        _Hint = new FastInteractionHamiltonian(N, Pmax, m, dx, Interaction.PHI_THIRD);
         _Hint.calculateElements(); // calculate elements in the Interaction Hamiltonian
 
         // set coefficients (to pure vacuum) and do first step
@@ -50,8 +50,9 @@ public class QuantumState implements State {
     private void firstStep() {
         for (int n = 0; n < _S; n++) { // loop over state labels
             Complex sum = coeffs[n].times(_Hfree.energies[n]);
-            for (Entry<Integer, Double> h_mn : _Hint.getRow(n).entrySet())
+            for (Entry<Integer, Double> h_mn : _Hint.getRow(n).entrySet()) {
                 sum = sum.plus(coeffs[h_mn.getKey()].times(_lambda * h_mn.getValue()));
+            }
             // i*cdot_n(t) = E_n*c_n(t) + Sum(H_mn*c_m(t),{m})
             _nextcoeffs[n] = coeffs[n].plus(sum.timesi(-dt)); // c_n(t+dt) = c_n(t) + dt*cdot_n(t)
         }
@@ -60,7 +61,7 @@ public class QuantumState implements State {
     public void step() {
         step2ndOrderNonSymplectic();
     }
-    
+
     private void step2ndOrderNonSymplectic() {
         Complex[] tempcoeffs = _nextcoeffs; // temporary buffer for later swap-over
         for (int n = 0; n < _S; n++) { // loop over state labels
@@ -78,19 +79,18 @@ public class QuantumState implements State {
         _time = 0.0;
 
         // vacuum
-        coeffs[0] = Complex.one();
-        for (int i = 1; i < _S; i++)
-            coeffs[i] = Complex.zero();
+        // coeffs[0] = Complex.one();
+        // for (int i = 1; i < _S; i++) coeffs[i] = Complex.zero();
 
         // gaussian particle
-        // coeffs[0] = Complex.zero();
-        // double sigma = N / 5.0;
-        // double mu = N / 2.0;
-        // for (int p = 0; p < N; p++) {
-        // double z = (p - mu) / sigma;
-        // double gaussian = Math.exp(-z * z / 2.0) / sigma;
-        // coeffs[p + 1] = Complex.one().times(gaussian);
-        // }
+        coeffs[0] = Complex.zero();
+        double sigma = N / 5.0;
+        double mu = N / 2.0;
+        for (int p = 0; p < N; p++) {
+            double z = (p - mu) / sigma;
+            double gaussian = Math.exp(-z * z / 2.0) / sigma;
+            coeffs[p + 1] = Complex.one().times(gaussian);
+        }
 
         for (int i = N + 1; i < _S; i++)
             coeffs[i] = Complex.zero();
@@ -116,7 +116,7 @@ public class QuantumState implements State {
         double[][] probs = new double[N][N];
         for (int p = 0; p < N; p++)
             for (int q = p; q < N; q++) {
-                double value = coeffs[StateLabelling.index(p, q, N)].modSquared();
+                double value = coeffs[StateLabelling.index(Arrays.asList(p, q), N)].modSquared();
                 probs[p][q] = value; // +(1+N) in order to avoid 0P and 1P states
                 if (p != q)
                     probs[q][p] = value;
@@ -137,7 +137,7 @@ public class QuantumState implements State {
 
         for (int p = 0; p < N; p++)
             for (int q = p; q < N; q++) {
-                Complex c = coeffs[StateLabelling.index(p, q, N)];
+                Complex c = coeffs[StateLabelling.index(Arrays.asList(p, q), N)];
                 cs[p][q] = c;
                 if (p != q)
                     cs[q][p] = c;

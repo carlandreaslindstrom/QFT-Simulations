@@ -20,7 +20,7 @@ public class FourierTransformTest {
     // using FFT gives back same answer
     @Test
     public void testFFT1DUnitarity() {
-        int N = (int) Math.pow(2, 19);
+        int N = (int) Math.pow(2, 17);
         Complex[] f = new Complex[N];
         for (int i = 0; i < N; i++) {
             double arg = 2 * (i - N / 2) / N;
@@ -41,7 +41,7 @@ public class FourierTransformTest {
     // using DFT gives back same answer
     @Test
     public void testDFT1DUnitarity() {
-        int N = (int) Math.pow(2, 13);
+        int N = (int) Math.pow(2, 10);
         Complex[] f = new Complex[N];
         for (int i = 0; i < N; i++) {
             double arg = 2 * (i - N / 2) / N;
@@ -60,7 +60,7 @@ public class FourierTransformTest {
     
     @Test
     public void testFFT2DUnitarity() {
-        int N = (int) Math.pow(2, 9);
+        int N = (int) Math.pow(2, 8);
         int M = (int) Math.pow(2, 10);
         Complex[][] f = new Complex[N][M];
         for (int i = 0; i < N; i++) {
@@ -89,8 +89,8 @@ public class FourierTransformTest {
 
     @Test
     public void testDFT2DUnitarity() {
-        int N = 256;
-        int M = 256;
+        int N = 128;
+        int M = 128;
         Complex[][] f = new Complex[N][M];
         for (int i = 0; i < N; i++) {
             Complex[] row = new Complex[M];
