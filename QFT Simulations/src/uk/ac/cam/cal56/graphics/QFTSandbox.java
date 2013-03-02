@@ -20,7 +20,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import uk.ac.cam.cal56.qft.interactingtheory.State;
-import uk.ac.cam.cal56.qft.interactingtheory.impl.QuantumState;
+import uk.ac.cam.cal56.qft.interactingtheory.impl.SecondOrderNonSymplecticState;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
@@ -148,7 +148,7 @@ public class QFTSandbox extends JFrame {
 
     // quantum state and plots representing it
     protected void setupQuantumState() {
-        _state = new QuantumState(_N, _Pmax, _m, _dx, _dt, _lambda);
+        _state = new SecondOrderNonSymplecticState(_N, _Pmax, _m, _dx, _dt, _lambda);
         drawPlots();
     }
 

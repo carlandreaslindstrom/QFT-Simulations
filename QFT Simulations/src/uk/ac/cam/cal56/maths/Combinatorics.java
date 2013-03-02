@@ -49,4 +49,11 @@ public class Combinatorics {
         return Math.sqrt(squaredProduct);
     }
 
+    public static int factorial(int k) {
+        int result = 1;
+        for (int i = 1; i <= k; i++)
+            result *= i;
+        return result;
+    }
+
 }

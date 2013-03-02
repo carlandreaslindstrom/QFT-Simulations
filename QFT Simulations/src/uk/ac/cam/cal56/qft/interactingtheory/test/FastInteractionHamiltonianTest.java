@@ -4,11 +4,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map.Entry;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import uk.ac.cam.cal56.maths.Combinatorics;
@@ -20,32 +18,33 @@ import uk.ac.cam.cal56.qft.statelabelling.StateLabelling;
 
 public class FastInteractionHamiltonianTest {
 
-    private final double EPSILON = 1.0e-10;
+    private final double           EPSILON      = 1.0e-10;
 
-    @Test
-    public void testCalculateElements() {
-        int N = 15, Pmax = 3;
-        double mass = 1.0, dx = 0.1;
-        InteractionHamiltonian ih = new FastInteractionHamiltonian(N, Pmax, mass, dx, Interaction.PHI_THIRD);
+    private final int              _N           = 15;
+    private final int              _Pmax        = 3;
+    private final double           _mass        = 1.0;
+    private final double           _dx          = 0.1;
+    private final Interaction      _interaction = Interaction.PHI_THIRD;
 
-        ih.calculateElements();
+    private final int              _S           = Combinatorics.S(_N, _Pmax);
+
+    private InteractionHamiltonian _ih;
+
+    @Before
+    public void setUp() throws Exception {
+        _ih = new FastInteractionHamiltonian(_N, _Pmax, _mass, _dx, _interaction);
+        _ih.calculateElements();
     }
 
     @Test
     public void testMatrixSize() {
-        int N = 15, Pmax = 3;
-        double mass = 1.0, dx = 0.1;
-        InteractionHamiltonian ih = new FastInteractionHamiltonian(N, Pmax, mass, dx, Interaction.PHI_THIRD);
-
-        ih.calculateElements();
-        int S = Combinatorics.S(N, Pmax);
         int elementCount = 0;
         double total = 0;
-        for (int n = 0; n < S; n++) {
-            for (Entry<Integer, Double> element : ih.getRow(n).entrySet()) {
+        for (int n = 0; n < _S; n++) {
+            for (Entry<Integer, Double> element : _ih.getRow(n).entrySet()) {
                 elementCount++;
                 total += element.getValue();
-                assertTrue(element.getKey() < S);
+                assertTrue(element.getKey() < _S);
                 assertTrue(element.getValue() > 0.0);
             }
         }
@@ -55,16 +54,10 @@ public class FastInteractionHamiltonianTest {
 
     @Test
     public void testDiagonalSymmetry() {
-        int N = 15, Pmax = 3;
-        double mass = 1.0, dx = 0.1;
-        InteractionHamiltonian ih = new FastInteractionHamiltonian(N, Pmax, mass, dx, Interaction.PHI_THIRD);
-
-        ih.calculateElements();
-
-        for (int n = 0; n < Combinatorics.S(N, Pmax); n++) {
+        for (int n = 0; n < _S; n++) {
             for (int m = 0; m <= n; m++) {
-                Double value = ih.get(n, m);
-                Double diag = ih.get(m, n);
+                Double value = _ih.get(n, m);
+                Double diag = _ih.get(m, n);
                 if (value != null && diag != null) {
                     // System.out.println((diag / value) + " : " + value + " = " + diag);
                     assertEquals(value, diag, EPSILON);
@@ -75,53 +68,33 @@ public class FastInteractionHamiltonianTest {
 
     @Test
     public void testMomentumConservationAndParticleTransitions() {
-        int N = 30, Pmax = 3;
-        double mass = 1.0, dx = 0.1;
-        InteractionHamiltonian ih = new FastInteractionHamiltonian(N, Pmax, mass, dx, Interaction.PHI_THIRD);
-
-        ih.calculateElements();
-
-        for (int n = 0; n < Combinatorics.S(N, Pmax); n++) {
-            for (int m = 0; m < Combinatorics.S(N, Pmax); m++) {
-                Double value = ih.get(n, m);
+        for (int n = 0; n < _S; n++) {
+            for (int m = 0; m < _S; m++) {
+                Double value = _ih.get(n, m);
                 if (value != null) {
                     // check if transitions are between equal momentum states
-                    assertEquals(StateLabelling.momentumNumber(n, N), StateLabelling.momentumNumber(m, N));
+                    assertEquals(StateLabelling.momentumNumber(n, _N), StateLabelling.momentumNumber(m, _N));
                     // check if transitions are between particle numbers of an odd difference
-                    assertEquals(Math.abs(StateLabelling.P(n, N) - StateLabelling.P(m, N)) % 2, 1);
+                    assertEquals(Math.abs(StateLabelling.P(n, _N) - StateLabelling.P(m, _N)) % 2, 1);
                 }
             }
         }
     }
 
     @Test
-    public void testListRemove() {
-        List<Integer> ks = new ArrayList<Integer>(Arrays.asList(0, 0, 1));
-        System.out.println(ks);
-        ks.remove((Integer) 0);
-        System.out.println(ks);
-        assertEquals(ks, Arrays.asList(0, 1));
-    }
-
-    @Test
     public void testImplementationComparison() {
-        int N = 15, Pmax = 3;
-        double mass = 1.0, dx = 0.1;
 
-        // calculate both
-        InteractionHamiltonian fih = new FastInteractionHamiltonian(N, Pmax, mass, dx, Interaction.PHI_THIRD);
-        InteractionHamiltonian sih = new SlowInteractionHamiltonian(N, Pmax, mass, dx, Interaction.PHI_THIRD);
-        fih.calculateElements();
-        sih.calculateElements();
+        InteractionHamiltonian slowih = new SlowInteractionHamiltonian(_N, _Pmax, _mass, _dx, _interaction);
+        slowih.calculateElements();
 
         // compare
-        for (int n = 0; n < Combinatorics.S(N, Pmax); n++) {
-            for (int m = 0; m <= Combinatorics.S(N, Pmax); m++) {
-                Double f = fih.get(n, m);
-                Double s = sih.get(n, m);
-                if (s != null) {
-                    assertNotNull(f);
-                    assertEquals((double) s, (double) f, EPSILON);
+        for (int n = 0; n < _S; n++) {
+            for (int m = 0; m < _S; m++) {
+                Double fast = _ih.get(n, m);
+                Double slow = slowih.get(n, m);
+                if (slow != null) {
+                    assertNotNull(fast);
+                    assertEquals((double) slow, (double) fast, EPSILON);
                 }
             }
         }

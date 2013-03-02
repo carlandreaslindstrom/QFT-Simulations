@@ -77,5 +77,22 @@ public class CombinatoricsTest {
         }
         
     }
+    
+    @Test
+    public void testFactorial() {
+        assertEquals(Combinatorics.factorial(0), 1);
+        assertEquals(Combinatorics.factorial(1), 1);
+        assertEquals(Combinatorics.factorial(2), 2);
+        assertEquals(Combinatorics.factorial(3), 6);
+        assertEquals(Combinatorics.factorial(4), 24);
+        assertEquals(Combinatorics.factorial(5), 120);
+        assertEquals(Combinatorics.factorial(6), 720);
+        assertEquals(Combinatorics.factorial(7), 5040);
+        assertEquals(Combinatorics.factorial(8), 40320);
+        assertEquals(Combinatorics.factorial(9), 362880);
+        assertEquals(Combinatorics.factorial(10), 3628800);
+        assertEquals(Combinatorics.factorial(11), 39916800);
+        assertEquals(Combinatorics.factorial(12), 479001600);
+    }
 
 }

@@ -5,9 +5,10 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import uk.ac.cam.cal56.qft.interactingtheory.impl.QuantumState;
+import uk.ac.cam.cal56.qft.interactingtheory.State;
+import uk.ac.cam.cal56.qft.interactingtheory.impl.SecondOrderNonSymplecticState;
 
-public class QuantumStateTest {
+public class SecondOrderNonSymplecticStateTest {
 
     private static final double EPSILON = 1.0e-10;
 
@@ -15,7 +16,7 @@ public class QuantumStateTest {
     public void testConstructor() {
         int N = 10, Pmax = 3;
         double m = 1.0, dx = 1.0, dt = 0.01, lambda = 0.01;
-        QuantumState state = new QuantumState(N, Pmax, m, dx, dt, lambda);
+        SecondOrderNonSymplecticState state = new SecondOrderNonSymplecticState(N, Pmax, m, dx, dt, lambda);
         assertEquals(state.getTime(), 0.0, EPSILON);
     }
 
@@ -23,7 +24,7 @@ public class QuantumStateTest {
     public void testGetProbabilities() {
         int N = 11, Pmax = 3;
         double m = 1.0, dx = 1.0, dt = 0.01, lambda = 0.01;
-        QuantumState state = new QuantumState(N, Pmax, m, dx, dt, lambda);
+        SecondOrderNonSymplecticState state = new SecondOrderNonSymplecticState(N, Pmax, m, dx, dt, lambda);
         assertEquals(state.getTime(), 0.0, 1e-9);
 
         // 0P vacuum state
@@ -45,7 +46,7 @@ public class QuantumStateTest {
     public void testStepping() {
         int N = 8, Pmax = 3;
         double m = 1.0, dx = 1.0, dt = 0.01, lambda = 0.0;
-        QuantumState state = new QuantumState(N, Pmax, m, dx, dt, lambda);
+        SecondOrderNonSymplecticState state = new SecondOrderNonSymplecticState(N, Pmax, m, dx, dt, lambda);
 
         // check if initially all amplitude is in the vacuum state
         assertEquals(state.getTime(), 0.0, EPSILON);
@@ -80,6 +81,24 @@ public class QuantumStateTest {
             state.step();
         }
 
+    }
+
+    @Test
+    public void testExactComparison() {
+        int _N = 15;
+        int _Pmax = 3;
+        double _m = 1.0;
+        double _dx = 0.1;
+        double _dt = 0.01;
+        double _lambda = 0.0;
+        State _state = new SecondOrderNonSymplecticState(_N, _Pmax, _m, _dx, _dt, _lambda); // recalculate
+
+        // TODO: fix just like the other implementation test
+        for (double tfinal = 0.0; tfinal < 10.0; tfinal += Math.sqrt(2)) {
+            while (_state.getTime() < tfinal + _dt)
+                _state.step();
+            // Complex exact = Complex.expi(-_m * tfinal);
+        }
     }
 
 }
