@@ -20,7 +20,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import uk.ac.cam.cal56.qft.interactingtheory.State;
-import uk.ac.cam.cal56.qft.interactingtheory.impl.SecondOrderNonSymplecticState;
+import uk.ac.cam.cal56.qft.interactingtheory.impl.SecondOrderSymplecticState;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
@@ -148,7 +148,7 @@ public class QFTSandbox extends JFrame {
 
     // quantum state and plots representing it
     protected void setupQuantumState() {
-        _state = new SecondOrderNonSymplecticState(_N, _Pmax, _m, _dx, _dt, _lambda);
+        _state = new SecondOrderSymplecticState(_N, _Pmax, _m, _dx, _dt, _lambda);
         drawPlots();
     }
 
@@ -213,8 +213,8 @@ public class QFTSandbox extends JFrame {
             FormFactory.RELATED_GAP_ROWSPEC, FormFactory.MIN_ROWSPEC, FormFactory.MIN_ROWSPEC,
             FormFactory.RELATED_GAP_ROWSPEC, FormFactory.MIN_ROWSPEC, FormFactory.MIN_ROWSPEC,
             FormFactory.RELATED_GAP_ROWSPEC, FormFactory.MIN_ROWSPEC, FormFactory.MIN_ROWSPEC,
-            FormFactory.RELATED_GAP_ROWSPEC, FormFactory.MIN_ROWSPEC, FormFactory.MIN_ROWSPEC,
             FormFactory.RELATED_GAP_ROWSPEC, FormFactory.MIN_ROWSPEC, FormFactory.MIN_ROWSPEC, FormFactory.MIN_ROWSPEC,
+            FormFactory.RELATED_GAP_ROWSPEC, FormFactory.MIN_ROWSPEC, FormFactory.MIN_ROWSPEC,
             FormFactory.RELATED_GAP_ROWSPEC, FormFactory.MIN_ROWSPEC, FormFactory.MIN_ROWSPEC,
             FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC,
             FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC }));
@@ -224,12 +224,12 @@ public class QFTSandbox extends JFrame {
         setupSlider(_PmaxSlider, _PmaxValue, _PmaxLabel, PMAX_MIN, PMAX_MAX, 5, false);
         setupSlider(_dxSlider, _dxValue, _dxLabel, log10(DX_MIN), log10(DX_MAX), 8, true);
         setupSlider(_mSlider, _mValue, _mLabel, log10(M_MIN), log10(M_MAX), 11, true);
-        setupSlider(_dtSlider, _dtValue, _dtLabel, log10(DT_MIN), log10(DT_MAX), 14, true);
+        setupSlider(_dtSlider, _dtValue, _dtLabel, log10(DT_MIN), log10(DT_MAX), 15, true);
         setupSlider(_lambdaSlider, _lambdaValue, _lambdaLabel, log10(LAMBDA_MIN), log10(LAMBDA_MAX), 18, true);
         setupSliderListeners();
 
         // setup separating strut
-        _controlPanel.add(_controlPanelStrut, "2, 16");
+        _controlPanel.add(_controlPanelStrut, "2, 13");
 
         // setup buttons
         setupCalculateButton();
@@ -287,7 +287,6 @@ public class QFTSandbox extends JFrame {
             public void stateChanged(ChangeEvent e) {
                 _lambda = Math.pow(10, _lambdaSlider.getValue());
                 _lambdaValue.setText(format(_lambda));
-                _state.setInteractionStrength(_lambda); // alter quantum state interaction strength
             }
         });
     }
@@ -334,8 +333,11 @@ public class QFTSandbox extends JFrame {
                 _resetButton.setEnabled(false);
                 _animator.stopAnimation();
                 _playButton.setText(BUTTON_PLAY);
-                if (_state != null)
-                    _state.reset();
+                if (_state != null) {
+                    _state.setTimeStep(_dt); // update time step
+                    _state.setInteractionStrength(_lambda); // update interaction strength
+                    _state.reset(); // reset quantum state
+                }
                 frameUpdate();
             }
         });
