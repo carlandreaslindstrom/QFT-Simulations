@@ -148,10 +148,12 @@ public abstract class BaseState {
 
     public void setInteractionStrength(double lambda) {
         _lambda = lambda;
+        firstStep();
     }
 
     public void setTimeStep(double dt) {
         _dt = dt;
+        firstStep();
     }
 
     public void updatePlots(Plot p0m, Plot p0p, Plot p1m, Plot p1p, DensityPlot p2m, DensityPlot p2p) {

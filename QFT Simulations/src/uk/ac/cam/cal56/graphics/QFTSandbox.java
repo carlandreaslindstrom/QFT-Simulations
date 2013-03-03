@@ -281,12 +281,14 @@ public class QFTSandbox extends JFrame {
             public void stateChanged(ChangeEvent e) {
                 _dt = Math.pow(10, _dtSlider.getValue());
                 _dtValue.setText(format(_dt));
+                _state.setTimeStep(_dt); // update time step
             }
         });
         _lambdaSlider.addChangeListener(new ChangeListener() {
             public void stateChanged(ChangeEvent e) {
                 _lambda = Math.pow(10, _lambdaSlider.getValue());
                 _lambdaValue.setText(format(_lambda));
+                _state.setInteractionStrength(_lambda); // update interaction strength
             }
         });
     }
@@ -334,8 +336,6 @@ public class QFTSandbox extends JFrame {
                 _animator.stopAnimation();
                 _playButton.setText(BUTTON_PLAY);
                 if (_state != null) {
-                    _state.setTimeStep(_dt); // update time step
-                    _state.setInteractionStrength(_lambda); // update interaction strength
                     _state.reset(); // reset quantum state
                 }
                 frameUpdate();
