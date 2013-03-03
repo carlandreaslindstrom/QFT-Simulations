@@ -19,6 +19,9 @@ import javax.swing.border.LineBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import uk.ac.cam.cal56.maths.Complex;
+import uk.ac.cam.cal56.maths.FFT;
+import uk.ac.cam.cal56.maths.FourierTransform;
 import uk.ac.cam.cal56.qft.interactingtheory.State;
 import uk.ac.cam.cal56.qft.interactingtheory.impl.SecondOrderSymplecticState;
 
@@ -87,12 +90,17 @@ public class QFTSandbox extends JFrame {
     // Momentum space plots
     private Plot                _momPlotVacuum;
     private Plot                _momPlot1P;
-    private DensityPlot         _momDensityPlot2P;
+    private Plot                _momDensityPlot2P;
+    private Plot                _momPlotRest;
 
     // Position space plots
     private Plot                _posPlotVacuum;
     private Plot                _posPlot1P;
-    private DensityPlot         _posDensityPlot2P;
+    private Plot                _posDensityPlot2P;
+    private Plot                _posPlotRest;
+
+    /* FOURIER TRANSFORM */
+    private FourierTransform    _ft                = new FFT();
 
     /* ANIMATION VARIABLES */
     // Animation parameters and objects
@@ -155,12 +163,19 @@ public class QFTSandbox extends JFrame {
     protected void drawPlots() {
         // make new plots if not visible
         if (!_plotsVisible) {
-            _momPlotVacuum = new Plot(_state.get0P(), 0.0, 1.0, PLOT_1D_WIDTH, PLOT_HEIGHT);
-            _momPlot1P = new Plot(_state.get1PMomenta(), 0.0, 1.0, PLOT_WIDTH, PLOT_HEIGHT);
-            _momDensityPlot2P = new DensityPlot(_state.get2PMomenta(), 0.0, 0.5, PLOT_WIDTH, PLOT_HEIGHT);
-            _posPlotVacuum = new Plot(_state.get0P(), 0.0, 1.0, PLOT_1D_WIDTH, PLOT_HEIGHT);
-            _posPlot1P = new Plot(_state.get1PPositions(), 0.0, 0.2, PLOT_WIDTH, PLOT_HEIGHT);
-            _posDensityPlot2P = new DensityPlot(_state.get2PPositions(), 0.0, 0.5, PLOT_WIDTH, PLOT_HEIGHT);
+            Complex rest = Complex.one().times(Math.sqrt(_state.getRemainingProbability()));
+
+            _momPlotVacuum = new FunctionPlot(_state.get0P(), 0.0, 1.0, PLOT_1D_WIDTH, PLOT_HEIGHT);
+            _momPlot1P = new FunctionPlot(_state.get1PMom(), 0.0, 1.0, PLOT_WIDTH, PLOT_HEIGHT);
+            _momDensityPlot2P = new DensityPlot(_state.get2PMom(), 0.0, 1.0, PLOT_WIDTH, PLOT_HEIGHT);
+            _momPlotRest = new FunctionPlot(rest, 0.0, 1.0, PLOT_1D_WIDTH, PLOT_HEIGHT);
+
+            _posPlotVacuum = new FunctionPlot(_state.get0P(), 0.0, 1.0, PLOT_1D_WIDTH, PLOT_HEIGHT);
+            _posPlot1P = new FunctionPlot(_ft.transform(_state.get1PMom()), 0.0, 1.0, PLOT_WIDTH, PLOT_HEIGHT);
+            _posDensityPlot2P = new DensityPlot(_ft.transform2D(_state.get2PMom()), 0.0, 1.0, PLOT_WIDTH,
+                PLOT_HEIGHT);
+            _posPlotRest = new FunctionPlot(rest, 0.0, 1.0, PLOT_1D_WIDTH, PLOT_HEIGHT);
+
             _plotsVisible = true;
         }
 
@@ -174,9 +189,12 @@ public class QFTSandbox extends JFrame {
         _displayPanel.add(_momPlotVacuum, "2, 4, center, center");
         _displayPanel.add(_momPlot1P, "4, 4, center, center");
         _displayPanel.add(_momDensityPlot2P, "6, 4, center, center");
+        _displayPanel.add(_momPlotRest, "8, 4, center, center");
+
         _displayPanel.add(_posPlotVacuum, "2, 6, center, center");
         _displayPanel.add(_posPlot1P, "4, 6, center, center");
         _displayPanel.add(_posDensityPlot2P, "6, 6, center, center");
+        _displayPanel.add(_posPlotRest, "8, 6, center, center");
     }
 
     private void setupFrame() {
@@ -193,8 +211,9 @@ public class QFTSandbox extends JFrame {
 
         // set layout
         _displayPanel.setLayout(new FormLayout(new ColumnSpec[] { FormFactory.UNRELATED_GAP_COLSPEC,
-            ColumnSpec.decode("112px"), FormFactory.UNRELATED_GAP_COLSPEC, ColumnSpec.decode("max(154dlu;default)"),
-            FormFactory.UNRELATED_GAP_COLSPEC, ColumnSpec.decode("max(166dlu;default)"), }, new RowSpec[] {
+            ColumnSpec.decode("84px"), FormFactory.UNRELATED_GAP_COLSPEC, ColumnSpec.decode("max(149dlu;default)"),
+            FormFactory.UNRELATED_GAP_COLSPEC, ColumnSpec.decode("max(155dlu;default)"),
+            FormFactory.RELATED_GAP_COLSPEC, ColumnSpec.decode("max(30dlu;default)"), }, new RowSpec[] {
             FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC, FormFactory.UNRELATED_GAP_ROWSPEC,
             RowSpec.decode("311px"), FormFactory.UNRELATED_GAP_ROWSPEC, RowSpec.decode("309px"),
             FormFactory.UNRELATED_GAP_ROWSPEC, }));
@@ -351,15 +370,19 @@ public class QFTSandbox extends JFrame {
 
         _timeLabel.setText("t = " + _state.getTime());
 
+        Complex rest = Complex.one().times(Math.sqrt(_state.getRemainingProbability()));
+
         // momentum plots
         _momPlotVacuum.update(_state.get0P());
-        _momPlot1P.update(_state.get1PMomenta());
-        _momDensityPlot2P.update(_state.get2PMomenta());
+        _momPlot1P.update(_state.get1PMom());
+        _momDensityPlot2P.update(_state.get2PMom());
+        _momPlotRest.update(rest);
 
         // momentum plots
         _posPlotVacuum.update(_state.get0P());
-        _posPlot1P.update(_state.get1PPositions());
-        _posDensityPlot2P.update(_state.get2PPositions());
+        _posPlot1P.update(_ft.transform(_state.get1PMom()));
+        _posDensityPlot2P.update(_ft.transform2D(_state.get2PMom()));
+        _posPlotRest.update(rest);
 
         _state.step();
     }

@@ -24,14 +24,14 @@ public class UselessFirstOrderSymplecticStateTest {
     public void testConstructor() {
         State state = new UselessFirstOrderSymplecticState(3, _N, _Pmax, _m, _dx, _dt, _lambda);
         assertEquals(state.getTime(), 0.0, EPSILON);
-        assertEquals(state.get0P(), 1.0, EPSILON);
+        assertEquals(state.get0P().modSquared(), 1.0, EPSILON);
     }
 
     @Test
     public void testStep() {
         State state = new UselessFirstOrderSymplecticState(4, _N, _Pmax, _m, _dx, _dt, _lambda);
         assertEquals(state.getTime(), 0.0, EPSILON);
-        assertEquals(state.get0P(), 1.0, EPSILON);
+        assertEquals(state.get0P().modSquared(), 1.0, EPSILON);
 
         State otherState = new FirstOrderSymplecticState(_N, _Pmax, _m, _dx, _dt, _lambda);
 

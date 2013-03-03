@@ -8,7 +8,8 @@ import javax.swing.JFrame;
 
 import org.junit.Test;
 
-import uk.ac.cam.cal56.graphics.DensityPlot;
+import uk.ac.cam.cal56.graphics.FunctionPlot;
+import uk.ac.cam.cal56.graphics.Plot;
 import uk.ac.cam.cal56.maths.Complex;
 import uk.ac.cam.cal56.maths.DFT;
 import uk.ac.cam.cal56.maths.FFT;
@@ -57,7 +58,7 @@ public class FourierTransformTest {
             assertTrue(g[i].equals(f[i]));
         }
     }
-    
+
     @Test
     public void testFFT2DUnitarity() {
         int N = (int) Math.pow(2, 8);
@@ -139,7 +140,7 @@ public class FourierTransformTest {
         for (int i = 0; i < N; i++) {
             for (int j = 0; j < M; j++) {
                 data[i][j] = F[i][j].modSquared();
-                //data[i][j] = f[i][j].modSquared();
+                // data[i][j] = f[i][j].modSquared();
             }
         }
         return data;
@@ -225,9 +226,9 @@ public class FourierTransformTest {
                     // Plot p = new Plot(testDFT1D(), maxwidth, maxheight);
                     // Plot p = new Plot(testFFT1D(), maxwidth, maxheight);
                     // DensityPlot p = new DensityPlot(testDFT2D(), maxwidth, maxheight);
-                    DensityPlot p = new DensityPlot(testFFT2D(), maxwidth, maxheight);
+                    Plot p = new FunctionPlot(testFFT2D(), maxwidth, maxheight);
                     frame.add(p);
-                    frame.setBounds(0, 0, p.width, p.height + 22);
+                    frame.setBounds(0, 0, p.getWidth(), p.getHeight() + 22);
                     frame.setVisible(true);
                 }
                 catch (Exception e) {

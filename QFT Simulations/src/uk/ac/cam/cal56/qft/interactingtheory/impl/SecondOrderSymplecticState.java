@@ -3,17 +3,16 @@ package uk.ac.cam.cal56.qft.interactingtheory.impl;
 import java.util.Map.Entry;
 
 import uk.ac.cam.cal56.maths.Complex;
-import uk.ac.cam.cal56.qft.interactingtheory.State;
 
-public class SecondOrderSymplecticState extends BaseState implements State {
+public class SecondOrderSymplecticState extends BaseState {
 
-    private Complex[] _prevc;    // {c_n(t+dt)}
+    private Complex[] _prevc;    // c_n(t-dt)
 
     public SecondOrderSymplecticState(int N, int Pmax, double m, double dx, double dt, double lambda) {
         super(N, Pmax, m, dx, dt, lambda);
     }
 
-    // first order Euler backward step to calculate _prevc 
+    // first order Euler backward step to calculate _prevc
     @Override
     protected void firstStep() {
         _prevc = new Complex[_S];
@@ -28,7 +27,7 @@ public class SecondOrderSymplecticState extends BaseState implements State {
         }
     }
 
-    // second order symplectic stepping algorithm (mid point) to calculate 
+    // second order symplectic stepping algorithm (mid point) to calculate
     @Override
     public void step() {
         Complex[] nextc = new Complex[_S]; // temporary buffer for later swap-over
@@ -41,7 +40,7 @@ public class SecondOrderSymplecticState extends BaseState implements State {
             Complex cdot = sum.timesi(-1);
             nextc[n] = _prevc[n].plus(cdot.times(2 * _dt)); // c_n(t+dt)=c_n(t-dt)+2dt*cdot_n(t)
         }
-        
+
         // swap to new coefficients
         _prevc = _c;
         _c = nextc;

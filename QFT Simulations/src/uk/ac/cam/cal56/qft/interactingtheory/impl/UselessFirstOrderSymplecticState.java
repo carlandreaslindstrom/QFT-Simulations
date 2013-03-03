@@ -5,9 +5,8 @@ import java.util.Map.Entry;
 
 import uk.ac.cam.cal56.maths.Combinatorics;
 import uk.ac.cam.cal56.maths.Complex;
-import uk.ac.cam.cal56.qft.interactingtheory.State;
 
-public class UselessFirstOrderSymplecticState extends BaseState implements State {
+public class UselessFirstOrderSymplecticState extends BaseState {
 
     private final int _K;    // order
 
@@ -48,7 +47,7 @@ public class UselessFirstOrderSymplecticState extends BaseState implements State
         Complex[] currentderiv = new Complex[_S];
 
         for (int k = 1; k < _K; k++) {
-            double lastfactor = 2 * Math.pow(_dt, k-1) / Combinatorics.factorial(k-1);
+            double lastfactor = 2 * Math.pow(_dt, k - 1) / Combinatorics.factorial(k - 1);
             for (int n = 0; n < _S; n++) {
                 if ((_K + k) % 2 == 0)
                     nextc[n] = nextc[n].plus(lastderiv[n].times(lastfactor));

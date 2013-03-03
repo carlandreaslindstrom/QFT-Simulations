@@ -4,30 +4,25 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import uk.ac.cam.cal56.graphics.DensityPlot;
-import uk.ac.cam.cal56.graphics.Plot;
 import uk.ac.cam.cal56.maths.Combinatorics;
 import uk.ac.cam.cal56.maths.Complex;
-import uk.ac.cam.cal56.maths.FFT;
-import uk.ac.cam.cal56.maths.FourierTransform;
 import uk.ac.cam.cal56.qft.interactingtheory.FreeHamiltonian;
 import uk.ac.cam.cal56.qft.interactingtheory.Interaction;
 import uk.ac.cam.cal56.qft.interactingtheory.InteractionHamiltonian;
+import uk.ac.cam.cal56.qft.interactingtheory.State;
 import uk.ac.cam.cal56.qft.statelabelling.StateLabelling;
 
-public abstract class BaseState {
+public abstract class BaseState implements State {
 
-    protected final int                    _N;             // number of lattice points
-    protected double                       _dt;            // time step
-    protected final int                    _S;             // S(N,P) = total number of Fock state coefficients
-    protected final FreeHamiltonian        _Hfree;         // free theory Hamiltonian
-    protected final InteractionHamiltonian _Hint;          // interaction Hamiltonian
+    protected final int                    _N;     // number of lattice points
+    protected double                       _dt;    // time step
+    protected final int                    _S;     // S(N,P) = total number of Fock state coefficients
+    protected final FreeHamiltonian        _Hfree; // free theory Hamiltonian
+    protected final InteractionHamiltonian _Hint;  // interaction Hamiltonian
     protected double                       _lambda;        // interaction strength
 
     protected double                       _time;
-    protected Complex[]                    _c;             // {c_n(t)}
-
-    private FourierTransform               _ft = new FFT();
+    protected Complex[]                    _c;     // {c_n(t)}
 
     public BaseState(int N, int Pmax, double m, double dx, double dt, double lambda) {
         // initialise parameters
@@ -61,7 +56,7 @@ public abstract class BaseState {
         Integer n = StateLabelling.index(ls, _N);
         if (n == null || n >= _S)
             n = 0;
-        
+
         // set one particle
         for (int i = 0; i < _S; i++)
             _c[i] = Complex.zero();
@@ -81,6 +76,7 @@ public abstract class BaseState {
         return sum;
     }
 
+    // for unit tests
     public Complex get(int... particles) {
         List<Integer> ls = new ArrayList<Integer>();
         for (int p : particles)
@@ -90,60 +86,33 @@ public abstract class BaseState {
             return null;
         else
             return _c[n];
-
     }
 
-    public double get0P() {
-        return _c[0].modSquared();
+    public Complex get0P() {
+        return _c[0];
     }
 
-    public double[] get1PMomenta() {
-        double[] probs = new double[_N];
-        for (int p = 0; p < _N; p++)
-            probs[p] = _c[p + 1].modSquared(); // +1 in order to avoid the 0P vacuum state
-        return probs;
+    public Complex[] get1PMom() {
+        return Arrays.copyOfRange(_c, 1, _N + 1);
     }
 
-    public double[][] get2PMomenta() {
-        double[][] probs = new double[_N][_N];
+    public Complex[][] get2PMom() {
+        Complex[][] ampls = new Complex[_N][_N];
         for (int p = 0; p < _N; p++)
             for (int q = p; q < _N; q++) {
-                double value = _c[StateLabelling.index(Arrays.asList(p, q), _N)].modSquared();
-                probs[p][q] = value; // +(1+N) in order to avoid 0P and 1P states
+                Complex value = _c[StateLabelling.index(Arrays.asList(p, q), _N)];
+                ampls[p][q] = value;
                 if (p != q)
-                    probs[q][p] = value;
+                    ampls[q][p] = value;
             }
-        return probs;
+        return ampls;
     }
 
-    public double[] get1PPositions() {
-        double[] probs = new double[_N];
-        Complex[] transformed = _ft.transform(Arrays.copyOfRange(_c, 1, _N + 1));
-        for (int p = 0; p < _N; p++)
-            probs[p] = transformed[p].modSquared();
-        return probs;
-    }
-
-    public double[][] get2PPositions() {
-        Complex[][] coeffs = new Complex[_N][_N];
-
-        for (int p = 0; p < _N; p++)
-            for (int q = p; q < _N; q++) {
-                Complex coeff = _c[StateLabelling.index(Arrays.asList(p, q), _N)];
-                coeffs[p][q] = coeff;
-                if (p != q)
-                    coeffs[q][p] = coeff;
-            }
-        double[][] probs = new double[_N][_N];
-        coeffs = _ft.transform2D(coeffs);
-        for (int p = 0; p < _N; p++)
-            for (int q = p; q < _N; q++) {
-                double value = coeffs[p][q].modSquared();
-                probs[p][q] = value;
-                if (p != q)
-                    probs[q][p] = value;
-            }
-        return probs;
+    public double getRemainingProbability() {
+        double probSquared = 0;
+        for (int n = Combinatorics.S(_N, 2); n < _S; n++)
+            probSquared += _c[n].modSquared();
+        return probSquared;
     }
 
     public void setInteractionStrength(double lambda) {
@@ -156,7 +125,4 @@ public abstract class BaseState {
         firstStep();
     }
 
-    public void updatePlots(Plot p0m, Plot p0p, Plot p1m, Plot p1p, DensityPlot p2m, DensityPlot p2p) {
-        // TODO Auto-generated method stub
-    }
 }

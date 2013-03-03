@@ -1,5 +1,7 @@
 package uk.ac.cam.cal56.qft.interactingtheory.test;
 
+import static org.junit.Assert.assertEquals;
+
 import org.junit.Test;
 
 import uk.ac.cam.cal56.maths.Complex;
@@ -7,6 +9,8 @@ import uk.ac.cam.cal56.qft.interactingtheory.State;
 import uk.ac.cam.cal56.qft.interactingtheory.impl.SecondOrderSymplecticState;
 
 public class SecondOrderSymplecticStateTest {
+
+    private final double EPSILON = 1.0e-10;
 
     @Test
     public void testSymplecticity() {
@@ -81,5 +85,36 @@ public class SecondOrderSymplecticStateTest {
         catch (Exception e) {
             System.err.println("Error: " + e.getMessage());
         }
+    }
+
+    @Test
+    public void testGetRemainingProbability() {
+        int N = 10;
+        int Pmax = 3;
+        double m = 1.0;
+        double dx = 0.1;
+        double dt = 0.01;
+        double lambda = 0.1;
+        State state = new SecondOrderSymplecticState(N, Pmax, m, dx, dt, lambda); // recalculate
+
+        double tfinal = 1.0;
+        while (state.getTime() < tfinal) {
+            state.step();
+
+            double exact = state.getModSquared();
+
+            double calc = state.get0P().modSquared();
+            Complex[] oneParticle = state.get1PMom();
+            for (int p = 0; p < N; p++)
+                calc += oneParticle[p].modSquared();
+            Complex[][] twoParticles = state.get2PMom();
+            for (int p = 0; p < N; p++)
+                for (int q = 0; q <= p; q++)
+                    calc += twoParticles[p][q].modSquared();
+            calc += state.getRemainingProbability();
+
+            assertEquals(calc, exact, EPSILON);
+        }
+
     }
 }

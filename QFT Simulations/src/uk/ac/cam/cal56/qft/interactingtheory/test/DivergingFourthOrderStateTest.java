@@ -26,7 +26,7 @@ public class DivergingFourthOrderStateTest {
     public void setUp() {
         _state = new DivergingFourthOrderState(_N, _Pmax, _m, _dx, _dt, _lambda);
         assertEquals(_state.getTime(), 0.0, EPSILON);
-        assertEquals(_state.get0P(), 1.0, EPSILON);
+        assertEquals(_state.get0P().modSquared(), 1.0, EPSILON);
     }
 
     @Test
@@ -40,7 +40,7 @@ public class DivergingFourthOrderStateTest {
         }
         _state.reset();
         assertEquals(_state.getTime(), 0.0, EPSILON);
-        assertEquals(_state.get0P(), 1.0, EPSILON);
+        assertEquals(_state.get0P().modSquared(), 1.0, EPSILON);
     }
 
     @Test

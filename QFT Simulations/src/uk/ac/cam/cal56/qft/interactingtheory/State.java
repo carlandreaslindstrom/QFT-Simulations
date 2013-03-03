@@ -1,13 +1,8 @@
 package uk.ac.cam.cal56.qft.interactingtheory;
 
-import uk.ac.cam.cal56.graphics.DensityPlot;
-import uk.ac.cam.cal56.graphics.Plot;
+import uk.ac.cam.cal56.maths.Complex;
 
 public interface State {
-
-    public void setInteractionStrength(double lambda);
-
-    public void setTimeStep(double dt);
 
     public void step();
 
@@ -17,15 +12,18 @@ public interface State {
 
     public double getModSquared();
 
-    public double get0P();
+    public Complex get0P();
 
-    public double[] get1PMomenta();
+    public Complex[] get1PMom();
 
-    public double[] get1PPositions();
+    public Complex[][] get2PMom();
 
-    public double[][] get2PMomenta();
+    public double getRemainingProbability();
 
-    public double[][] get2PPositions();
+    // remember to recalculate ALL the coefficients (not only current)
+    public void setInteractionStrength(double lambda);
 
-    public void updatePlots(Plot p0m, Plot p0p, Plot p1m, Plot p1p, DensityPlot p2m, DensityPlot p2p);
+    // remember to recalculate ALL the coefficients (not only current)
+    public void setTimeStep(double dt);
+
 }

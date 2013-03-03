@@ -3,9 +3,8 @@ package uk.ac.cam.cal56.qft.interactingtheory.impl;
 import java.util.Map.Entry;
 
 import uk.ac.cam.cal56.maths.Complex;
-import uk.ac.cam.cal56.qft.interactingtheory.State;
 
-public class UnstableSecondOrderSymplecticState extends BaseState implements State {
+public class UnstableSecondOrderSymplecticState extends BaseState {
 
     private Complex[] _prevc;
     private Complex[] _cdot;

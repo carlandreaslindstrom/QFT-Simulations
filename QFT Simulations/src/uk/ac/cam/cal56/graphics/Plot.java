@@ -1,136 +1,70 @@
 package uk.ac.cam.cal56.graphics;
 
 import java.awt.Canvas;
+import java.awt.Color;
 import java.awt.Graphics;
-
-import javax.swing.JFrame;
-
-import uk.ac.cam.cal56.maths.Complex;
+import java.awt.Image;
+import java.awt.Rectangle;
 
 @SuppressWarnings("serial")
-public class Plot extends Canvas {
+public abstract class Plot extends Canvas {
 
-    public final int width;
-    public final int height;
-    private double[] _data;
-    private int      _sampling;
-    private int      _pointsize;
-    private double   _min = Double.MAX_VALUE;
-    private double   _max = Double.MIN_VALUE;
+    protected int    _width;
+    protected int    _height;
+    protected int    _sampling;
+    protected int    _pointsize;
+    protected double _min = Double.MAX_VALUE;
+    protected double _max = Double.MIN_VALUE;
 
-    // paints the graph
-    @Override
+    protected abstract void plot(Graphics g);
+
+    public abstract void update(Object data);
+
+    protected abstract void setHeightAndWidth(int width, int height);
+
+    protected abstract void setPointSizeAndSampling(int width, int height);
+
+    protected abstract void setMinAndMax(Double min, Double max);
+
     public void paint(Graphics g) {
         super.paint(g);
-        for (int i = 0; i < _data.length / _sampling; i++) {
-            double value = (_data[i] - _min) / (_max - _min);
-            g.setColor(DensityPlot.doubleToRainbowColor(value));
-            int barHeight = (int) (height * value);
-            g.fillRect(i * _pointsize, height - barHeight, _pointsize, barHeight);
-        }
+        plot(g);
     }
 
-    // constructor for single value
-    public Plot(double value, double min, double max, int maxwidth, int maxheight) {
-        this(new double[] { value }, min, max, maxwidth, maxheight);
+    /* Copyright (c) 1996 by Groupe Bull. All Rights Reserved */
+    @Override
+    public void update(Graphics g) {
+        Graphics offgc;
+        Image offscreen = null;
+        Rectangle box = g.getClipBounds();
+
+        // create the offscreen buffer and associated Graphics
+        offscreen = createImage(box.width, box.height);
+        offgc = offscreen.getGraphics();
+
+        // clear the exposed area
+        offgc.setColor(getBackground());
+        offgc.fillRect(0, 0, box.width, box.height);
+        offgc.setColor(getForeground());
+
+        // do normal redraw
+        paint(offgc);
+
+        // transfer offscreen to window
+        g.drawImage(offscreen, 0, 0, this);
     }
 
-    // constructors for data set
-    public Plot(double[] data, int maxwidth, int maxheight) {
-        this(data, null, null, maxwidth, maxheight);
-    }
-    
-    public Plot(Complex[] cdata, int maxwidth, int maxheight) {
-        this(modSquare(cdata), null, null, maxwidth, maxheight);
-    }
-    
-    public Plot(Complex[] cdata, Double min, Double max, int maxwidth, int maxheight) {
-        this(modSquare(cdata), min, max, maxwidth, maxheight);
-    }
-    
-    private static double[] modSquare(Complex[] cdata) {
-        int N = cdata.length;
-        double[] data = new double[N];
-        for(int i = 0; i < N; i++) data[i] = cdata[i].modSquared();
-        return data;
-    }
-
-    // ...
-    public Plot(double[] data, Double min, Double max, int maxwidth, int height) {
-        _data = data;
-
-        this.height = height;
-        if (maxwidth < _data.length) { // sampled
-            _pointsize = 1;
-            _sampling = (int) Math.ceil(_data.length / maxwidth);
-            width = (int) (1.0 * _data.length / _sampling);
-        }
-        else { // scaled up
-            _sampling = 1;
-            _pointsize = maxwidth / _data.length;
-            width = _data.length * _pointsize;
-        }
-
-        // if max, min not set, determine them from data
-        if (min != null && max != null) {
-            _min = min;
-            _max = max;
-        }
-        else {
-            for (int i = 0; i < _data.length; i++) {
-                double value = _data[i];
-                if (value < _min)
-                    _min = value;
-                if (value > _max)
-                    _max = value;
-            }
-        }
-        this.setBounds(0, 0, width, height);
-    }
-
-    public void update(double[] data) {
-        _data = data;
-        if (width < _data.length) { // sampled
-            _pointsize = 1;
-            _sampling = (int) Math.ceil(_data.length / width);
-        }
-        else { // scaled up
-            _sampling = 1;
-            _pointsize = width / _data.length;
-        }
-        repaint();
-    }
-    
-    public void update(Complex[] cdata) {
-        update(modSquare(cdata));
-    }
-
-    public void update(double value) {
-        _data = new double[] { value };
-        repaint();
-    }
-
-    // TEST CASE
-    public static void main(String[] args) {
-        JFrame frame = new JFrame();
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-        // invent data
-        int maxheight = 500, maxwidth = 500, N = 500;
-        double[] d = new double[N];
-        for (int i = 0; i < N; i++) {
-            double z1 = 1.0 * (i - N / 2) / N;
-            d[i] = Math.exp(-z1 * z1);
-        }
-
-        // make plot
-        Plot p = new Plot(d, maxwidth, maxheight);
-        // Plot p = new Plot(0.7, 0, 1, maxwidth, maxheight);
-        frame.setSize(p.width, p.height + 22);
-        frame.add(p);
-
-        frame.setVisible(true);
-
+    // transforms a linear number scale to a rainbow color scale
+    public static Color doubleToRainbowColor(double num) {
+        if (num < 0.0 || num > 1.0)
+            return Color.WHITE;
+        double freq = 5.5;
+        double phase = 0.2;
+        int scale = 127;
+        int red = (int) (scale * (1 + Math.sin(freq * num + (phase + 3.7) * Math.PI / 3)));
+        int green = (int) (scale * (1 + Math.sin(freq * num + (phase + 4.7) * Math.PI / 3)));
+        int blue = (int) (scale * (1 + Math.sin(freq * num + phase * Math.PI / 3)));
+        return new Color(red, green, blue);
     }
 
 }
