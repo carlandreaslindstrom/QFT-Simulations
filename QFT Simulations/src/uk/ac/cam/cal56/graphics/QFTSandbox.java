@@ -48,11 +48,11 @@ public class QFTSandbox extends JFrame {
 
     private static final int    N_MIN              = 2;
     private static final int    N_DEFAULT          = 16;
-    private static final int    N_MAX              = 64;
+    private static final int    N_MAX              = 128;
 
-    private static final int    PMAX_MIN           = 2;
+    private static final int    PMAX_MIN           = 1;
     private static final int    PMAX_DEFAULT       = 3;
-    private static final int    PMAX_MAX           = 5;
+    private static final int    PMAX_MAX           = 7;
 
     private static final double DX_MIN             = 1.0e-3;
     private static final double DX_DEFAULT         = 1.0;
@@ -66,9 +66,13 @@ public class QFTSandbox extends JFrame {
     private static final double DT_DEFAULT         = 1.0e-3;
     private static final double DT_MAX             = 1.0;
 
-    private static final double LAMBDA_MIN         = 1.0e-3;
+    private static final int    STEPS_MIN          = 1;
+    private static final int    STEPS_DEFAULT      = 10;
+    private static final int    STEPS_MAX          = 1000;
+
+    private static final double LAMBDA_MIN         = 1.0e-9;
     private static final double LAMBDA_DEFAULT     = 1.0e1;
-    private static final double LAMBDA_MAX         = 1.0e3;
+    private static final double LAMBDA_MAX         = 1.0e2;
 
     private static final String BUTTON_CALCULATE   = "Calculate";
     private static final String BUTTON_PLAY        = "Play";
@@ -107,6 +111,7 @@ public class QFTSandbox extends JFrame {
     /* ANIMATION VARIABLES */
     // Animation parameters and objects
     private double              _framerate         = 30.0;
+    private int                 _steps             = STEPS_DEFAULT;
     private Animator            _animator          = new Animator();
 
     /* FRAME SETUP VARIABLES */
@@ -115,7 +120,7 @@ public class QFTSandbox extends JFrame {
     private JPanel              _displayPanel      = new JPanel();
     private boolean             _plotsVisible      = false;
 
-    private final Component     _controlPanelStrut = Box.createVerticalStrut(100);
+    private final Component     _controlPanelStrut = Box.createVerticalStrut(20);
 
     // Value Labels
     private JLabel              _NValue            = new JLabel(N_DEFAULT + "");
@@ -123,6 +128,7 @@ public class QFTSandbox extends JFrame {
     private JLabel              _dxValue           = new JLabel(format(DX_DEFAULT));
     private JLabel              _mValue            = new JLabel(format(M_DEFAULT));
     private JLabel              _dtValue           = new JLabel(format(DT_DEFAULT));
+    private JLabel              _stepsValue        = new JLabel(STEPS_DEFAULT + "");
     private JLabel              _lambdaValue       = new JLabel(format(LAMBDA_DEFAULT));
 
     private JLabel              _NLabel            = new JLabel("Lattice points [N]:");
@@ -130,6 +136,7 @@ public class QFTSandbox extends JFrame {
     private JLabel              _dxLabel           = new JLabel("Lattice spacing [dx]:");
     private JLabel              _mLabel            = new JLabel("Particle mass [m]:");
     private JLabel              _dtLabel           = new JLabel("Time step [dt]:");
+    private JLabel              _stepsLabel        = new JLabel("Steps per frame:");
     private JLabel              _lambdaLabel       = new JLabel("Interaction strength:");
     private final JLabel        _timeLabel         = new JLabel();
 
@@ -139,6 +146,7 @@ public class QFTSandbox extends JFrame {
     private JSlider             _dxSlider          = new JSlider(log10(DX_MIN), log10(DX_MAX), log10(DX_DEFAULT));
     private JSlider             _mSlider           = new JSlider(log10(M_MIN), log10(M_MAX), log10(M_DEFAULT));
     private JSlider             _dtSlider          = new JSlider(log10(DT_MIN), log10(DT_MAX), log10(DT_DEFAULT));
+    private JSlider             _stepsSlider       = new JSlider(STEPS_MIN, STEPS_MAX, STEPS_DEFAULT);
     private JSlider             _lambdaSlider      = new JSlider(log10(LAMBDA_MIN), log10(LAMBDA_MAX),
                                                        log10(LAMBDA_DEFAULT));
 
@@ -236,6 +244,7 @@ public class QFTSandbox extends JFrame {
             FormFactory.RELATED_GAP_ROWSPEC, FormFactory.MIN_ROWSPEC, FormFactory.MIN_ROWSPEC, FormFactory.MIN_ROWSPEC,
             FormFactory.RELATED_GAP_ROWSPEC, FormFactory.MIN_ROWSPEC, FormFactory.MIN_ROWSPEC,
             FormFactory.RELATED_GAP_ROWSPEC, FormFactory.MIN_ROWSPEC, FormFactory.MIN_ROWSPEC,
+            FormFactory.RELATED_GAP_ROWSPEC, FormFactory.MIN_ROWSPEC, FormFactory.MIN_ROWSPEC,
             FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC,
             FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC }));
 
@@ -245,7 +254,8 @@ public class QFTSandbox extends JFrame {
         setupSlider(_dxSlider, _dxValue, _dxLabel, log10(DX_MIN), log10(DX_MAX), 8, true);
         setupSlider(_mSlider, _mValue, _mLabel, log10(M_MIN), log10(M_MAX), 11, true);
         setupSlider(_dtSlider, _dtValue, _dtLabel, log10(DT_MIN), log10(DT_MAX), 15, true);
-        setupSlider(_lambdaSlider, _lambdaValue, _lambdaLabel, log10(LAMBDA_MIN), log10(LAMBDA_MAX), 18, true);
+        setupSlider(_stepsSlider, _stepsValue, _stepsLabel, STEPS_MIN, STEPS_MAX, 18, false);
+        setupSlider(_lambdaSlider, _lambdaValue, _lambdaLabel, log10(LAMBDA_MIN), log10(LAMBDA_MAX), 21, true);
         setupSliderListeners();
 
         // setup separating strut
@@ -304,6 +314,12 @@ public class QFTSandbox extends JFrame {
                 _state.setTimeStep(_dt); // update time step
             }
         });
+        _stepsSlider.addChangeListener(new ChangeListener() {
+            public void stateChanged(ChangeEvent e) {
+                _steps = _stepsSlider.getValue();
+                _stepsValue.setText(Integer.toString(_steps));
+            }
+        });
         _lambdaSlider.addChangeListener(new ChangeListener() {
             public void stateChanged(ChangeEvent e) {
                 _lambda = Math.pow(10, _lambdaSlider.getValue());
@@ -314,7 +330,7 @@ public class QFTSandbox extends JFrame {
     }
 
     private void setupCalculateButton() {
-        _controlPanel.add(_calculateButton, "2, 21");
+        _controlPanel.add(_calculateButton, "2, 24");
         _calculateButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 _animator.stopAnimation();
@@ -330,7 +346,7 @@ public class QFTSandbox extends JFrame {
 
     private void setupPlayButton() {
         _playButton.setEnabled(false);
-        _controlPanel.add(_playButton, "2, 23");
+        _controlPanel.add(_playButton, "2, 26");
         _playButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 if (_playButton.getText() == BUTTON_PLAY) {
@@ -348,7 +364,7 @@ public class QFTSandbox extends JFrame {
     }
 
     private void setupResetButton() {
-        _controlPanel.add(_resetButton, "2, 25");
+        _controlPanel.add(_resetButton, "2, 28");
         _resetButton.setEnabled(false);
         _resetButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -385,7 +401,7 @@ public class QFTSandbox extends JFrame {
         _posDensityPlot2P.update(_ft.transform2D(_state.get2PMom()));
         _posPlotRest.update(rest);
 
-        _state.step(9);
+        _state.step(_steps);
     }
 
     // [log10,tenToThe,format] are helper functions for slider input
