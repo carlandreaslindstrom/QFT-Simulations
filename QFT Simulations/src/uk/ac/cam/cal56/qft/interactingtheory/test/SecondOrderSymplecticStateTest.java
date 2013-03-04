@@ -6,6 +6,7 @@ import org.junit.Test;
 
 import uk.ac.cam.cal56.maths.Complex;
 import uk.ac.cam.cal56.qft.interactingtheory.State;
+import uk.ac.cam.cal56.qft.interactingtheory.impl.EvenOrderSymplecticState;
 import uk.ac.cam.cal56.qft.interactingtheory.impl.SecondOrderSymplecticState;
 
 public class SecondOrderSymplecticStateTest {
@@ -77,6 +78,67 @@ public class SecondOrderSymplecticStateTest {
                 System.out.println(dt + " " + Math.abs(exact.minus(calc).mod()));
                 // out.write(dt + " " + Math.abs(exact.minus(calc).mod()));
                 // out.newLine();
+            }
+
+            // Close the output stream
+            // out.close();
+        }
+        catch (Exception e) {
+            System.err.println("Error: " + e.getMessage());
+        }
+    }
+
+    @Test
+    public void testSecondOrderComparison() {
+        int N = 6;
+        int Pmax = 3;
+        double m = 1.0;
+        double dx = 0.1;
+        double dtInitial = 0.01;
+        double lambda = 0.1;
+        State state = new SecondOrderSymplecticState(N, Pmax, m, dx, dtInitial, lambda);
+        State otherState = new EvenOrderSymplecticState(4, N, Pmax, m, dx, dtInitial, lambda);
+
+        try {
+            // Create file
+            // String filename = "gnuplot/Symplectic2ndOrderErrorVsDt.txt";
+            // FileWriter fstream = new FileWriter(filename);
+            // BufferedWriter out = new BufferedWriter(fstream);
+            // System.out.println(filename);
+
+            double tfinal = 10.0;
+            for (double steps = 1000; steps < 10000 + 1; steps *= 10) {
+                double dt = tfinal / steps;
+                state.setTimeStep(dt);
+                otherState.setTimeStep(dt);
+                state.reset(0); // set to single zero momentum particle
+                otherState.reset(0);
+                for (int i = 0; i < steps; i++) {
+                    state.step();
+                    otherState.step();
+                }
+                Complex calc = ((SecondOrderSymplecticState) state).get(0);
+                Complex otherCalc = ((EvenOrderSymplecticState) otherState).get(0);
+                System.out.println(dt + " " + Math.abs(calc.minus(otherCalc).mod()));
+                // out.write(dt + " " + Math.abs(exact.minus(calc).mod()));
+                // out.newLine();
+            }
+
+            dtInitial = 0.001;
+            state.setTimeStep(dtInitial);
+            otherState.setTimeStep(dtInitial);
+            state.reset(0);
+            otherState.reset(0);
+            tfinal = 1/dtInitial;
+            int counter = 0;
+            while (state.getTime() < tfinal) {
+                state.step();
+                otherState.step();
+                if (counter++ % 1000 == 0) {
+                    Complex calc = ((SecondOrderSymplecticState) state).get(0);
+                    Complex otherCalc = ((EvenOrderSymplecticState) otherState).get(0);
+                    System.out.println(state.getTime() + " " + Math.abs(calc.minus(otherCalc).mod()));
+                }
             }
 
             // Close the output stream

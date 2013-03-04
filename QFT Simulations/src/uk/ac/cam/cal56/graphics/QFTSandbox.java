@@ -30,6 +30,8 @@ import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 
+;
+
 @SuppressWarnings("serial")
 public class QFTSandbox extends JFrame {
 
@@ -172,8 +174,7 @@ public class QFTSandbox extends JFrame {
 
             _posPlotVacuum = new FunctionPlot(_state.get0P(), 0.0, 1.0, PLOT_1D_WIDTH, PLOT_HEIGHT);
             _posPlot1P = new FunctionPlot(_ft.transform(_state.get1PMom()), 0.0, 1.0, PLOT_WIDTH, PLOT_HEIGHT);
-            _posDensityPlot2P = new DensityPlot(_ft.transform2D(_state.get2PMom()), 0.0, 1.0, PLOT_WIDTH,
-                PLOT_HEIGHT);
+            _posDensityPlot2P = new DensityPlot(_ft.transform2D(_state.get2PMom()), 0.0, 1.0, PLOT_WIDTH, PLOT_HEIGHT);
             _posPlotRest = new FunctionPlot(rest, 0.0, 1.0, PLOT_1D_WIDTH, PLOT_HEIGHT);
 
             _plotsVisible = true;
@@ -384,7 +385,7 @@ public class QFTSandbox extends JFrame {
         _posDensityPlot2P.update(_ft.transform2D(_state.get2PMom()));
         _posPlotRest.update(rest);
 
-        _state.step();
+        _state.step(9);
     }
 
     // [log10,tenToThe,format] are helper functions for slider input

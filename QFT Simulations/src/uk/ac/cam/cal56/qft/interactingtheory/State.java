@@ -6,7 +6,9 @@ public interface State {
 
     public void step();
 
-    public void reset(int... particles);
+    public void step(int numSteps);
+
+    public void reset(int... particleMomenta);
 
     public double getTime();
 

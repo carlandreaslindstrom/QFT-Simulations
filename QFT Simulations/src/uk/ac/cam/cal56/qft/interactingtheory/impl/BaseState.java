@@ -47,6 +47,13 @@ public abstract class BaseState implements State {
 
     public abstract void step();
 
+    @Override
+    public void step(int numSteps) {
+        for (int i = 0; i < numSteps; i++)
+            step();
+    }
+
+    @Override
     public void reset(int... particles) {
         _time = 0.0;
 
@@ -65,10 +72,12 @@ public abstract class BaseState implements State {
         firstStep();
     }
 
+    @Override
     public double getTime() {
         return _time;
     }
 
+    @Override
     public double getModSquared() {
         double sum = 0.0;
         for (int n = 0; n < _S; n++)
@@ -88,14 +97,17 @@ public abstract class BaseState implements State {
             return _c[n];
     }
 
+    @Override
     public Complex get0P() {
         return _c[0];
     }
 
+    @Override
     public Complex[] get1PMom() {
         return Arrays.copyOfRange(_c, 1, _N + 1);
     }
 
+    @Override
     public Complex[][] get2PMom() {
         Complex[][] ampls = new Complex[_N][_N];
         for (int p = 0; p < _N; p++)
@@ -108,6 +120,7 @@ public abstract class BaseState implements State {
         return ampls;
     }
 
+    @Override
     public double getRemainingProbability() {
         double probSquared = 0;
         for (int n = Combinatorics.S(_N, 2); n < _S; n++)
@@ -115,11 +128,13 @@ public abstract class BaseState implements State {
         return probSquared;
     }
 
+    @Override
     public void setInteractionStrength(double lambda) {
         _lambda = lambda;
         firstStep();
     }
 
+    @Override
     public void setTimeStep(double dt) {
         _dt = dt;
         firstStep();

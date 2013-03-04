@@ -6,15 +6,15 @@ import java.util.Map.Entry;
 import uk.ac.cam.cal56.maths.Combinatorics;
 import uk.ac.cam.cal56.maths.Complex;
 
-public class UselessFirstOrderSymplecticState extends BaseState {
+public class EvenOrderSymplecticState extends BaseState {
 
-    private final int _K;    // order
+    private final int _K;    // order (local), global order = _K - 2
 
     private Complex[] _prevc;
 
-    public UselessFirstOrderSymplecticState(int order, int N, int Pmax, double m, double dx, double dt, double lambda) {
+    public EvenOrderSymplecticState(int order, int N, int Pmax, double m, double dx, double dt, double lambda) {
         super(N, Pmax, m, dx, dt, lambda);
-        _K = order;
+        _K = order - (order % 2) + 2; // ensure even numbers and add 2 due to accumulative effects of integration
     }
 
     // backward Euler method of order "_order"
@@ -39,17 +39,14 @@ public class UselessFirstOrderSymplecticState extends BaseState {
 
     @Override
     public void step() {
-        if (_K % 2 == 1)
-            for (int n = 0; n < _S; n++)
-                _prevc[n] = _prevc[n].negative();
         Complex[] nextc = _prevc;
         Complex[] lastderiv = _c;
         Complex[] currentderiv = new Complex[_S];
 
         for (int k = 1; k < _K; k++) {
-            double lastfactor = 2 * Math.pow(_dt, k - 1) / Combinatorics.factorial(k - 1);
+            double lastfactor = 2.0 * Math.pow(_dt, k - 1) / Combinatorics.factorial(k - 1);
             for (int n = 0; n < _S; n++) {
-                if ((_K + k) % 2 == 0)
+                if (k % 2 == 0)
                     nextc[n] = nextc[n].plus(lastderiv[n].times(lastfactor));
                 Complex sum = Complex.zero();
                 for (Entry<Integer, Double> h_mn : _Hint.getRow(n).entrySet())
