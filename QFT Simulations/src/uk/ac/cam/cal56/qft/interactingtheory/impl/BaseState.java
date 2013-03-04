@@ -56,7 +56,7 @@ public abstract class BaseState implements State {
     @Override
     public void reset(int... particles) {
         _time = 0.0;
-
+/*
         List<Integer> ls = new ArrayList<Integer>();
         for (int p : particles)
             ls.add(p);
@@ -68,8 +68,29 @@ public abstract class BaseState implements State {
         for (int i = 0; i < _S; i++)
             _c[i] = Complex.zero();
         _c[n] = Complex.one();
-
+*/
+        setWavePacket(_N/4,_N/10);
         firstStep();
+    }
+
+    public void setWavePacket(int momentum, double sigma) {
+        
+        _c[0] = Complex.zero();
+        
+        double norm = 0.0;
+        double[] values = new double[_N]; 
+        for (int i = 0; i < _N; i++) {
+            double z = (i-momentum)/(sigma);
+            double value = Math.exp(-z*z/2);
+            values[i] = value;
+            norm += value;
+        }
+        norm = Math.sqrt(norm);
+        for (int i = 0; i < _N; i++)
+            _c[i+1] = Complex.one().times(values[i]/norm);
+        
+        for (int i = _N + 1; i < _S; i++)
+            _c[i] = Complex.zero();
     }
 
     @Override
