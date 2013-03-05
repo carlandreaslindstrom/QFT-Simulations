@@ -1,4 +1,4 @@
-package uk.ac.cam.cal56.qft.interactingtheory.test;
+package uk.ac.cam.cal56.qft.statelabelling.test;
 
 import static org.junit.Assert.assertEquals;
 
@@ -8,7 +8,7 @@ import java.util.Collections;
 import org.junit.Test;
 
 import uk.ac.cam.cal56.maths.Combinatorics;
-import uk.ac.cam.cal56.qft.interactingtheory.FockState;
+import uk.ac.cam.cal56.qft.statelabelling.FockState;
 
 public class FockStateTest {
 

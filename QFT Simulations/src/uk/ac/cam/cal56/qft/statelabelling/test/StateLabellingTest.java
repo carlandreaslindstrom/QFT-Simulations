@@ -14,7 +14,7 @@ import java.util.Map.Entry;
 import org.junit.Test;
 
 import uk.ac.cam.cal56.maths.Combinatorics;
-import uk.ac.cam.cal56.qft.interactingtheory.FockState;
+import uk.ac.cam.cal56.qft.statelabelling.FockState;
 import uk.ac.cam.cal56.qft.statelabelling.StateLabelling;
 
 public class StateLabellingTest {

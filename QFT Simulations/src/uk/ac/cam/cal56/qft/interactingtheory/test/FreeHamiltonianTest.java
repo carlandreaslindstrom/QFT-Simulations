@@ -4,8 +4,8 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import uk.ac.cam.cal56.qft.interactingtheory.FockState;
 import uk.ac.cam.cal56.qft.interactingtheory.FreeHamiltonian;
+import uk.ac.cam.cal56.qft.statelabelling.FockState;
 
 public class FreeHamiltonianTest {
 

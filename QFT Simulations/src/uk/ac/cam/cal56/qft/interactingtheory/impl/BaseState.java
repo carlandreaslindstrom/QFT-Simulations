@@ -56,39 +56,31 @@ public abstract class BaseState implements State {
     @Override
     public void reset(int... particles) {
         _time = 0.0;
-/*
-        List<Integer> ls = new ArrayList<Integer>();
-        for (int p : particles)
-            ls.add(p);
-        Integer n = StateLabelling.index(ls, _N);
-        if (n == null || n >= _S)
-            n = 0;
-
-        // set one particle
-        for (int i = 0; i < _S; i++)
-            _c[i] = Complex.zero();
-        _c[n] = Complex.one();
-*/
-        setWavePacket(_N/4,_N/10);
+        /*
+         * List<Integer> ls = new ArrayList<Integer>(); for (int p : particles) ls.add(p); Integer n =
+         * StateLabelling.index(ls, _N); if (n == null || n >= _S) n = 0; // set one particle for (int i = 0; i < _S;
+         * i++) _c[i] = Complex.zero(); _c[n] = Complex.one();
+         */
+        setWavePacket(_N / 4, _N / 8);
         firstStep();
     }
 
     public void setWavePacket(int momentum, double sigma) {
-        
+
         _c[0] = Complex.zero();
-        
+
         double norm = 0.0;
-        double[] values = new double[_N]; 
+        double[] values = new double[_N];
         for (int i = 0; i < _N; i++) {
-            double z = (i-momentum)/(sigma);
-            double value = Math.exp(-z*z/2);
+            double z = (i - momentum) / (sigma);
+            double value = Math.exp(-z * z / 2);
             values[i] = value;
             norm += value;
         }
         norm = Math.sqrt(norm);
         for (int i = 0; i < _N; i++)
-            _c[i+1] = Complex.one().times(values[i]/norm);
-        
+            _c[i + 1] = Complex.one().times(values[i] / norm);
+
         for (int i = _N + 1; i < _S; i++)
             _c[i] = Complex.zero();
     }
@@ -125,11 +117,15 @@ public abstract class BaseState implements State {
 
     @Override
     public Complex[] get1PMom() {
+        if (_S <= 1)
+            return null;
         return Arrays.copyOfRange(_c, 1, _N + 1);
     }
 
     @Override
     public Complex[][] get2PMom() {
+        if (_S <= 1 + _N)
+            return null;
         Complex[][] ampls = new Complex[_N][_N];
         for (int p = 0; p < _N; p++)
             for (int q = p; q < _N; q++) {

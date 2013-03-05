@@ -1,6 +1,7 @@
 package uk.ac.cam.cal56.qft.interactingtheory;
 
 import uk.ac.cam.cal56.maths.Combinatorics;
+import uk.ac.cam.cal56.qft.statelabelling.FockState;
 
 // Free Hamiltonian holds the energies for all the fock states of the
 // system for faster access than recalculation every time step.

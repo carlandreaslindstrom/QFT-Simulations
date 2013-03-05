@@ -8,12 +8,12 @@ import javax.swing.JFrame;
 
 import org.junit.Test;
 
-import uk.ac.cam.cal56.graphics.FunctionPlot;
 import uk.ac.cam.cal56.graphics.Plot;
+import uk.ac.cam.cal56.graphics.impl.FunctionPlot;
 import uk.ac.cam.cal56.maths.Complex;
-import uk.ac.cam.cal56.maths.DFT;
-import uk.ac.cam.cal56.maths.FFT;
 import uk.ac.cam.cal56.maths.FourierTransform;
+import uk.ac.cam.cal56.maths.impl.DFT;
+import uk.ac.cam.cal56.maths.impl.FFT;
 
 public class FourierTransformTest {
 

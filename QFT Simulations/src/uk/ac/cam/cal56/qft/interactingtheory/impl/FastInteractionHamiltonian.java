@@ -7,9 +7,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import uk.ac.cam.cal56.maths.Combinatorics;
-import uk.ac.cam.cal56.qft.interactingtheory.FockState;
 import uk.ac.cam.cal56.qft.interactingtheory.Interaction;
 import uk.ac.cam.cal56.qft.interactingtheory.InteractionHamiltonian;
+import uk.ac.cam.cal56.qft.statelabelling.FockState;
 import uk.ac.cam.cal56.qft.statelabelling.StateLabelling;
 
 // TODO: something is wrong as it isn't diagonal

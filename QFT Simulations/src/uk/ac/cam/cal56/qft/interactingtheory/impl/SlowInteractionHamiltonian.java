@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.Map;
 
 import uk.ac.cam.cal56.maths.Combinatorics;
-import uk.ac.cam.cal56.qft.interactingtheory.FockState;
 import uk.ac.cam.cal56.qft.interactingtheory.Interaction;
 import uk.ac.cam.cal56.qft.interactingtheory.InteractionHamiltonian;
+import uk.ac.cam.cal56.qft.statelabelling.FockState;
 import uk.ac.cam.cal56.qft.statelabelling.StateLabelling;
 
 // Interaction Hamiltonian holds all the coefficients for jumping between states.

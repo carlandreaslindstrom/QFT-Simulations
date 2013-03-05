@@ -19,9 +19,11 @@ import javax.swing.border.LineBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import uk.ac.cam.cal56.graphics.impl.DensityPlot;
+import uk.ac.cam.cal56.graphics.impl.FunctionPlot;
 import uk.ac.cam.cal56.maths.Complex;
-import uk.ac.cam.cal56.maths.FFT;
 import uk.ac.cam.cal56.maths.FourierTransform;
+import uk.ac.cam.cal56.maths.impl.FFT;
 import uk.ac.cam.cal56.qft.interactingtheory.State;
 import uk.ac.cam.cal56.qft.interactingtheory.impl.SecondOrderSymplecticState;
 
@@ -29,8 +31,6 @@ import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
-
-;
 
 @SuppressWarnings("serial")
 public class QFTSandbox extends JFrame {
@@ -118,7 +118,6 @@ public class QFTSandbox extends JFrame {
     // Panels
     private JPanel              _controlPanel      = new JPanel();
     private JPanel              _displayPanel      = new JPanel();
-    private boolean             _plotsVisible      = false;
 
     private final Component     _controlPanelStrut = Box.createVerticalStrut(20);
 
@@ -138,7 +137,7 @@ public class QFTSandbox extends JFrame {
     private JLabel              _dtLabel           = new JLabel("Time step [dt]:");
     private JLabel              _stepsLabel        = new JLabel("Steps per frame:");
     private JLabel              _lambdaLabel       = new JLabel("Interaction strength:");
-    private final JLabel        _timeLabel         = new JLabel();
+    private JLabel              _timeLabel         = new JLabel();
 
     // Sliders
     private JSlider             _NSlider           = new JSlider(N_MIN, N_MAX, N_DEFAULT);
@@ -167,43 +166,48 @@ public class QFTSandbox extends JFrame {
     // quantum state and plots representing it
     protected void setupQuantumState() {
         _state = new SecondOrderSymplecticState(_N, _Pmax, _m, _dx, _dt, _lambda);
-        drawPlots();
     }
 
     protected void drawPlots() {
-        // make new plots if not visible
-        if (!_plotsVisible) {
-            Complex rest = Complex.one().times(Math.sqrt(_state.getRemainingProbability()));
-
-            _momPlotVacuum = new FunctionPlot(_state.get0P(), 0.0, 1.0, PLOT_1D_WIDTH, PLOT_HEIGHT);
-            _momPlot1P = new FunctionPlot(_state.get1PMom(), 0.0, 1.0, PLOT_WIDTH, PLOT_HEIGHT);
-            _momDensityPlot2P = new DensityPlot(_state.get2PMom(), 0.0, 1.0, PLOT_WIDTH, PLOT_HEIGHT);
-            _momPlotRest = new FunctionPlot(rest, 0.0, 1.0, PLOT_1D_WIDTH, PLOT_HEIGHT);
-
-            _posPlotVacuum = new FunctionPlot(_state.get0P(), 0.0, 1.0, PLOT_1D_WIDTH, PLOT_HEIGHT);
-            _posPlot1P = new FunctionPlot(_ft.transform(_state.get1PMom()), 0.0, 1.0, PLOT_WIDTH, PLOT_HEIGHT);
-            _posDensityPlot2P = new DensityPlot(_ft.transform2D(_state.get2PMom()), 0.0, 1.0, PLOT_WIDTH, PLOT_HEIGHT);
-            _posPlotRest = new FunctionPlot(rest, 0.0, 1.0, PLOT_1D_WIDTH, PLOT_HEIGHT);
-
-            _plotsVisible = true;
-        }
 
         // clean display panel
         _displayPanel.removeAll();
 
-        // add timer to frame
-        _displayPanel.add(_timeLabel, "2, 2");
+        _timeLabel.setText("");
+        _displayPanel.add(_timeLabel, "2, 2, center, center");
 
-        // add plots to frame
+        // get coefficients
+        Complex c0p = _state.get0P();
+        Complex[] c1p = _state.get1PMom();
+        Complex[][] c2p = _state.get2PMom();
+        Complex rest = Complex.one().times(Math.sqrt(_state.getRemainingProbability()));
+
+        // make and add plots (only if they exist)
+        _momPlotVacuum = new FunctionPlot(c0p, 0.0, 1.0, PLOT_1D_WIDTH, PLOT_HEIGHT);
+        _posPlotVacuum = new FunctionPlot(c0p, 0.0, 1.0, PLOT_WIDTH, PLOT_HEIGHT);
         _displayPanel.add(_momPlotVacuum, "2, 4, center, center");
-        _displayPanel.add(_momPlot1P, "4, 4, center, center");
-        _displayPanel.add(_momDensityPlot2P, "6, 4, center, center");
-        _displayPanel.add(_momPlotRest, "8, 4, center, center");
-
         _displayPanel.add(_posPlotVacuum, "2, 6, center, center");
-        _displayPanel.add(_posPlot1P, "4, 6, center, center");
-        _displayPanel.add(_posDensityPlot2P, "6, 6, center, center");
+
+        if (c1p != null) {
+            _momPlot1P = new FunctionPlot(c1p, 0.0, 1.0, PLOT_WIDTH, PLOT_HEIGHT);
+            _posPlot1P = new FunctionPlot(_ft.transform(c1p), 0.0, 1.0, PLOT_WIDTH, PLOT_HEIGHT);
+            _displayPanel.add(_momPlot1P, "4, 4, center, center");
+            _displayPanel.add(_posPlot1P, "4, 6, center, center");
+        }
+
+        if (c2p != null) {
+            _momDensityPlot2P = new DensityPlot(c2p, 0.0, 1.0, PLOT_WIDTH, PLOT_HEIGHT);
+            _posDensityPlot2P = new DensityPlot(_ft.transform2D(c2p), 0.0, 1.0, PLOT_WIDTH, PLOT_HEIGHT);
+            _displayPanel.add(_momDensityPlot2P, "6, 4, center, center");
+            _displayPanel.add(_posDensityPlot2P, "6, 6, center, center");
+        }
+
+        _momPlotRest = new FunctionPlot(rest, 0.0, 1.0, PLOT_1D_WIDTH, PLOT_HEIGHT);
+        _posPlotRest = new FunctionPlot(rest, 0.0, 1.0, PLOT_1D_WIDTH, PLOT_HEIGHT);
+        _displayPanel.add(_momPlotRest, "8, 4, center, center");
         _displayPanel.add(_posPlotRest, "8, 6, center, center");
+
+        frameUpdate();
     }
 
     private void setupFrame() {
@@ -311,7 +315,8 @@ public class QFTSandbox extends JFrame {
             public void stateChanged(ChangeEvent e) {
                 _dt = Math.pow(10, _dtSlider.getValue());
                 _dtValue.setText(format(_dt));
-                _state.setTimeStep(_dt); // update time step
+                if (_state != null)
+                    _state.setTimeStep(_dt); // update time step
             }
         });
         _stepsSlider.addChangeListener(new ChangeListener() {
@@ -324,7 +329,8 @@ public class QFTSandbox extends JFrame {
             public void stateChanged(ChangeEvent e) {
                 _lambda = Math.pow(10, _lambdaSlider.getValue());
                 _lambdaValue.setText(format(_lambda));
-                _state.setInteractionStrength(_lambda); // update interaction strength
+                if (_state != null)
+                    _state.setInteractionStrength(_lambda); // update interaction strength
             }
         });
     }
@@ -334,12 +340,12 @@ public class QFTSandbox extends JFrame {
         _calculateButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 _animator.stopAnimation();
-                _playButton.setText(BUTTON_PLAY);
                 _playButton.setEnabled(false);
-                _resetButton.setEnabled(false);
+                _playButton.setText(BUTTON_PLAY);
                 setupQuantumState();
+                drawPlots();
                 _playButton.setEnabled(true);
-                frameUpdate();
+                _resetButton.setEnabled(false);
             }
         });
     }
@@ -371,9 +377,8 @@ public class QFTSandbox extends JFrame {
                 _resetButton.setEnabled(false);
                 _animator.stopAnimation();
                 _playButton.setText(BUTTON_PLAY);
-                if (_state != null) {
+                if (_state != null)
                     _state.reset(); // reset quantum state
-                }
                 frameUpdate();
             }
         });
@@ -385,23 +390,30 @@ public class QFTSandbox extends JFrame {
         if (_state == null)
             return; // only if state is set up
 
-        _timeLabel.setText("t = " + _state.getTime());
+        _timeLabel.setText("Time = " + _state.getTime());
 
+        // get coefficients
+        Complex c0p = _state.get0P();
+        Complex[] c1p = _state.get1PMom();
+        Complex[][] c2p = _state.get2PMom();
         Complex rest = Complex.one().times(Math.sqrt(_state.getRemainingProbability()));
 
-        // momentum plots
-        _momPlotVacuum.update(_state.get0P());
-        _momPlot1P.update(_state.get1PMom());
-        _momDensityPlot2P.update(_state.get2PMom());
+        // plots
+        _momPlotVacuum.update(c0p);
+        _posPlotVacuum.update(c0p);
+        if (c1p != null) {
+            _momPlot1P.update(c1p);
+            _posPlot1P.update(_ft.transform(c1p));
+        }
+        if (c2p != null) {
+            _momDensityPlot2P.update(c2p);
+            _posDensityPlot2P.update(_ft.transform2D(c2p));
+        }
         _momPlotRest.update(rest);
-
-        // momentum plots
-        _posPlotVacuum.update(_state.get0P());
-        _posPlot1P.update(_ft.transform(_state.get1PMom()));
-        _posDensityPlot2P.update(_ft.transform2D(_state.get2PMom()));
         _posPlotRest.update(rest);
 
         _state.step(_steps);
+
     }
 
     // [log10,tenToThe,format] are helper functions for slider input

@@ -1,4 +1,7 @@
-package uk.ac.cam.cal56.maths;
+package uk.ac.cam.cal56.maths.impl;
+
+import uk.ac.cam.cal56.maths.Complex;
+import uk.ac.cam.cal56.maths.FourierTransform;
 
 // Using DFT: Discrete Fourier Transform algorithm.
 // Source used: http://www.cs.cf.ac.uk/Dave/Vision_lecture/node20.html

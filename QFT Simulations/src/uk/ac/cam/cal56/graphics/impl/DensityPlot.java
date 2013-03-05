@@ -1,9 +1,10 @@
-package uk.ac.cam.cal56.graphics;
+package uk.ac.cam.cal56.graphics.impl;
 
 import java.awt.Graphics;
 
 import javax.swing.JFrame;
 
+import uk.ac.cam.cal56.graphics.Plot;
 import uk.ac.cam.cal56.maths.Complex;
 
 @SuppressWarnings("serial")

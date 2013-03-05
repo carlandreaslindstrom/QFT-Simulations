@@ -1,4 +1,7 @@
-package uk.ac.cam.cal56.maths;
+package uk.ac.cam.cal56.maths.impl;
+
+import uk.ac.cam.cal56.maths.Complex;
+import uk.ac.cam.cal56.maths.FourierTransform;
 
 // Copied from Robert Sedgewick and Kevin Wayne @ Princeton, then changed.
 // Source: http://introcs.cs.princeton.edu/java/97data/FFT.java.html

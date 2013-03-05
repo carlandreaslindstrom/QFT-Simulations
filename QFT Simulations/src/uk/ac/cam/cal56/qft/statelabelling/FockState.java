@@ -1,4 +1,4 @@
-package uk.ac.cam.cal56.qft.interactingtheory;
+package uk.ac.cam.cal56.qft.statelabelling;
 
 import java.util.ArrayList;
 import java.util.Collections;
