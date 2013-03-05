@@ -24,7 +24,7 @@ public abstract class BaseState implements State {
     protected double                       _time;
     protected Complex[]                    _c;     // {c_n(t)}
 
-    public BaseState(int N, int Pmax, double m, double dx, double dt, double lambda) {
+    public BaseState(int N, int Pmax, double m, double dx, double dt, double lambda, int... particleMomenta) {
         // initialise parameters
         _N = N;
         _dt = dt;
@@ -40,7 +40,7 @@ public abstract class BaseState implements State {
         _Hint.calculateElements(); // calculate elements in the Interaction Hamiltonian
 
         // set coefficients (to pure vacuum) and do first step
-        reset();
+        reset(particleMomenta);
     }
 
     protected abstract void firstStep();
@@ -54,35 +54,51 @@ public abstract class BaseState implements State {
     }
 
     @Override
-    public void reset(int... particles) {
+    public void reset(int... particleMomenta) {
         _time = 0.0;
-        /*
-         * List<Integer> ls = new ArrayList<Integer>(); for (int p : particles) ls.add(p); Integer n =
-         * StateLabelling.index(ls, _N); if (n == null || n >= _S) n = 0; // set one particle for (int i = 0; i < _S;
-         * i++) _c[i] = Complex.zero(); _c[n] = Complex.one();
-         */
-        setWavePacket(_N / 4, _N / 8);
+
+        // List<Integer> ls = new ArrayList<Integer>();
+        // for (int p : particles)
+        // ls.add(p);
+        // Integer n = StateLabelling.index(ls, _N);
+        // if (n == null || n >= _S)
+        // n = 0; // set one particle
+        // for (int i = 0; i < _S; i++)
+        // _c[i] = Complex.zero();
+        // _c[n] = Complex.one();
+
+        setWavePackets(_N / 8.0, particleMomenta);
         firstStep();
     }
 
-    public void setWavePacket(int momentum, double sigma) {
+    public void setWavePackets(double sigma, int... particleMomenta) {
 
-        _c[0] = Complex.zero();
-
-        double norm = 0.0;
-        double[] values = new double[_N];
-        for (int i = 0; i < _N; i++) {
-            double z = (i - momentum) / (sigma);
-            double value = Math.exp(-z * z / 2);
-            values[i] = value;
-            norm += value;
+        if (particleMomenta.length == 0) {
+            // set all coefficients = 0, apart from vacuum = 1
+            _c[0] = Complex.one();
+            for (int i = 1; i < _S; i++)
+                _c[i] = Complex.zero();
         }
-        norm = Math.sqrt(norm);
-        for (int i = 0; i < _N; i++)
-            _c[i + 1] = Complex.one().times(values[i] / norm);
+        else if (particleMomenta.length == 1) {
+            // calculate gaussian and normalisation
+            double norm = 0.0;
+            double[] values = new double[_N];
+            for (int i = 0; i < _N; i++) {
+                double z1 = (i - particleMomenta[0]) / (sigma);
+                double z2 = ((i - _N - particleMomenta[0])) / (sigma);
+                double value = Math.exp(-z1 * z1 / 2) + Math.exp(-z2 * z2 / 2);
+                values[i] = value;
+                norm += value;
+            }
+            norm = Math.sqrt(norm);
 
-        for (int i = _N + 1; i < _S; i++)
-            _c[i] = Complex.zero();
+            // set all coefficients = 0, apart from 1 particle states
+            _c[0] = Complex.zero();
+            for (int i = 0; i < _N; i++)
+                _c[i + 1] = Complex.one().times(values[i] / norm);
+            for (int i = _N + 1; i < _S; i++)
+                _c[i] = Complex.zero();
+        }
     }
 
     @Override

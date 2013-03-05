@@ -8,8 +8,9 @@ public class SecondOrderSymplecticState extends BaseState {
 
     private Complex[] _prevc;    // c_n(t-dt)
 
-    public SecondOrderSymplecticState(int N, int Pmax, double m, double dx, double dt, double lambda) {
-        super(N, Pmax, m, dx, dt, lambda);
+    public SecondOrderSymplecticState(int N, int Pmax, double m, double dx, double dt, double lambda,
+            int... particleMomenta) {
+        super(N, Pmax, m, dx, dt, lambda, particleMomenta);
     }
 
     // first order Euler backward step to calculate _prevc
