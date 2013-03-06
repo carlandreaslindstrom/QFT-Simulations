@@ -83,9 +83,9 @@ public class DensityPlot extends Plot {
             for (int i = 0; i < imax; i++) {
                 for (int j = 0; j < jmax; j++) {
                     double value = _data[i][j].modSquared();
-                    if (value < _min)
+                    if (max == null && value < _min)
                         _min = value;
-                    if (value > _max)
+                    if (max == null && value > _max)
                         _max = value;
                 }
             }

@@ -88,9 +88,9 @@ public class FunctionPlot extends Plot {
         else {
             for (int i = 0; i < _data.length; i++) {
                 double value = _data[i].modSquared();
-                if (value < _min)
+                if (min == null && value < _min)
                     _min = value;
-                if (value > _max)
+                if (max == null && value > _max)
                     _max = value;
             }
         }
