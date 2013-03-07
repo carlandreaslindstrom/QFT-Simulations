@@ -66,13 +66,18 @@ public abstract class BaseState implements State {
 
     @Override
     public void reset(int... particleMomenta) {
+        reset(0.5, particleMomenta);
+    }
+
+    public void reset(double peakProbability, int... particleMomenta) {
         _time = 0.0;
-        setWavePackets(_N / 8.0, particleMomenta);
+        setWavePackets(peakProbability, particleMomenta);
         firstStep();
     }
 
-    public void setWavePackets(double sigma, int... particleMomenta) {
+    public void setWavePackets(double peakProbability, int... particleMomenta) {
 
+        double sigma = _N / 8.0;
         // TODO: implement something for more than 2 particles
         // VACUUM
         if (particleMomenta.length == 0 || particleMomenta.length > 2) {
@@ -89,7 +94,7 @@ public abstract class BaseState implements State {
             for (int i = 0; i < _N; i++) {
                 double z1 = (i - particleMomenta[0]) / (sigma);
                 double z2 = ((i - _N - particleMomenta[0])) / (sigma);
-                double value = Math.exp(-z1 * z1 / 2) + Math.exp(-z2 * z2 / 2);
+                double value = Math.sqrt(peakProbability) * (Math.exp(-z1 * z1 / 2) + Math.exp(-z2 * z2 / 2));
                 values[i] = value;
                 norm += value;
             }
