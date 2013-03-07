@@ -88,7 +88,7 @@ public abstract class BaseState implements State {
         }
         // ONE PARTICLE WAVE PACKET
         else if (particleMomenta.length == 1) {
-            // calculate gaussian and normalisation
+            // calculate Gaussian and normalisation
             double norm = 0.0;
             double[] values = new double[_N];
             for (int i = 0; i < _N; i++) {

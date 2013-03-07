@@ -47,7 +47,7 @@ public class QFTSandbox extends JFrame {
     /***** VARIABLES *****/
 
     /* STATIC VARIABLES */
-    private static final String FRAME_TITLE          = "QFT Sandbox";
+    protected static final String FRAME_TITLE          = "QFT Sandbox";
     private static final int    FRAME_WIDTH          = 1120;
     private static final int    FRAME_HEIGHT         = 700;
 
@@ -137,15 +137,15 @@ public class QFTSandbox extends JFrame {
     private int[]               _particleMomenta     = new int[] {};
 
     // Sliders
-    protected JSlider             _NSlider             = new JSlider(N_MIN, N_MAX, N_DEFAULT);
-    protected JSlider             _PmaxSlider          = new JSlider(PMAX_MIN, PMAX_MAX, PMAX_DEFAULT);
-    protected JSlider             _dxSlider            = new JSlider(encode(DX_MIN), encode(DX_MAX), encode(DX_DEFAULT));
-    protected JSlider             _mSlider             = new JSlider(encode(M_MIN), encode(M_MAX), encode(M_DEFAULT));
-    protected JSlider             _dtSlider            = new JSlider(encode(DT_MIN), encode(DT_MAX), encode(DT_DEFAULT));
-    protected JSlider             _stepsSlider         = new JSlider(STEPS_MIN, STEPS_MAX, STEPS_DEFAULT);
-    protected JSlider             _lambdaSquaredSlider = new JSlider(encode(LAMBDA_MIN), encode(LAMBDA_MAX),
+    protected JSlider           _NSlider             = new JSlider(N_MIN, N_MAX, N_DEFAULT);
+    protected JSlider           _PmaxSlider          = new JSlider(PMAX_MIN, PMAX_MAX, PMAX_DEFAULT);
+    protected JSlider           _dxSlider            = new JSlider(encode(DX_MIN), encode(DX_MAX), encode(DX_DEFAULT));
+    protected JSlider           _mSlider             = new JSlider(encode(M_MIN), encode(M_MAX), encode(M_DEFAULT));
+    protected JSlider           _dtSlider            = new JSlider(encode(DT_MIN), encode(DT_MAX), encode(DT_DEFAULT));
+    protected JSlider           _stepsSlider         = new JSlider(STEPS_MIN, STEPS_MAX, STEPS_DEFAULT);
+    protected JSlider           _lambdaSquaredSlider = new JSlider(encode(LAMBDA_MIN), encode(LAMBDA_MAX),
                                                          encode(LAMBDA_DEFAULT));
-    protected JSlider             _lambdaCubedSlider   = new JSlider(encode(LAMBDA_MIN), encode(LAMBDA_MAX),
+    protected JSlider           _lambdaCubedSlider   = new JSlider(encode(LAMBDA_MIN), encode(LAMBDA_MAX),
                                                          encode(LAMBDA_DEFAULT));
     // Separators
     private final Component     _separator           = Box.createVerticalStrut(50);
@@ -169,15 +169,15 @@ public class QFTSandbox extends JFrame {
     // quantum state and plots representing it
     protected void setupQuantumState() {
         Map<Interaction, Double> lambdas = new HashMap<Interaction, Double>();
-        lambdas.put(Interaction.PHI_SQUARED, 0.1);
-        lambdas.put(Interaction.PHI_CUBED, decode(_lambdaSquaredSlider.getValue()));
+        lambdas.put(Interaction.PHI_SQUARED, decode(_lambdaSquaredSlider.getValue()));
+        lambdas.put(Interaction.PHI_CUBED, decode(_lambdaCubedSlider.getValue()));
         _state = new SecondOrderSymplecticState(_NSlider.getValue(), _PmaxSlider.getValue(),
             decode(_mSlider.getValue()), decode(_dxSlider.getValue()), decode(_dtSlider.getValue()), lambdas,
             _particleMomenta);
     }
 
     // fired every time frame is updated
-    private void frameUpdate() {
+    protected void frameUpdate() {
 
         if (_state == null)
             return; // only if state is set up
@@ -254,14 +254,14 @@ public class QFTSandbox extends JFrame {
         frameUpdate();
     }
 
-    private void setupFrame() {
+    protected void setupFrame() {
         setTitle(FRAME_TITLE);
         setBounds(0, 0, FRAME_WIDTH, FRAME_HEIGHT);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         getContentPane().setLayout(new BorderLayout(0, 0));
     }
 
-    private void setupDisplayPanel() {
+    protected void setupDisplayPanel() {
         // make display panel
         getContentPane().add(_displayPanel, BorderLayout.CENTER);
         _displayPanel.setBackground(Color.BLACK);
@@ -289,7 +289,7 @@ public class QFTSandbox extends JFrame {
             })); // @formatter:on
     }
 
-    private void setupControlPanel() {
+    protected void setupControlPanel() {
         // make it pretty
         _controlPanel.setBorder(new LineBorder(Color.LIGHT_GRAY));
         getContentPane().add(_controlPanel, BorderLayout.EAST);
@@ -331,7 +331,7 @@ public class QFTSandbox extends JFrame {
         setupButtons();
     }
 
-    private void setupPresetSelector() {
+    protected void setupPresetSelector() {
 
         // add presets
         _presetSelector.addItem(SELECTOR_DEFAULT);
@@ -361,7 +361,7 @@ public class QFTSandbox extends JFrame {
         _controlPanel.add(_presetSelector, "1, 1, 3, 1, fill, default");
     }
 
-    private void setupSliders() {
+    protected void setupSliders() {
         // add calculate sliders
         setupGeneralSlider(_NSlider, _NValue, N_MIN, N_MAX, 2, int.class, "Number of lattice points");
         setupGeneralSlider(_PmaxSlider, _PmaxValue, PMAX_MIN, PMAX_MAX, 3, int.class, "Number of particles considered");
@@ -397,7 +397,7 @@ public class QFTSandbox extends JFrame {
         });
     }
 
-    private void setupGeneralSlider(final JSlider slider, final JLabel value, int min, int max, final int row,
+    protected void setupGeneralSlider(final JSlider slider, final JLabel value, int min, int max, final int row,
                                     final Class<?> type, String toolTip) {
         if (type == double.class) {
             Hashtable<Integer, JLabel> labelTable = new Hashtable<Integer, JLabel>();
@@ -431,7 +431,7 @@ public class QFTSandbox extends JFrame {
     }
 
     // add buttons to the control panel
-    private void setupButtons() {
+    protected void setupButtons() {
         _resetButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 _resetButton.setEnabled(false);
@@ -474,7 +474,7 @@ public class QFTSandbox extends JFrame {
         _resetButton.setEnabled(false);
     }
 
-    private void calculate() {
+    protected void calculate() {
         _animator.stopAnimation();
         _playButton.setEnabled(false);
         _playButton.setText(BUTTON_PLAY);
@@ -487,16 +487,16 @@ public class QFTSandbox extends JFrame {
 
     /**** functions to encode doubles as slider values (integers) ****/
 
-    private Integer encode(double d) {
+    protected Integer encode(double d) {
         return (int) (100.0 * (Math.log10(d)));
     }
 
-    private double decode(int encoded) {
+    protected double decode(int encoded) {
         return Math.pow(10, encoded / 100.0);
     }
 
     // converts to scientific notation
-    private String decodeText(int encoded) {
+    protected String decodeText(int encoded) {
         double number = decode(encoded);
         int power = (int) Math.floor(Math.log10(number));
         double mantissa = number / Math.pow(10, power);
@@ -504,13 +504,13 @@ public class QFTSandbox extends JFrame {
         return "<html>" + (digit.equals("1") ? "" : digit + "x") + "10<sup>" + power + "</sup></html>";
     }
 
-    private String format(double d) {
+    protected String format(double d) {
         return decodeText(encode(d));
     }
 
     /**** INTERACTIVE PLOTS ****/
 
-    private void setupInteractivePlots() {
+    protected void setupInteractivePlots() {
         MouseListener vacuumListener = new MouseListener() {
             public void mouseClicked(MouseEvent e) {
                 _state.reset();
@@ -549,7 +549,7 @@ public class QFTSandbox extends JFrame {
 
     /***** ANIMATION INNER CLASS *****/
 
-    private class Animator implements ActionListener {
+    protected class Animator implements ActionListener {
         // takes care of animation
         private Timer   _timer;
         private boolean _frozen = true;
