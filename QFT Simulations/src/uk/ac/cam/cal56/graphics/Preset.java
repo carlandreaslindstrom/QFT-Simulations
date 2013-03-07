@@ -3,7 +3,7 @@ package uk.ac.cam.cal56.graphics;
 public class Preset {
 
     // definitions of presets
-    public static final Preset   VACUUM       = new Preset("Interacting vacuum", 16, 3, 1e-1, 1, 1e-2, 10, 1);
+    public static final Preset   VACUUM       = new Preset("Interacting vacuum", 24, 3, 1e-1, 1, 3e-3, 10, 1);
     public static final Preset   FREE_1P_SLOW = new Preset("Non-interacting slow particle", 64, 1, 1e-1, 1, 1e-3, 100,
                                                   0, 4);
     public static final Preset   FREE_1P_FAST = new Preset("Non-interacting fast particle", 64, 1, 1e-1, 1, 1e-3, 256,

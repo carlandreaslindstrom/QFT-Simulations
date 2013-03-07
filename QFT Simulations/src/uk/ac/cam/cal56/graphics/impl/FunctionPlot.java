@@ -30,7 +30,7 @@ public class FunctionPlot extends Plot {
     protected void plot(Graphics g) {
         for (int i = 0; i < _data.length / _sampling; i++) {
             double value = (_data[i].modSquared() - _min) / (_max - _min);
-            g.setColor(doubleToRainbowColor(value));
+            g.setColor(toFunctionColor(value));
             int barHeight = (int) (_height * value);
             g.fillRect(i * _pointsize, _height - barHeight, _pointsize, barHeight);
         }

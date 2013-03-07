@@ -6,6 +6,8 @@ import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -31,6 +33,7 @@ import uk.ac.cam.cal56.maths.FourierTransform;
 import uk.ac.cam.cal56.maths.impl.FFT;
 import uk.ac.cam.cal56.qft.interactingtheory.Interaction;
 import uk.ac.cam.cal56.qft.interactingtheory.State;
+import uk.ac.cam.cal56.qft.interactingtheory.impl.BaseState;
 import uk.ac.cam.cal56.qft.interactingtheory.impl.SecondOrderSymplecticState;
 
 import com.jgoodies.forms.factories.FormFactory;
@@ -134,15 +137,15 @@ public class QFTSandbox extends JFrame {
     private int[]               _particleMomenta     = new int[] {};
 
     // Sliders
-    private JSlider             _NSlider             = new JSlider(N_MIN, N_MAX, N_DEFAULT);
-    private JSlider             _PmaxSlider          = new JSlider(PMAX_MIN, PMAX_MAX, PMAX_DEFAULT);
-    private JSlider             _dxSlider            = new JSlider(encode(DX_MIN), encode(DX_MAX), encode(DX_DEFAULT));
-    private JSlider             _mSlider             = new JSlider(encode(M_MIN), encode(M_MAX), encode(M_DEFAULT));
-    private JSlider             _dtSlider            = new JSlider(encode(DT_MIN), encode(DT_MAX), encode(DT_DEFAULT));
-    private JSlider             _stepsSlider         = new JSlider(STEPS_MIN, STEPS_MAX, STEPS_DEFAULT);
-    private JSlider             _lambdaSquaredSlider = new JSlider(encode(LAMBDA_MIN), encode(LAMBDA_MAX),
+    protected JSlider             _NSlider             = new JSlider(N_MIN, N_MAX, N_DEFAULT);
+    protected JSlider             _PmaxSlider          = new JSlider(PMAX_MIN, PMAX_MAX, PMAX_DEFAULT);
+    protected JSlider             _dxSlider            = new JSlider(encode(DX_MIN), encode(DX_MAX), encode(DX_DEFAULT));
+    protected JSlider             _mSlider             = new JSlider(encode(M_MIN), encode(M_MAX), encode(M_DEFAULT));
+    protected JSlider             _dtSlider            = new JSlider(encode(DT_MIN), encode(DT_MAX), encode(DT_DEFAULT));
+    protected JSlider             _stepsSlider         = new JSlider(STEPS_MIN, STEPS_MAX, STEPS_DEFAULT);
+    protected JSlider             _lambdaSquaredSlider = new JSlider(encode(LAMBDA_MIN), encode(LAMBDA_MAX),
                                                          encode(LAMBDA_DEFAULT));
-    private JSlider             _lambdaCubedSlider   = new JSlider(encode(LAMBDA_MIN), encode(LAMBDA_MAX),
+    protected JSlider             _lambdaCubedSlider   = new JSlider(encode(LAMBDA_MIN), encode(LAMBDA_MAX),
                                                          encode(LAMBDA_DEFAULT));
     // Separators
     private final Component     _separator           = Box.createVerticalStrut(50);
@@ -245,6 +248,8 @@ public class QFTSandbox extends JFrame {
         _displayPanel.add(_momPlotRest, "8, 4, center, center");
         _displayPanel.add(_posPlotRest, "8, 6, center, center");
 
+        setupInteractivePlots();
+
         // update the frame
         frameUpdate();
     }
@@ -262,14 +267,26 @@ public class QFTSandbox extends JFrame {
         _displayPanel.setBackground(Color.BLACK);
         _timeLabel.setForeground(Color.WHITE);
 
-        // set layout
-        _displayPanel.setLayout(new FormLayout(new ColumnSpec[] { FormFactory.UNRELATED_GAP_COLSPEC,
-            ColumnSpec.decode("84px"), FormFactory.UNRELATED_GAP_COLSPEC, ColumnSpec.decode("max(149dlu;default)"),
-            FormFactory.UNRELATED_GAP_COLSPEC, ColumnSpec.decode("max(155dlu;default)"),
-            FormFactory.RELATED_GAP_COLSPEC, ColumnSpec.decode("max(30dlu;default)"), }, new RowSpec[] {
-            FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC, FormFactory.UNRELATED_GAP_ROWSPEC,
-            RowSpec.decode("311px"), FormFactory.UNRELATED_GAP_ROWSPEC, RowSpec.decode("309px"),
-            FormFactory.UNRELATED_GAP_ROWSPEC }));
+        // set layout @formatter:off
+        _displayPanel.setLayout(new FormLayout(
+            new ColumnSpec[] { 
+                FormFactory.UNRELATED_GAP_COLSPEC,
+                ColumnSpec.decode("84px"), 
+                FormFactory.UNRELATED_GAP_COLSPEC, 
+                ColumnSpec.decode("max(149dlu;default)"),
+                FormFactory.UNRELATED_GAP_COLSPEC, 
+                ColumnSpec.decode("max(155dlu;default)"),
+                FormFactory.RELATED_GAP_COLSPEC, 
+                ColumnSpec.decode("max(30dlu;default)"), 
+            }, new RowSpec[] {
+                FormFactory.RELATED_GAP_ROWSPEC, 
+                FormFactory.DEFAULT_ROWSPEC, 
+                FormFactory.UNRELATED_GAP_ROWSPEC,
+                RowSpec.decode("311px"), 
+                FormFactory.UNRELATED_GAP_ROWSPEC, 
+                RowSpec.decode("309px"),
+                FormFactory.UNRELATED_GAP_ROWSPEC 
+            })); // @formatter:on
     }
 
     private void setupControlPanel() {
@@ -277,13 +294,29 @@ public class QFTSandbox extends JFrame {
         _controlPanel.setBorder(new LineBorder(Color.LIGHT_GRAY));
         getContentPane().add(_controlPanel, BorderLayout.EAST);
 
-        // form layout
-        _controlPanel.setLayout(new FormLayout(new ColumnSpec[] { ColumnSpec.decode("40px"),
-            ColumnSpec.decode("175px:grow"), ColumnSpec.decode("64px"), FormFactory.LABEL_COMPONENT_GAP_COLSPEC, },
-            new RowSpec[] { FormFactory.MIN_ROWSPEC, FormFactory.MIN_ROWSPEC, FormFactory.MIN_ROWSPEC,
-                FormFactory.MIN_ROWSPEC, FormFactory.MIN_ROWSPEC, FormFactory.MIN_ROWSPEC, FormFactory.MIN_ROWSPEC,
-                FormFactory.MIN_ROWSPEC, FormFactory.MIN_ROWSPEC, FormFactory.MIN_ROWSPEC, FormFactory.MIN_ROWSPEC,
-                FormFactory.MIN_ROWSPEC, FormFactory.MIN_ROWSPEC, FormFactory.MIN_ROWSPEC }));
+        // form layout @formatter:off
+        _controlPanel.setLayout(new FormLayout(
+            new ColumnSpec[] { 
+                ColumnSpec.decode("40px"),
+                ColumnSpec.decode("175px:grow"), 
+                ColumnSpec.decode("64px"), 
+                FormFactory.LABEL_COMPONENT_GAP_COLSPEC
+            }, new RowSpec[] { 
+                FormFactory.MIN_ROWSPEC, 
+                FormFactory.MIN_ROWSPEC, 
+                FormFactory.MIN_ROWSPEC,
+                FormFactory.MIN_ROWSPEC, 
+                FormFactory.MIN_ROWSPEC, 
+                FormFactory.MIN_ROWSPEC, 
+                FormFactory.MIN_ROWSPEC,
+                FormFactory.MIN_ROWSPEC, 
+                FormFactory.MIN_ROWSPEC, 
+                FormFactory.MIN_ROWSPEC, 
+                FormFactory.MIN_ROWSPEC,
+                FormFactory.MIN_ROWSPEC,
+                FormFactory.MIN_ROWSPEC, 
+                FormFactory.MIN_ROWSPEC 
+            }));// @formatter:on
 
         setupPresetSelector();
 
@@ -473,6 +506,45 @@ public class QFTSandbox extends JFrame {
 
     private String format(double d) {
         return decodeText(encode(d));
+    }
+
+    /**** INTERACTIVE PLOTS ****/
+
+    private void setupInteractivePlots() {
+        MouseListener vacuumListener = new MouseListener() {
+            public void mouseClicked(MouseEvent e) {
+                _state.reset();
+                frameUpdate();
+            }
+
+            // @formatter:off
+            public void mouseEntered(MouseEvent e) {}
+            public void mouseExited(MouseEvent e) {}
+            public void mousePressed(MouseEvent e) {}
+            public void mouseReleased(MouseEvent e) {}
+            // @formatter:on
+        };
+        _momPlotVacuum.addMouseListener(vacuumListener);
+        _posPlotVacuum.addMouseListener(vacuumListener);
+
+        MouseListener oneParticleListener = new MouseListener() {
+            public void mouseClicked(MouseEvent e) {
+                Plot plot = (Plot) e.getSource();
+                int N = _NSlider.getValue();
+                int p = (int) (1.0 * N * e.getX() / plot._width);
+                double peakProbability = 1.0 - 1.0 * e.getY() / plot._height;
+                ((BaseState) _state).reset(peakProbability, p);
+                frameUpdate();
+            }
+
+            // @formatter:off
+            public void mouseEntered(MouseEvent e) {}
+            public void mouseExited(MouseEvent e) {}
+            public void mousePressed(MouseEvent e) {}
+            public void mouseReleased(MouseEvent e) {}
+            // @formatter:on
+        };
+        _momPlot1P.addMouseListener(oneParticleListener);
     }
 
     /***** ANIMATION INNER CLASS *****/

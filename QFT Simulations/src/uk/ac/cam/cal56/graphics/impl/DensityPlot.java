@@ -33,8 +33,8 @@ public class DensityPlot extends Plot {
         for (int i = 0; i < imax; i++)
             for (int j = 0; j < jmax; j++) {
                 double value = (_data[i * _sampling][j * _sampling].modSquared() - _min) / (_max - _min);
-                g.setColor(doubleToRainbowColor(value));
-                g.fillRect(i * _pointsize, j * _pointsize, _pointsize, _pointsize);
+                g.setColor(toDensityColor(value));
+                g.fillRect(i * _pointsize, (jmax - 1 - j) * _pointsize, _pointsize, _pointsize);
             }
     }
 

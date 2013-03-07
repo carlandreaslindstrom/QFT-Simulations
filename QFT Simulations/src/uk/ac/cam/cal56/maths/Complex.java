@@ -58,9 +58,9 @@ public class Complex {
         return Math.sqrt(modSquared());
     }
 
-    public double arg() throws IllegalArgumentException {
+    public double arg() {
         if (_imag < EPSILON && _real < EPSILON)
-            throw new IllegalArgumentException();
+            return 0.0;
         return Math.atan2(_imag, _real);
     };
 

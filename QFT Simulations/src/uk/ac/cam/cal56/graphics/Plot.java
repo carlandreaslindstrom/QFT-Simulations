@@ -9,12 +9,14 @@ import java.awt.Rectangle;
 @SuppressWarnings("serial")
 public abstract class Plot extends Canvas {
 
-    protected int    _width;
-    protected int    _height;
-    protected int    _sampling;
-    protected int    _pointsize;
-    protected double _min = Double.MAX_VALUE;
-    protected double _max = Double.MIN_VALUE;
+    protected static Color OVERFLOW_COLOUR = Color.RED;
+
+    protected int          _width;
+    protected int          _height;
+    protected int          _sampling;
+    protected int          _pointsize;
+    protected double       _min            = Double.MAX_VALUE;
+    protected double       _max            = Double.MIN_VALUE;
 
     protected abstract void plot(Graphics g);
 
@@ -54,10 +56,25 @@ public abstract class Plot extends Canvas {
         g.drawImage(offscreen, 0, 0, this);
     }
 
+    // shaded lemon-lime color scheme 
+    protected static Color toDensityColor(double num) {
+        if (num > 1.0 || num < 0.0)
+            return OVERFLOW_COLOUR;
+        return new Color((int) ((191 + 64 * num) * num), (int) ((255 - 45 * num) * num), (int) (48 * num));
+    }
+
+    // bright lemon-lime color scheme
+    protected static Color toFunctionColor(double num) {
+        if (num > 1.0 || num < 0.0)
+            return OVERFLOW_COLOUR;
+        else
+            return new Color((int) (191 + 64 * num), (int) (255 - 45 * num), 48);
+    }
+
     // transforms a linear number scale to a rainbow color scale
-    public static Color doubleToRainbowColor(double num) {
+    protected static Color doubleToRainbowColor(double num) {
         if (num < 0.0 || num > 1.0)
-            return Color.WHITE;
+            return OVERFLOW_COLOUR;
         double freq = 5.5;
         double phase = 0.2;
         int scale = 127;
@@ -65,6 +82,14 @@ public abstract class Plot extends Canvas {
         int green = (int) (scale * (1 + Math.sin(freq * num + (phase + 4.7) * Math.PI / 3)));
         int blue = (int) (scale * (1 + Math.sin(freq * num + phase * Math.PI / 3)));
         return new Color(red, green, blue);
+    }
+
+    // transforms a linear number scale to gray scale
+    protected static Color doubleToGrayScale(double num) {
+        if (num > 1.0)
+            return OVERFLOW_COLOUR;
+        int scaled = (int) (255 * num);
+        return new Color(scaled, scaled, scaled);
     }
 
 }
