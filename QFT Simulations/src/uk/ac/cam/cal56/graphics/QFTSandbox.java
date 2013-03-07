@@ -332,7 +332,8 @@ public class QFTSandbox extends JFrame {
         // add calculate sliders
         setupGeneralSlider(_NSlider, _NValue, N_MIN, N_MAX, 2, int.class, "Number of lattice points");
         setupGeneralSlider(_PmaxSlider, _PmaxValue, PMAX_MIN, PMAX_MAX, 3, int.class, "Number of particles considered");
-        setupGeneralSlider(_dxSlider, _dxValue, encode(DX_MIN), encode(DX_MAX), 4, double.class, "Lattice point separation");
+        setupGeneralSlider(_dxSlider, _dxValue, encode(DX_MIN), encode(DX_MAX), 4, double.class,
+                           "Lattice point separation");
         setupGeneralSlider(_mSlider, _mValue, encode(M_MIN), encode(M_MAX), 5, double.class, "Particle mass");
         // add real time sliders
         setupGeneralSlider(_dtSlider, _dtValue, encode(DT_MIN), encode(DT_MAX), 7, double.class, "Time step");
@@ -376,7 +377,7 @@ public class QFTSandbox extends JFrame {
         slider.setPaintLabels(true);
 
         JLabel icon = new JLabel("");
-        icon.setIcon(new ImageIcon(getClass().getResource(row + ".png")));
+        icon.setIcon(new ImageIcon(getClass().getResource("icons/" + row + ".png")));
         icon.setToolTipText(toolTip);
 
         _controlPanel.add(icon, "1, " + row + ", center, center");
