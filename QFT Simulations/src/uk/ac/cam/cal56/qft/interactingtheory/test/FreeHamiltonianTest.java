@@ -4,7 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import uk.ac.cam.cal56.qft.interactingtheory.FreeHamiltonian;
+import uk.ac.cam.cal56.qft.interactingtheory.impl.FreeHamiltonian;
 import uk.ac.cam.cal56.qft.statelabelling.FockState;
 
 public class FreeHamiltonianTest {
@@ -21,8 +21,9 @@ public class FreeHamiltonianTest {
 
         FockState phi = new FockState(N, Pmax, m, dx);
         for (int n : phi) {
-            //System.out.println(fh.energies[n]);
-            assertEquals(phi.getEnergy(), fh.energies[n], EPSILON);
+            // System.out.println(fh.energies[n]);
+            assertEquals(phi.getEnergy(), fh.getEnergy(n), EPSILON);
         }
     }
+
 }

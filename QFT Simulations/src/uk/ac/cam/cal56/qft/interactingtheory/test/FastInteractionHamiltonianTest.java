@@ -11,8 +11,8 @@ import org.junit.Test;
 
 import uk.ac.cam.cal56.maths.Combinatorics;
 import uk.ac.cam.cal56.qft.interactingtheory.Interaction;
-import uk.ac.cam.cal56.qft.interactingtheory.InteractionHamiltonian;
-import uk.ac.cam.cal56.qft.interactingtheory.impl.FastInteractionHamiltonian;
+import uk.ac.cam.cal56.qft.interactingtheory.Hamiltonian;
+import uk.ac.cam.cal56.qft.interactingtheory.impl.InteractionHamiltonian;
 import uk.ac.cam.cal56.qft.interactingtheory.impl.SlowInteractionHamiltonian;
 import uk.ac.cam.cal56.qft.statelabelling.StateLabelling;
 
@@ -24,15 +24,15 @@ public class FastInteractionHamiltonianTest {
     private final int              _Pmax        = 3;
     private final double           _mass        = 1.0;
     private final double           _dx          = 0.1;
-    private final Interaction      _interaction = Interaction.PHI_THIRD;
+    private final Interaction      _interaction = Interaction.PHI_CUBED;
 
     private final int              _S           = Combinatorics.S(_N, _Pmax);
 
-    private InteractionHamiltonian _ih;
+    private Hamiltonian _ih;
 
     @Before
     public void setUp() throws Exception {
-        _ih = new FastInteractionHamiltonian(_N, _Pmax, _mass, _dx, _interaction);
+        _ih = new InteractionHamiltonian(_N, _Pmax, _mass, _dx, _interaction);
         _ih.calculateElements();
     }
 
@@ -84,7 +84,7 @@ public class FastInteractionHamiltonianTest {
     @Test
     public void testImplementationComparison() {
 
-        InteractionHamiltonian slowih = new SlowInteractionHamiltonian(_N, _Pmax, _mass, _dx, _interaction);
+        Hamiltonian slowih = new SlowInteractionHamiltonian(_N, _Pmax, _mass, _dx, _interaction);
         slowih.calculateElements();
 
         // compare

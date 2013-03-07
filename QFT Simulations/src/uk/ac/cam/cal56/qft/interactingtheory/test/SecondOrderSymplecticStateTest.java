@@ -2,9 +2,13 @@ package uk.ac.cam.cal56.qft.interactingtheory.test;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.junit.Test;
 
 import uk.ac.cam.cal56.maths.Complex;
+import uk.ac.cam.cal56.qft.interactingtheory.Interaction;
 import uk.ac.cam.cal56.qft.interactingtheory.State;
 import uk.ac.cam.cal56.qft.interactingtheory.impl.EvenOrderSymplecticState;
 import uk.ac.cam.cal56.qft.interactingtheory.impl.SecondOrderSymplecticState;
@@ -20,8 +24,9 @@ public class SecondOrderSymplecticStateTest {
         double _m = 1.0;
         double _dx = 0.1;
         double _dt = 0.01;
-        double _lambda = 1;
-        State _state = new SecondOrderSymplecticState(_N, _Pmax, _m, _dx, _dt, _lambda); // recalculate
+        Map<Interaction, Double> lambdas = new HashMap<Interaction, Double>();
+        lambdas.put(Interaction.PHI_CUBED, 1.0);
+        State _state = new SecondOrderSymplecticState(_N, _Pmax, _m, _dx, _dt, lambdas); // recalculate
         _state.reset(0);
 
         try {
@@ -56,8 +61,9 @@ public class SecondOrderSymplecticStateTest {
         double m = 1.0;
         double dx = 0.1;
         double dtInitial = 0.01;
-        double lambda = 0.0;
-        State state = new SecondOrderSymplecticState(N, Pmax, m, dx, dtInitial, lambda); // recalculate
+        Map<Interaction, Double> lambdas = new HashMap<Interaction, Double>();
+        lambdas.put(Interaction.PHI_CUBED, 0.0);
+        State state = new SecondOrderSymplecticState(N, Pmax, m, dx, dtInitial, lambdas); // recalculate
 
         try {
             // Create file
@@ -95,9 +101,10 @@ public class SecondOrderSymplecticStateTest {
         double m = 1.0;
         double dx = 0.1;
         double dtInitial = 0.01;
-        double lambda = 0.1;
-        State state = new SecondOrderSymplecticState(N, Pmax, m, dx, dtInitial, lambda);
-        State otherState = new EvenOrderSymplecticState(4, N, Pmax, m, dx, dtInitial, lambda);
+        Map<Interaction, Double> lambdas = new HashMap<Interaction, Double>();
+        lambdas.put(Interaction.PHI_CUBED, 0.1);
+        State state = new SecondOrderSymplecticState(N, Pmax, m, dx, dtInitial, lambdas);
+        State otherState = new EvenOrderSymplecticState(4, N, Pmax, m, dx, dtInitial, lambdas);
 
         try {
             // Create file
@@ -129,7 +136,7 @@ public class SecondOrderSymplecticStateTest {
             otherState.setTimeStep(dtInitial);
             state.reset(0);
             otherState.reset(0);
-            tfinal = 1/dtInitial;
+            tfinal = 100;
             int counter = 0;
             while (state.getTime() < tfinal) {
                 state.step();
@@ -156,8 +163,9 @@ public class SecondOrderSymplecticStateTest {
         double m = 1.0;
         double dx = 0.1;
         double dt = 0.01;
-        double lambda = 0.1;
-        State state = new SecondOrderSymplecticState(N, Pmax, m, dx, dt, lambda); // recalculate
+        Map<Interaction, Double> lambdas = new HashMap<Interaction, Double>();
+        lambdas.put(Interaction.PHI_CUBED, 0.1);
+        State state = new SecondOrderSymplecticState(N, Pmax, m, dx, dt, lambdas); // recalculate
 
         double tfinal = 1.0;
         while (state.getTime() < tfinal) {

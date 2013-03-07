@@ -7,7 +7,9 @@ import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.DecimalFormat;
+import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Map;
 
 import javax.swing.Box;
 import javax.swing.ImageIcon;
@@ -27,6 +29,7 @@ import uk.ac.cam.cal56.graphics.impl.FunctionPlot;
 import uk.ac.cam.cal56.maths.Complex;
 import uk.ac.cam.cal56.maths.FourierTransform;
 import uk.ac.cam.cal56.maths.impl.FFT;
+import uk.ac.cam.cal56.qft.interactingtheory.Interaction;
 import uk.ac.cam.cal56.qft.interactingtheory.State;
 import uk.ac.cam.cal56.qft.interactingtheory.impl.SecondOrderSymplecticState;
 
@@ -41,48 +44,48 @@ public class QFTSandbox extends JFrame {
     /***** VARIABLES *****/
 
     /* STATIC VARIABLES */
-    private static final String FRAME_TITLE      = "QFT Sandbox";
-    private static final int    FRAME_WIDTH      = 1120;
-    private static final int    FRAME_HEIGHT     = 700;
+    private static final String FRAME_TITLE          = "QFT Sandbox";
+    private static final int    FRAME_WIDTH          = 1120;
+    private static final int    FRAME_HEIGHT         = 700;
 
-    private static final int    PLOT_1D_WIDTH    = 20;
-    private static final int    PLOT_WIDTH       = 256;
-    private static final int    PLOT_HEIGHT      = 256;
+    private static final int    PLOT_1D_WIDTH        = 20;
+    private static final int    PLOT_WIDTH           = 256;
+    private static final int    PLOT_HEIGHT          = 256;
 
-    private static final int    N_MIN            = 2;
-    private static final int    N_DEFAULT        = 16;
-    private static final int    N_MAX            = 128;
+    private static final int    N_MIN                = 2;
+    private static final int    N_DEFAULT            = 16;
+    private static final int    N_MAX                = 128;
 
-    private static final int    PMAX_MIN         = 1;
-    private static final int    PMAX_DEFAULT     = 3;
-    private static final int    PMAX_MAX         = 7;
+    private static final int    PMAX_MIN             = 1;
+    private static final int    PMAX_DEFAULT         = 3;
+    private static final int    PMAX_MAX             = 7;
 
-    private static final double DX_MIN           = 1.0e-3;
-    private static final double DX_DEFAULT       = 1.0;
-    private static final double DX_MAX           = 10.0;
+    private static final double DX_MIN               = 1.0e-3;
+    private static final double DX_DEFAULT           = 1.0;
+    private static final double DX_MAX               = 10.0;
 
-    private static final double M_MIN            = 1.0e-3;
-    private static final double M_DEFAULT        = 1.0;
-    private static final double M_MAX            = 10.0;
+    private static final double M_MIN                = 1.0e-3;
+    private static final double M_DEFAULT            = 1.0;
+    private static final double M_MAX                = 10.0;
 
-    private static final double DT_MIN           = 1.0e-5;
-    private static final double DT_DEFAULT       = 1.0e-3;
-    private static final double DT_MAX           = 1.0e-1;
+    private static final double DT_MIN               = 1.0e-5;
+    private static final double DT_DEFAULT           = 1.0e-3;
+    private static final double DT_MAX               = 1.0e-1;
 
-    private static final int    STEPS_MIN        = 1;
-    private static final int    STEPS_DEFAULT    = 16;
-    private static final int    STEPS_MAX        = 256;
+    private static final int    STEPS_MIN            = 1;
+    private static final int    STEPS_DEFAULT        = 16;
+    private static final int    STEPS_MAX            = 256;
 
-    private static final double LAMBDA_MIN       = 1.0e-7;
-    private static final double LAMBDA_DEFAULT   = 1.0e1;
-    private static final double LAMBDA_MAX       = 1.0e2;
+    private static final double LAMBDA_MIN           = 1.0e-7;
+    private static final double LAMBDA_DEFAULT       = 1.0e1;
+    private static final double LAMBDA_MAX           = 1.0e2;
 
-    private static final String BUTTON_CALCULATE = "Calculate";
-    private static final String BUTTON_PLAY      = "Play";
-    private static final String BUTTON_STOP      = "Stop";
-    private static final String BUTTON_RESET     = "Reset";
+    private static final String BUTTON_CALCULATE     = "Calculate";
+    private static final String BUTTON_PLAY          = "Play";
+    private static final String BUTTON_STOP          = "Stop";
+    private static final String BUTTON_RESET         = "Reset";
 
-    private static final String SELECTOR_DEFAULT = "Select a preset...";
+    private static final String SELECTOR_DEFAULT     = "Select a preset...";
 
     /* QUANTUM STATE VARIABLES */
     // quantum state
@@ -102,51 +105,54 @@ public class QFTSandbox extends JFrame {
     private Plot                _posPlotRest;
 
     /* FOURIER TRANSFORM */
-    private FourierTransform    _ft              = new FFT();
+    private FourierTransform    _ft                  = new FFT();
 
     /* ANIMATION VARIABLES */
     // Animation parameters and objects
-    private double              _framerate       = 30.0;
-    private Animator            _animator        = new Animator();
+    private double              _framerate           = 30.0;
+    private Animator            _animator            = new Animator();
 
     /* FRAME SETUP VARIABLES */
     // Panels
-    private JPanel              _controlPanel    = new JPanel();
-    private JPanel              _displayPanel    = new JPanel();
+    private JPanel              _controlPanel        = new JPanel();
+    private JPanel              _displayPanel        = new JPanel();
 
     // Value Labels
-    private JLabel              _NValue          = new JLabel(N_DEFAULT + "");
-    private JLabel              _PmaxValue       = new JLabel(PMAX_DEFAULT + "");
-    private JLabel              _dxValue         = new JLabel(format(DX_DEFAULT));
-    private JLabel              _mValue          = new JLabel(format(M_DEFAULT));
-    private JLabel              _dtValue         = new JLabel(format(DT_DEFAULT));
-    private JLabel              _stepsValue      = new JLabel(STEPS_DEFAULT + "");
-    private JLabel              _lambdaValue     = new JLabel(format(LAMBDA_DEFAULT));
+    private JLabel              _NValue              = new JLabel(N_DEFAULT + "");
+    private JLabel              _PmaxValue           = new JLabel(PMAX_DEFAULT + "");
+    private JLabel              _dxValue             = new JLabel(format(DX_DEFAULT));
+    private JLabel              _mValue              = new JLabel(format(M_DEFAULT));
+    private JLabel              _dtValue             = new JLabel(format(DT_DEFAULT));
+    private JLabel              _stepsValue          = new JLabel(STEPS_DEFAULT + "");
+    private JLabel              _lambdaSquaredValue  = new JLabel(format(LAMBDA_DEFAULT));
+    private JLabel              _lambdaCubedValue    = new JLabel(format(LAMBDA_DEFAULT));
 
-    private JLabel              _timeLabel       = new JLabel();
+    private JLabel              _timeLabel           = new JLabel();
 
     // Preset Selector
-    private final JComboBox     _presetSelector  = new JComboBox();
-    private int[]               _particleMomenta       = new int[] {};
+    private final JComboBox     _presetSelector      = new JComboBox();
+    private int[]               _particleMomenta     = new int[] {};
 
     // Sliders
-    private JSlider             _NSlider         = new JSlider(N_MIN, N_MAX, N_DEFAULT);
-    private JSlider             _PmaxSlider      = new JSlider(PMAX_MIN, PMAX_MAX, PMAX_DEFAULT);
-    private JSlider             _dxSlider        = new JSlider(encode(DX_MIN), encode(DX_MAX), encode(DX_DEFAULT));
-    private JSlider             _mSlider         = new JSlider(encode(M_MIN), encode(M_MAX), encode(M_DEFAULT));
-    private JSlider             _dtSlider        = new JSlider(encode(DT_MIN), encode(DT_MAX), encode(DT_DEFAULT));
-    private JSlider             _stepsSlider     = new JSlider(STEPS_MIN, STEPS_MAX, STEPS_DEFAULT);
-    private JSlider             _lambdaSlider    = new JSlider(encode(LAMBDA_MIN), encode(LAMBDA_MAX),
-                                                     encode(LAMBDA_DEFAULT));
+    private JSlider             _NSlider             = new JSlider(N_MIN, N_MAX, N_DEFAULT);
+    private JSlider             _PmaxSlider          = new JSlider(PMAX_MIN, PMAX_MAX, PMAX_DEFAULT);
+    private JSlider             _dxSlider            = new JSlider(encode(DX_MIN), encode(DX_MAX), encode(DX_DEFAULT));
+    private JSlider             _mSlider             = new JSlider(encode(M_MIN), encode(M_MAX), encode(M_DEFAULT));
+    private JSlider             _dtSlider            = new JSlider(encode(DT_MIN), encode(DT_MAX), encode(DT_DEFAULT));
+    private JSlider             _stepsSlider         = new JSlider(STEPS_MIN, STEPS_MAX, STEPS_DEFAULT);
+    private JSlider             _lambdaSquaredSlider = new JSlider(encode(LAMBDA_MIN), encode(LAMBDA_MAX),
+                                                         encode(LAMBDA_DEFAULT));
+    private JSlider             _lambdaCubedSlider   = new JSlider(encode(LAMBDA_MIN), encode(LAMBDA_MAX),
+                                                         encode(LAMBDA_DEFAULT));
     // Separators
-    private final Component     _separator       = Box.createVerticalStrut(50);
-    private final int           SEPARATOR_ROW    = 6;
-    private final Component     _separator2      = Box.createVerticalStrut(50);
+    private final Component     _separator           = Box.createVerticalStrut(50);
+    private final int           SEPARATOR_ROW        = 6;
+    private final Component     _separator2          = Box.createVerticalStrut(50);
 
     // Buttons
-    private JButton             _calculateButton = new JButton(BUTTON_CALCULATE);
-    private JButton             _playButton      = new JButton(BUTTON_PLAY);
-    private JButton             _resetButton     = new JButton(BUTTON_RESET);
+    private JButton             _calculateButton     = new JButton(BUTTON_CALCULATE);
+    private JButton             _playButton          = new JButton(BUTTON_PLAY);
+    private JButton             _resetButton         = new JButton(BUTTON_RESET);
 
     /***** FUNCTIONS *****/
 
@@ -159,9 +165,12 @@ public class QFTSandbox extends JFrame {
 
     // quantum state and plots representing it
     protected void setupQuantumState() {
+        Map<Interaction, Double> lambdas = new HashMap<Interaction, Double>();
+        lambdas.put(Interaction.PHI_SQUARED, 0.1);
+        lambdas.put(Interaction.PHI_CUBED, decode(_lambdaSquaredSlider.getValue()));
         _state = new SecondOrderSymplecticState(_NSlider.getValue(), _PmaxSlider.getValue(),
-            decode(_mSlider.getValue()), decode(_dxSlider.getValue()), decode(_dtSlider.getValue()),
-            decode(_lambdaSlider.getValue()), _particleMomenta);
+            decode(_mSlider.getValue()), decode(_dxSlider.getValue()), decode(_dtSlider.getValue()), lambdas,
+            _particleMomenta);
     }
 
     // fired every time frame is updated
@@ -269,12 +278,12 @@ public class QFTSandbox extends JFrame {
         getContentPane().add(_controlPanel, BorderLayout.EAST);
 
         // form layout
-        _controlPanel.setLayout(new FormLayout(new ColumnSpec[] { ColumnSpec.decode("32px"),
+        _controlPanel.setLayout(new FormLayout(new ColumnSpec[] { ColumnSpec.decode("40px"),
             ColumnSpec.decode("175px:grow"), ColumnSpec.decode("64px"), FormFactory.LABEL_COMPONENT_GAP_COLSPEC, },
             new RowSpec[] { FormFactory.MIN_ROWSPEC, FormFactory.MIN_ROWSPEC, FormFactory.MIN_ROWSPEC,
                 FormFactory.MIN_ROWSPEC, FormFactory.MIN_ROWSPEC, FormFactory.MIN_ROWSPEC, FormFactory.MIN_ROWSPEC,
                 FormFactory.MIN_ROWSPEC, FormFactory.MIN_ROWSPEC, FormFactory.MIN_ROWSPEC, FormFactory.MIN_ROWSPEC,
-                FormFactory.MIN_ROWSPEC, FormFactory.MIN_ROWSPEC, }));
+                FormFactory.MIN_ROWSPEC, FormFactory.MIN_ROWSPEC, FormFactory.MIN_ROWSPEC }));
 
         setupPresetSelector();
 
@@ -283,7 +292,7 @@ public class QFTSandbox extends JFrame {
 
         // setup separating struts
         _controlPanel.add(_separator, "2, " + SEPARATOR_ROW);
-        _controlPanel.add(_separator2, "2, 10");
+        _controlPanel.add(_separator2, "2, 11");
 
         // setup buttons (calculate, play, reset)
         setupButtons();
@@ -308,7 +317,7 @@ public class QFTSandbox extends JFrame {
                     _mSlider.setValue(encode(preset.m));
                     _dtSlider.setValue(encode(preset.dt));
                     _stepsSlider.setValue(preset.steps);
-                    _lambdaSlider.setValue(encode(preset.lambda));
+                    _lambdaSquaredSlider.setValue(encode(preset.lambda));
                     _particleMomenta = preset.particleMomenta;
                     calculate();
                 }
@@ -320,14 +329,18 @@ public class QFTSandbox extends JFrame {
     }
 
     private void setupSliders() {
-        // add all sliders
-        setupGeneralSlider(_NSlider, _NValue, N_MIN, N_MAX, 2, int.class);
-        setupGeneralSlider(_PmaxSlider, _PmaxValue, PMAX_MIN, PMAX_MAX, 3, int.class);
-        setupGeneralSlider(_dxSlider, _dxValue, encode(DX_MIN), encode(DX_MAX), 4, double.class);
-        setupGeneralSlider(_mSlider, _mValue, encode(M_MIN), encode(M_MAX), 5, double.class);
-        setupGeneralSlider(_dtSlider, _dtValue, encode(DT_MIN), encode(DT_MAX), 7, double.class);
-        setupGeneralSlider(_stepsSlider, _stepsValue, STEPS_MIN, STEPS_MAX, 8, int.class);
-        setupGeneralSlider(_lambdaSlider, _lambdaValue, encode(LAMBDA_MIN), encode(LAMBDA_MAX), 9, double.class);
+        // add calculate sliders
+        setupGeneralSlider(_NSlider, _NValue, N_MIN, N_MAX, 2, int.class, "Number of lattice points");
+        setupGeneralSlider(_PmaxSlider, _PmaxValue, PMAX_MIN, PMAX_MAX, 3, int.class, "Number of particles considered");
+        setupGeneralSlider(_dxSlider, _dxValue, encode(DX_MIN), encode(DX_MAX), 4, double.class, "Lattice point separation");
+        setupGeneralSlider(_mSlider, _mValue, encode(M_MIN), encode(M_MAX), 5, double.class, "Particle mass");
+        // add real time sliders
+        setupGeneralSlider(_dtSlider, _dtValue, encode(DT_MIN), encode(DT_MAX), 7, double.class, "Time step");
+        setupGeneralSlider(_stepsSlider, _stepsValue, STEPS_MIN, STEPS_MAX, 8, int.class, "Steps calculated per frame");
+        setupGeneralSlider(_lambdaSquaredSlider, _lambdaSquaredValue, encode(LAMBDA_MIN), encode(LAMBDA_MAX), 9,
+                           double.class, "2-vertex interaction strength");
+        setupGeneralSlider(_lambdaCubedSlider, _lambdaCubedValue, encode(LAMBDA_MIN), encode(LAMBDA_MAX), 10,
+                           double.class, "3-vertex interaction strength");
 
         // then add real time update listeners (time step and interaction strength)
         _dtSlider.addChangeListener(new ChangeListener() { // update time step
@@ -336,16 +349,22 @@ public class QFTSandbox extends JFrame {
                     _state.setTimeStep(decode(_dtSlider.getValue()));
             }
         });
-        _lambdaSlider.addChangeListener(new ChangeListener() { // update interaction strength
+        _lambdaSquaredSlider.addChangeListener(new ChangeListener() { // update interaction strength
             public void stateChanged(ChangeEvent e) {
                 if (_state != null)
-                    _state.setInteractionStrength(decode(_lambdaSlider.getValue()));
+                    _state.setInteractionStrength(Interaction.PHI_SQUARED, decode(_lambdaSquaredSlider.getValue()));
+            }
+        });
+        _lambdaCubedSlider.addChangeListener(new ChangeListener() { // update interaction strength
+            public void stateChanged(ChangeEvent e) {
+                if (_state != null)
+                    _state.setInteractionStrength(Interaction.PHI_CUBED, decode(_lambdaCubedSlider.getValue()));
             }
         });
     }
 
     private void setupGeneralSlider(final JSlider slider, final JLabel value, int min, int max, final int row,
-                                    final Class<?> type) {
+                                    final Class<?> type, String toolTip) {
         if (type == double.class) {
             Hashtable<Integer, JLabel> labelTable = new Hashtable<Integer, JLabel>();
             labelTable.put(min, new JLabel(decodeText(min)));
@@ -357,8 +376,8 @@ public class QFTSandbox extends JFrame {
         slider.setPaintLabels(true);
 
         JLabel icon = new JLabel("");
-        icon.setIcon(new ImageIcon("icons/3x3_grid.png"));
-        icon.setToolTipText("Number of lattice points.");
+        icon.setIcon(new ImageIcon(getClass().getResource(row + ".png")));
+        icon.setToolTipText(toolTip);
 
         _controlPanel.add(icon, "1, " + row + ", center, center");
         _controlPanel.add(slider, "2, " + row + ", left, top");
@@ -412,13 +431,13 @@ public class QFTSandbox extends JFrame {
         });
 
         // add buttons to control panel
-        _controlPanel.add(_calculateButton, "2, 11");
+        _controlPanel.add(_calculateButton, "2, 12");
+        _controlPanel.add(_playButton, "2, 13");
+        _controlPanel.add(_resetButton, "2, 14");
 
         // initially disable the play and reset buttons
         _playButton.setEnabled(false);
-        _controlPanel.add(_playButton, "2, 12");
         _resetButton.setEnabled(false);
-        _controlPanel.add(_resetButton, "2, 13");
     }
 
     private void calculate() {

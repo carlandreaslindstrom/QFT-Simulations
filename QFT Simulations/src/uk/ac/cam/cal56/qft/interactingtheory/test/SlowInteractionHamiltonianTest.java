@@ -9,7 +9,7 @@ import org.junit.Test;
 
 import uk.ac.cam.cal56.maths.Combinatorics;
 import uk.ac.cam.cal56.qft.interactingtheory.Interaction;
-import uk.ac.cam.cal56.qft.interactingtheory.InteractionHamiltonian;
+import uk.ac.cam.cal56.qft.interactingtheory.Hamiltonian;
 import uk.ac.cam.cal56.qft.interactingtheory.impl.SlowInteractionHamiltonian;
 import uk.ac.cam.cal56.qft.statelabelling.StateLabelling;
 
@@ -21,7 +21,7 @@ public class SlowInteractionHamiltonianTest {
     public void testCalculateElements() {
         int N = 10, Pmax = 3;
         double mass = 1.0, dx = 0.1;
-        InteractionHamiltonian ih = new SlowInteractionHamiltonian(N, Pmax, mass, dx, Interaction.PHI_THIRD);
+        Hamiltonian ih = new SlowInteractionHamiltonian(N, Pmax, mass, dx, Interaction.PHI_CUBED);
 
         ih.calculateElements();
 
@@ -44,7 +44,7 @@ public class SlowInteractionHamiltonianTest {
     public void testMatrixSize() {
         int N = 15, Pmax = 3;
         double mass = 1.0, dx = 0.1;
-        InteractionHamiltonian ih = new SlowInteractionHamiltonian(N, Pmax, mass, dx, Interaction.PHI_THIRD);
+        Hamiltonian ih = new SlowInteractionHamiltonian(N, Pmax, mass, dx, Interaction.PHI_CUBED);
 
         ih.calculateElements();
         int S = Combinatorics.S(N, Pmax);

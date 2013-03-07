@@ -7,14 +7,14 @@ import java.util.Map;
 
 import uk.ac.cam.cal56.maths.Combinatorics;
 import uk.ac.cam.cal56.qft.interactingtheory.Interaction;
-import uk.ac.cam.cal56.qft.interactingtheory.InteractionHamiltonian;
+import uk.ac.cam.cal56.qft.interactingtheory.Hamiltonian;
 import uk.ac.cam.cal56.qft.statelabelling.FockState;
 import uk.ac.cam.cal56.qft.statelabelling.StateLabelling;
 
 // Interaction Hamiltonian holds all the coefficients for jumping between states.
 // Only calculated once per simulation, but takes a lot of effort to calculate.
 // It is therefore heavily optimized (and possibly hard to read/understand).
-public class SlowInteractionHamiltonian implements InteractionHamiltonian {
+public class SlowInteractionHamiltonian implements Hamiltonian {
 
     private List<Map<Integer, Double>> _elements;
     private int                        _N;
@@ -57,7 +57,7 @@ public class SlowInteractionHamiltonian implements InteractionHamiltonian {
         double element = 0;
 
         // uses ladder ops split into sections (0,0), (p,0), (p,p), (p,q) for optimization
-        if (_interaction == Interaction.PHI_THIRD) {
+        if (_interaction == Interaction.PHI_CUBED) {
 
             // h_00 = ( a_0^3 + a*_0^3 + 3a*_0 a_0^2 + 3a*_0^2 a_0 + 3a_0 + 3a*_0 ) / m^1.5
             double h_00 = F(new int[] {}, 0, 0, 0) + F(new int[] { 0, 0, 0 }) + 3 * F(new int[] { 0 }, 0, 0) + 3 *
@@ -130,7 +130,7 @@ public class SlowInteractionHamiltonian implements InteractionHamiltonian {
     }
 
     private static boolean allowedTransition(int Pket, int Pbra, Interaction interaction) {
-        if (interaction == Interaction.PHI_THIRD) {
+        if (interaction == Interaction.PHI_CUBED) {
             if (Pbra == Pket - 3 || Pbra == Pket - 1 || Pbra == Pket + 1 || Pbra == Pket + 3)
                 return true;
         }

@@ -2,42 +2,53 @@ package uk.ac.cam.cal56.qft.interactingtheory.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import uk.ac.cam.cal56.maths.Combinatorics;
 import uk.ac.cam.cal56.maths.Complex;
-import uk.ac.cam.cal56.qft.interactingtheory.FreeHamiltonian;
+import uk.ac.cam.cal56.qft.interactingtheory.Hamiltonian;
 import uk.ac.cam.cal56.qft.interactingtheory.Interaction;
-import uk.ac.cam.cal56.qft.interactingtheory.InteractionHamiltonian;
 import uk.ac.cam.cal56.qft.interactingtheory.State;
 import uk.ac.cam.cal56.qft.statelabelling.StateLabelling;
 
 public abstract class BaseState implements State {
 
-    protected final int                    _N;     // number of lattice points
-    protected double                       _dt;    // time step
-    protected final int                    _S;     // S(N,P) = total number of Fock state coefficients
-    protected final FreeHamiltonian        _Hfree; // free theory Hamiltonian
-    protected final InteractionHamiltonian _Hint;  // interaction Hamiltonian
-    protected double                       _lambda;        // interaction strength
+    protected final int                     _N;           // number of lattice points
+    protected double                        _dt;          // time step
+    protected final int                     _S;           // S(N,Pmax) = number of coefficients
+    protected FreeHamiltonian               _Hfree;       // free theory Hamiltonian
+    protected Map<Interaction, Hamiltonian> _hamiltonians; // interaction Hamiltonians
+    protected Map<Interaction, Double>      _lambdas;     // interaction strength
 
-    protected double                       _time;
-    protected Complex[]                    _c;     // {c_n(t)}
+    protected double                        _time;
+    protected Complex[]                     _c;           // {c_n(t)}
 
-    public BaseState(int N, int Pmax, double m, double dx, double dt, double lambda, int... particleMomenta) {
+    public BaseState(int N, int Pmax, double m, double dx, double dt, Map<Interaction, Double> lambdas,
+            int... particleMomenta) {
         // initialise parameters
         _N = N;
         _dt = dt;
-        _lambda = lambda;
         _S = Combinatorics.S(N, Pmax);
+        _lambdas = lambdas;
+        _hamiltonians = new HashMap<Interaction, Hamiltonian>();
 
         // set coefficients
         _c = new Complex[_S];
 
-        // calculate free theory energies and interaction amplitudes
+        // calculate free theory energies
         _Hfree = new FreeHamiltonian(N, Pmax, m, dx);
-        _Hint = new FastInteractionHamiltonian(N, Pmax, m, dx, Interaction.PHI_THIRD);
-        _Hint.calculateElements(); // calculate elements in the Interaction Hamiltonian
+
+        // add interaction Hamiltonians
+        for (Entry<Interaction, Double> lambda : lambdas.entrySet())
+            _hamiltonians.put(lambda.getKey(), new InteractionHamiltonian(N, Pmax, m, dx, lambda.getKey()));
+
+        // calculate elements of these
+        // TODO: make this part report on its progress (useful if multithreaded)
+        for (Entry<Interaction, Hamiltonian> h : _hamiltonians.entrySet())
+            h.getValue().calculateElements();
 
         // set coefficients (to pure vacuum) and do first step
         reset(particleMomenta);
@@ -56,29 +67,21 @@ public abstract class BaseState implements State {
     @Override
     public void reset(int... particleMomenta) {
         _time = 0.0;
-
-        // List<Integer> ls = new ArrayList<Integer>();
-        // for (int p : particles)
-        // ls.add(p);
-        // Integer n = StateLabelling.index(ls, _N);
-        // if (n == null || n >= _S)
-        // n = 0; // set one particle
-        // for (int i = 0; i < _S; i++)
-        // _c[i] = Complex.zero();
-        // _c[n] = Complex.one();
-
         setWavePackets(_N / 8.0, particleMomenta);
         firstStep();
     }
 
     public void setWavePackets(double sigma, int... particleMomenta) {
 
-        if (particleMomenta.length == 0) {
+        // TODO: implement something for more than 2 particles
+        // VACUUM
+        if (particleMomenta.length == 0 || particleMomenta.length > 2) {
             // set all coefficients = 0, apart from vacuum = 1
             _c[0] = Complex.one();
             for (int i = 1; i < _S; i++)
                 _c[i] = Complex.zero();
         }
+        // ONE PARTICLE WAVE PACKET
         else if (particleMomenta.length == 1) {
             // calculate gaussian and normalisation
             double norm = 0.0;
@@ -99,6 +102,9 @@ public abstract class BaseState implements State {
             for (int i = _N + 1; i < _S; i++)
                 _c[i] = Complex.zero();
         }
+
+        // TWO PARTICLE WAVE PACKETS
+        // else if (particleMomenta.length == 2) { }
     }
 
     @Override
@@ -162,8 +168,8 @@ public abstract class BaseState implements State {
     }
 
     @Override
-    public void setInteractionStrength(double lambda) {
-        _lambda = lambda;
+    public void setInteractionStrength(Interaction interaction, double lambda) {
+        _lambdas.put(interaction, lambda);
         firstStep();
     }
 

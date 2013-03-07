@@ -2,12 +2,16 @@ package uk.ac.cam.cal56.qft.interactingtheory.test;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.junit.Test;
 
 import uk.ac.cam.cal56.maths.Complex;
+import uk.ac.cam.cal56.qft.interactingtheory.Interaction;
 import uk.ac.cam.cal56.qft.interactingtheory.State;
-import uk.ac.cam.cal56.qft.interactingtheory.impl.FirstOrderSymplecticState;
 import uk.ac.cam.cal56.qft.interactingtheory.impl.EvenOrderSymplecticState;
+import uk.ac.cam.cal56.qft.interactingtheory.impl.SecondOrderSymplecticState;
 
 public class EvenOrderSymplecticStateTest {
 
@@ -19,21 +23,25 @@ public class EvenOrderSymplecticStateTest {
     private final double _dx     = 0.1;
     private final double _dt     = 0.01;
     private double       _lambda = 0.01;
+    
+    private Map<Interaction, Double> _lambdas = new HashMap<Interaction, Double>();
 
     @Test
     public void testConstructor() {
-        State state = new EvenOrderSymplecticState(3, _N, _Pmax, _m, _dx, _dt, _lambda);
+        _lambdas.put(Interaction.PHI_CUBED, _lambda);
+        State state = new EvenOrderSymplecticState(3, _N, _Pmax, _m, _dx, _dt, _lambdas);
         assertEquals(state.getTime(), 0.0, EPSILON);
         assertEquals(state.get0P().modSquared(), 1.0, EPSILON);
     }
 
     @Test
     public void testStep() {
-        State state = new EvenOrderSymplecticState(4, _N, _Pmax, _m, _dx, _dt, _lambda);
+        State state = new EvenOrderSymplecticState(4, _N, _Pmax, _m, _dx, _dt, _lambdas);
         assertEquals(state.getTime(), 0.0, EPSILON);
         assertEquals(state.get0P().modSquared(), 1.0, EPSILON);
-
-        State otherState = new FirstOrderSymplecticState(_N, _Pmax, _m, _dx, _dt, _lambda);
+        Map<Interaction, Double> lambdas = new HashMap<Interaction, Double>();
+        lambdas.put(Interaction.PHI_CUBED, _lambda);
+        State otherState = new SecondOrderSymplecticState(_N, _Pmax, _m, _dx, _dt, lambdas);
 
         state.reset(0);
         otherState.reset(0);
@@ -41,7 +49,7 @@ public class EvenOrderSymplecticStateTest {
         double tfinal = 1.0;
         while (state.getTime() < tfinal) {
             double value = ((EvenOrderSymplecticState) state).get(0).real();
-            double otherValue = ((FirstOrderSymplecticState) otherState).get(0).real();
+            double otherValue = ((SecondOrderSymplecticState) otherState).get(0).real();
             System.out.println(value + " : " + otherValue);
             // assertEquals(value, otherValue, EPSILON);
             state.step();
@@ -51,7 +59,7 @@ public class EvenOrderSymplecticStateTest {
 
     @Test
     public void testSymplecticity() {
-        State _state = new EvenOrderSymplecticState(8, _N, _Pmax, _m, _dx, _dt, _lambda); // recalculate
+        State _state = new EvenOrderSymplecticState(8, _N, _Pmax, _m, _dx, _dt, _lambdas); // recalculate
         _state.reset(0);
 
         try {
@@ -81,7 +89,8 @@ public class EvenOrderSymplecticStateTest {
 
     @Test
     public void testExactComparison() {
-        State state = new EvenOrderSymplecticState(2, _N, _Pmax, _m, _dx, _dt, 0.0);
+        _lambdas.put(Interaction.PHI_CUBED, 0.0);
+        State state = new EvenOrderSymplecticState(2, _N, _Pmax, _m, _dx, _dt, _lambdas);
 
         try {
             // Create file

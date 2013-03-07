@@ -23,7 +23,7 @@ public interface State {
     public double getRemainingProbability();
 
     // remember to recalculate ALL the coefficients (not only current)
-    public void setInteractionStrength(double lambda);
+    public void setInteractionStrength(Interaction interaction, double lambda);
 
     // remember to recalculate ALL the coefficients (not only current)
     public void setTimeStep(double dt);

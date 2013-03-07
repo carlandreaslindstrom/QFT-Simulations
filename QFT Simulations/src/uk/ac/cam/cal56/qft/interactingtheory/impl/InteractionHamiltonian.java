@@ -8,12 +8,11 @@ import java.util.Map.Entry;
 
 import uk.ac.cam.cal56.maths.Combinatorics;
 import uk.ac.cam.cal56.qft.interactingtheory.Interaction;
-import uk.ac.cam.cal56.qft.interactingtheory.InteractionHamiltonian;
+import uk.ac.cam.cal56.qft.interactingtheory.Hamiltonian;
 import uk.ac.cam.cal56.qft.statelabelling.FockState;
 import uk.ac.cam.cal56.qft.statelabelling.StateLabelling;
 
-// TODO: something is wrong as it isn't diagonal
-public class FastInteractionHamiltonian implements InteractionHamiltonian {
+public class InteractionHamiltonian implements Hamiltonian {
 
     private final double               EPSILON = 1e-13;
 
@@ -27,9 +26,9 @@ public class FastInteractionHamiltonian implements InteractionHamiltonian {
 
     private FockState                  _ket;                    // used internally
 
-    private double[]                   _E      = new double[_N];
+    private double[]                   _E      = new double[_N]; // energy buffer
 
-    public FastInteractionHamiltonian(int N, int Pmax, double mass, double dx, Interaction interaction) {
+    public InteractionHamiltonian(int N, int Pmax, double mass, double dx, Interaction interaction) {
         _N = N;
         _S = Combinatorics.S(N, Pmax);
         _m = mass;
@@ -55,8 +54,23 @@ public class FastInteractionHamiltonian implements InteractionHamiltonian {
     }
 
     private void calculateRow(int n) {
+
+        // PHI SQUARED THEORY (has analytical solution)
+        if (_interaction == Interaction.PHI_SQUARED) {
+            double constantTerm = 0.0;
+            for (int p = 0; p < _N; p++) {
+                double f = 1.0 / (2.0 * _E[p]);
+                constantTerm += f;
+                add(2 * f, new int[] { p }, p); // 2 a*_p a_p
+                add(f, new int[] {}, p, -p); // a_p a_-p
+                add(f, new int[] { p, -p }); // a*_p a*_-p
+            }
+            add(constantTerm, new int[] {}); // 1
+        }
+
+        // PHI THIRD THOERY
         // uses ladder ops split into sections (0,0), (p,0), (p,p), (p,q) for optimization
-        if (_interaction == Interaction.PHI_THIRD) {
+        else if (_interaction == Interaction.PHI_CUBED) {
 
             double divisor = Math.sqrt(8.0 * _N * _dx);
             double f;

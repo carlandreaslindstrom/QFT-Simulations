@@ -2,7 +2,7 @@ package uk.ac.cam.cal56.qft.interactingtheory;
 
 import java.util.Map;
 
-public interface InteractionHamiltonian {
+public interface Hamiltonian {
 
     public void calculateElements();
     
