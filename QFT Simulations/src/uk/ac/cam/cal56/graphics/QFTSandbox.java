@@ -47,11 +47,11 @@ public class QFTSandbox extends JFrame {
     /***** VARIABLES *****/
 
     /* STATIC VARIABLES */
-    protected static final String FRAME_TITLE          = "QFT Sandbox";
-    private static final int    FRAME_WIDTH          = 1120;
+    public static final String  FRAME_TITLE          = "QFT Sandbox";
+    public static final Color   BACKGROUND_COLOR     = Color.BLACK;
+    private static final int    FRAME_WIDTH          = 1140;
     private static final int    FRAME_HEIGHT         = 700;
 
-    private static final int    PLOT_1D_WIDTH        = 20;
     private static final int    PLOT_WIDTH           = 256;
     private static final int    PLOT_HEIGHT          = 256;
 
@@ -188,7 +188,7 @@ public class QFTSandbox extends JFrame {
         Complex c0p = _state.get0P();
         Complex[] c1p = _state.get1PMom();
         Complex[][] c2p = _state.get2PMom();
-        Complex rest = Complex.one().times(Math.sqrt(_state.getRemainingProbability()));
+        Double rest = _state.getRemainingProbability();
 
         // plots
         _momPlotVacuum.update(c0p);
@@ -201,8 +201,10 @@ public class QFTSandbox extends JFrame {
             _momDensityPlot2P.update(c2p);
             _posDensityPlot2P.update(_ft.transform2D(c2p));
         }
-        _momPlotRest.update(rest);
-        _posPlotRest.update(rest);
+        if (rest != null) {
+            _momPlotRest.update(Complex.one().times(Math.sqrt(rest)));
+            _posPlotRest.update(Complex.one().times(Math.sqrt(rest)));
+        }
 
         _state.step(_stepsSlider.getValue());
 
@@ -215,17 +217,17 @@ public class QFTSandbox extends JFrame {
         _displayPanel.removeAll();
 
         _timeLabel.setText("");
-        _displayPanel.add(_timeLabel, "4, 2, left, center");
+        _displayPanel.add(_timeLabel, "6, 5, left, center");
 
         // get coefficients
         Complex c0p = _state.get0P();
         Complex[] c1p = _state.get1PMom();
         Complex[][] c2p = _state.get2PMom();
-        Complex rest = Complex.one().times(Math.sqrt(_state.getRemainingProbability()));
+        Double rest = _state.getRemainingProbability();
 
         // make and add plots (only if they exist)
-        _momPlotVacuum = new FunctionPlot(c0p, 0.0, 1.0, PLOT_1D_WIDTH, PLOT_HEIGHT);
-        _posPlotVacuum = new FunctionPlot(c0p, 0.0, 1.0, PLOT_1D_WIDTH, PLOT_HEIGHT);
+        _momPlotVacuum = new FunctionPlot(c0p, 0.0, 1.0, PLOT_HEIGHT);
+        _posPlotVacuum = new FunctionPlot(c0p, 0.0, 1.0, PLOT_HEIGHT);
         _displayPanel.add(_momPlotVacuum, "2, 4, center, center");
         _displayPanel.add(_posPlotVacuum, "2, 6, center, center");
 
@@ -242,11 +244,12 @@ public class QFTSandbox extends JFrame {
             _displayPanel.add(_momDensityPlot2P, "6, 4, center, center");
             _displayPanel.add(_posDensityPlot2P, "6, 6, center, center");
         }
-
-        _momPlotRest = new FunctionPlot(rest, 0.0, 1.0, PLOT_1D_WIDTH, PLOT_HEIGHT);
-        _posPlotRest = new FunctionPlot(rest, 0.0, 1.0, PLOT_1D_WIDTH, PLOT_HEIGHT);
-        _displayPanel.add(_momPlotRest, "8, 4, center, center");
-        _displayPanel.add(_posPlotRest, "8, 6, center, center");
+        if (rest != null) {
+            _momPlotRest = new FunctionPlot(Complex.one().times(Math.sqrt(rest)), 0.0, 1.0, PLOT_HEIGHT);
+            _posPlotRest = new FunctionPlot(Complex.one().times(Math.sqrt(rest)), 0.0, 1.0, PLOT_HEIGHT);
+            _displayPanel.add(_momPlotRest, "8, 4, center, center");
+            _displayPanel.add(_posPlotRest, "8, 6, center, center");
+        }
 
         setupInteractivePlots();
 
@@ -264,29 +267,27 @@ public class QFTSandbox extends JFrame {
     protected void setupDisplayPanel() {
         // make display panel
         getContentPane().add(_displayPanel, BorderLayout.CENTER);
-        _displayPanel.setBackground(Color.BLACK);
+        _displayPanel.setBackground(BACKGROUND_COLOR);
         _timeLabel.setForeground(Color.WHITE);
 
         // set layout @formatter:off
-        _displayPanel.setLayout(new FormLayout(
-            new ColumnSpec[] { 
+        _displayPanel.setLayout(new FormLayout(new ColumnSpec[] {
                 FormFactory.UNRELATED_GAP_COLSPEC,
-                ColumnSpec.decode("84px"), 
-                FormFactory.UNRELATED_GAP_COLSPEC, 
+                ColumnSpec.decode("84px"),
+                FormFactory.UNRELATED_GAP_COLSPEC,
                 ColumnSpec.decode("max(149dlu;default)"),
-                FormFactory.UNRELATED_GAP_COLSPEC, 
+                FormFactory.UNRELATED_GAP_COLSPEC,
                 ColumnSpec.decode("max(155dlu;default)"),
-                FormFactory.RELATED_GAP_COLSPEC, 
-                ColumnSpec.decode("max(30dlu;default)"), 
-            }, new RowSpec[] {
-                FormFactory.RELATED_GAP_ROWSPEC, 
-                FormFactory.DEFAULT_ROWSPEC, 
+                FormFactory.RELATED_GAP_COLSPEC,
+                ColumnSpec.decode("max(40dlu;default)"),},
+            new RowSpec[] {
+                FormFactory.RELATED_GAP_ROWSPEC,
+                FormFactory.DEFAULT_ROWSPEC,
                 FormFactory.UNRELATED_GAP_ROWSPEC,
-                RowSpec.decode("311px"), 
-                FormFactory.UNRELATED_GAP_ROWSPEC, 
+                RowSpec.decode("311px"),
+                FormFactory.MIN_ROWSPEC,
                 RowSpec.decode("309px"),
-                FormFactory.UNRELATED_GAP_ROWSPEC 
-            })); // @formatter:on
+                FormFactory.UNRELATED_GAP_ROWSPEC,})); // @formatter:on
     }
 
     protected void setupControlPanel() {
@@ -350,7 +351,8 @@ public class QFTSandbox extends JFrame {
                     _mSlider.setValue(encode(preset.m));
                     _dtSlider.setValue(encode(preset.dt));
                     _stepsSlider.setValue(preset.steps);
-                    _lambdaSquaredSlider.setValue(encode(preset.lambda));
+                    _lambdaSquaredSlider.setValue(encode(preset.lambda2));
+                    _lambdaCubedSlider.setValue(encode(preset.lambda3));
                     _particleMomenta = preset.particleMomenta;
                     calculate();
                 }
@@ -398,7 +400,7 @@ public class QFTSandbox extends JFrame {
     }
 
     protected void setupGeneralSlider(final JSlider slider, final JLabel value, int min, int max, final int row,
-                                    final Class<?> type, String toolTip) {
+                                      final Class<?> type, String toolTip) {
         if (type == double.class) {
             Hashtable<Integer, JLabel> labelTable = new Hashtable<Integer, JLabel>();
             labelTable.put(min, new JLabel(decodeText(min)));
@@ -511,40 +513,67 @@ public class QFTSandbox extends JFrame {
     /**** INTERACTIVE PLOTS ****/
 
     protected void setupInteractivePlots() {
-        MouseListener vacuumListener = new MouseListener() {
-            public void mouseClicked(MouseEvent e) {
-                _state.reset();
-                frameUpdate();
-            }
 
-            // @formatter:off
+        if (_momPlotVacuum != null) {
+            MouseListener vacuumListener = new MouseListener() {
+
+                public void mouseClicked(MouseEvent e) {
+                    _state.reset();
+                    frameUpdate();
+                }
+
+                // @formatter:off
             public void mouseEntered(MouseEvent e) {}
             public void mouseExited(MouseEvent e) {}
             public void mousePressed(MouseEvent e) {}
             public void mouseReleased(MouseEvent e) {}
             // @formatter:on
-        };
-        _momPlotVacuum.addMouseListener(vacuumListener);
-        _posPlotVacuum.addMouseListener(vacuumListener);
+            };
+            _momPlotVacuum.addMouseListener(vacuumListener);
+            _posPlotVacuum.addMouseListener(vacuumListener);
+        }
 
-        MouseListener oneParticleListener = new MouseListener() {
-            public void mouseClicked(MouseEvent e) {
-                Plot plot = (Plot) e.getSource();
-                int N = _NSlider.getValue();
-                int p = (int) (1.0 * N * e.getX() / plot._width);
-                double peakProbability = 1.0 - 1.0 * e.getY() / plot._height;
-                ((BaseState) _state).reset(peakProbability, p);
-                frameUpdate();
-            }
+        if (_momPlot1P != null) {
+            MouseListener oneParticleListener = new MouseListener() {
+                public void mouseClicked(MouseEvent e) {
+                    Plot plot = (Plot) e.getSource();
+                    int N = _NSlider.getValue();
+                    int p = (int) (1.0 * N * (e.getX() - Plot.PADDING) / plot._width);
+                    double peakProbability = 1.0 - 1.0 * e.getY() / plot._height;
+                    ((BaseState) _state).reset(peakProbability, p);
+                    frameUpdate();
+                }
 
-            // @formatter:off
+                // @formatter:off
             public void mouseEntered(MouseEvent e) {}
             public void mouseExited(MouseEvent e) {}
             public void mousePressed(MouseEvent e) {}
             public void mouseReleased(MouseEvent e) {}
             // @formatter:on
-        };
-        _momPlot1P.addMouseListener(oneParticleListener);
+            };
+            _momPlot1P.addMouseListener(oneParticleListener);
+        }
+
+        if (_momDensityPlot2P != null) {
+            MouseListener twoParticleListener = new MouseListener() {
+                public void mouseClicked(MouseEvent e) {
+                    Plot plot = (Plot) e.getSource();
+                    int N = _NSlider.getValue();
+                    int p = (int) (1.0 * N * (e.getX() - Plot.PADDING) / plot._width);
+                    int q = (int) (N * (1.0 - 1.0 * e.getY() / plot._height));
+                    ((BaseState) _state).reset(0.3, p, q);
+                    frameUpdate();
+                }
+
+                // @formatter:off
+            public void mouseEntered(MouseEvent e) {}
+            public void mouseExited(MouseEvent e) {}
+            public void mousePressed(MouseEvent e) {}
+            public void mouseReleased(MouseEvent e) {}
+            // @formatter:on
+            };
+            _momDensityPlot2P.addMouseListener(twoParticleListener);
+        }
     }
 
     /***** ANIMATION INNER CLASS *****/

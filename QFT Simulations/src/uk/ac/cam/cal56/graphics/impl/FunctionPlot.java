@@ -10,11 +10,17 @@ import uk.ac.cam.cal56.maths.Complex;
 @SuppressWarnings("serial")
 public class FunctionPlot extends Plot {
 
-    private Complex[] _data;
+    public static final int PLOT_1D_WIDTH = 20;
+
+    private Complex[]       _data;
 
     // constructors for simplified argument list (no min/max)
     public FunctionPlot(Object data, int maxwidth, int maxheight) {
         this(data, null, null, maxwidth, maxheight);
+    }
+
+    public FunctionPlot(Object data, Double min, Double max, int height) {
+        this(data, min, max, PLOT_1D_WIDTH, height);
     }
 
     // constructors for full argument list
@@ -28,12 +34,24 @@ public class FunctionPlot extends Plot {
 
     @Override
     protected void plot(Graphics g) {
-        for (int i = 0; i < _data.length / _sampling; i++) {
+
+        // search for bad scaling by finding the highest value
+        double highest = Double.MIN_VALUE;
+
+        // draw rectangular bars with length corresponding to data
+        int imax = _data.length / _sampling;
+        for (int i = 0; i < imax; i++) {
             double value = (_data[i].modSquared() - _min) / (_max - _min);
             g.setColor(toFunctionColor(value));
             int barHeight = (int) (_height * value);
-            g.fillRect(i * _pointsize, _height - barHeight, _pointsize, barHeight);
+            g.fillRect(i * _pointsize + PADDING, _height - barHeight, _pointsize, barHeight);
+            // determine if highest
+            if (value > highest)
+                highest = value;
         }
+
+        // rescale if necessary
+        rescale(highest);
     }
 
     @Override
@@ -64,7 +82,7 @@ public class FunctionPlot extends Plot {
             _width = (int) (1.0 * _data.length / _sampling);
         else
             _width = _data.length * _pointsize;
-        setBounds(0, 0, _width, _height);
+        setBounds(0, 0, _width + PADDING, _height + PADDING);
     }
 
     // sets point size and sampling

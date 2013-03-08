@@ -20,7 +20,7 @@ public interface State {
 
     public Complex[][] get2PMom();
 
-    public double getRemainingProbability();
+    public Double getRemainingProbability();
 
     // remember to recalculate ALL the coefficients (not only current)
     public void setInteractionStrength(Interaction interaction, double lambda);

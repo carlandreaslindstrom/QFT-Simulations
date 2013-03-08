@@ -28,14 +28,30 @@ public class DensityPlot extends Plot {
 
     @Override
     protected void plot(Graphics g) {
+
+        // search for bad scaling by finding the highest value
+        double highest = Double.MIN_VALUE;
+
+        // find number of rectangles needed in each direction
         int imax = _data.length / _sampling;
         int jmax = _data[0].length / _sampling;
-        for (int i = 0; i < imax; i++)
+
+        // plot rectangles with color according to data
+        for (int i = 0; i < imax; i++) {
             for (int j = 0; j < jmax; j++) {
+                // convert complex coefficient to a percentage of plot height
                 double value = (_data[i * _sampling][j * _sampling].modSquared() - _min) / (_max - _min);
+                // determine colour/shade and draw in on the canvas
                 g.setColor(toDensityColor(value));
-                g.fillRect(i * _pointsize, (jmax - 1 - j) * _pointsize, _pointsize, _pointsize);
+                g.fillRect(i * _pointsize + PADDING, (jmax - 1 - j) * _pointsize, _pointsize, _pointsize);
+                // determine if highest
+                if (value > highest)
+                    highest = value;
             }
+        }
+
+        // rescale if necessary
+        rescale(highest);
     }
 
     @Override
@@ -56,7 +72,7 @@ public class DensityPlot extends Plot {
             _width = _data.length * _pointsize;
             _height = _data[0].length * _pointsize;
         }
-        setBounds(0, 0, _width, _height);
+        setBounds(0, 0, _width + PADDING, _height + PADDING);
     }
 
     // sets point size and sampling
@@ -117,5 +133,4 @@ public class DensityPlot extends Plot {
 
         frame.setVisible(true);
     }
-
 }
