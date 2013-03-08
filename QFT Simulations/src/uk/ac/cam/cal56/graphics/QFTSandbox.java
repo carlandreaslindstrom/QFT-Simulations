@@ -49,8 +49,8 @@ public class QFTSandbox extends JFrame {
     /* STATIC VARIABLES */
     public static final String  FRAME_TITLE          = "QFT Sandbox";
     public static final Color   BACKGROUND_COLOR     = Color.BLACK;
-    private static final int    FRAME_WIDTH          = 1140;
-    private static final int    FRAME_HEIGHT         = 700;
+    private static final int    FRAME_WIDTH          = 1100;
+    private static final int    FRAME_HEIGHT         = 740;
 
     private static final int    PLOT_WIDTH           = 256;
     private static final int    PLOT_HEIGHT          = 256;
@@ -72,7 +72,7 @@ public class QFTSandbox extends JFrame {
     private static final double M_MAX                = 10.0;
 
     private static final double DT_MIN               = 1.0e-5;
-    private static final double DT_DEFAULT           = 1.0e-3;
+    private static final double DT_DEFAULT           = 3.0e-4;
     private static final double DT_MAX               = 1.0e-1;
 
     private static final int    STEPS_MIN            = 1;
@@ -89,6 +89,7 @@ public class QFTSandbox extends JFrame {
     private static final String BUTTON_RESET         = "Reset";
 
     private static final String SELECTOR_DEFAULT     = "Select a preset...";
+    private static final String DRAG_AND_DROP_TEXT   = "(Tip: Click the plots to place particles)";
 
     /* QUANTUM STATE VARIABLES */
     // quantum state
@@ -157,6 +158,24 @@ public class QFTSandbox extends JFrame {
     private JButton             _playButton          = new JButton(BUTTON_PLAY);
     private JButton             _resetButton         = new JButton(BUTTON_RESET);
 
+    // Explanatory labels
+    private final JLabel        lblMomentumSpace     = new JLabel("<html><strong>Momentum Space:</strong></html>");
+    private final JLabel        lblMomVacuum         = new JLabel("Vacuum");
+    private final JLabel        lblMom1P             = new JLabel("1 particle of momentum p");
+    private final JLabel        lblMom2P             = new JLabel(
+                                                         "<html>2 particles of momenta p<sub>1</sub> and p<sub>2</sub></html>");
+    private final JLabel        lblMomRest           = new JLabel("3+ particles");
+    private final JLabel        lblPositionSpace     = new JLabel("<html><strong>Position Space:</strong></html>");
+    private final JLabel        lblPosVacuum         = new JLabel("Vacuum");
+    private final JLabel        lblPos1P             = new JLabel("1 particle of position x");
+    private final JLabel        lblPos2P             = new JLabel(
+                                                         "<html>2 particles of positions x<sub>1</sub> and x<sub>2</sub></html>");
+    private final JLabel        lblPosRest           = new JLabel("3+ particles");
+    private final JLabel        lblTime              = new JLabel("Time: ");
+    private final JLabel        lblDragAndDrop       = new JLabel(DRAG_AND_DROP_TEXT);
+
+    private final Color         lblColor             = Color.LIGHT_GRAY;
+
     /***** FUNCTIONS *****/
 
     // Constructor
@@ -164,6 +183,7 @@ public class QFTSandbox extends JFrame {
         setupFrame();
         setupControlPanel();
         setupDisplayPanel();
+        calculate();
     }
 
     // quantum state and plots representing it
@@ -182,7 +202,7 @@ public class QFTSandbox extends JFrame {
         if (_state == null)
             return; // only if state is set up
 
-        _timeLabel.setText("Time: " + (new DecimalFormat("#.#######").format(_state.getTime())));
+        _timeLabel.setText(new DecimalFormat("#.#######").format(_state.getTime()));
 
         // get coefficients
         Complex c0p = _state.get0P();
@@ -210,53 +230,6 @@ public class QFTSandbox extends JFrame {
 
     }
 
-    // draw plots after calculation
-    protected void drawPlots() {
-
-        // clean display panel
-        _displayPanel.removeAll();
-
-        _timeLabel.setText("");
-        _displayPanel.add(_timeLabel, "6, 5, left, center");
-
-        // get coefficients
-        Complex c0p = _state.get0P();
-        Complex[] c1p = _state.get1PMom();
-        Complex[][] c2p = _state.get2PMom();
-        Double rest = _state.getRemainingProbability();
-
-        // make and add plots (only if they exist)
-        _momPlotVacuum = new FunctionPlot(c0p, 0.0, 1.0, PLOT_HEIGHT);
-        _posPlotVacuum = new FunctionPlot(c0p, 0.0, 1.0, PLOT_HEIGHT);
-        _displayPanel.add(_momPlotVacuum, "2, 4, center, center");
-        _displayPanel.add(_posPlotVacuum, "2, 6, center, center");
-
-        if (c1p != null) {
-            _momPlot1P = new FunctionPlot(c1p, 0.0, 1.0, PLOT_WIDTH, PLOT_HEIGHT);
-            _posPlot1P = new FunctionPlot(_ft.transform(c1p), 0.0, 1.0, PLOT_WIDTH, PLOT_HEIGHT);
-            _displayPanel.add(_momPlot1P, "4, 4, center, center");
-            _displayPanel.add(_posPlot1P, "4, 6, center, center");
-        }
-
-        if (c2p != null) {
-            _momDensityPlot2P = new DensityPlot(c2p, 0.0, 1.0, PLOT_WIDTH, PLOT_HEIGHT);
-            _posDensityPlot2P = new DensityPlot(_ft.transform2D(c2p), 0.0, 1.0, PLOT_WIDTH, PLOT_HEIGHT);
-            _displayPanel.add(_momDensityPlot2P, "6, 4, center, center");
-            _displayPanel.add(_posDensityPlot2P, "6, 6, center, center");
-        }
-        if (rest != null) {
-            _momPlotRest = new FunctionPlot(Complex.one().times(Math.sqrt(rest)), 0.0, 1.0, PLOT_HEIGHT);
-            _posPlotRest = new FunctionPlot(Complex.one().times(Math.sqrt(rest)), 0.0, 1.0, PLOT_HEIGHT);
-            _displayPanel.add(_momPlotRest, "8, 4, center, center");
-            _displayPanel.add(_posPlotRest, "8, 6, center, center");
-        }
-
-        setupInteractivePlots();
-
-        // update the frame
-        frameUpdate();
-    }
-
     protected void setupFrame() {
         setTitle(FRAME_TITLE);
         setBounds(0, 0, FRAME_WIDTH, FRAME_HEIGHT);
@@ -268,26 +241,45 @@ public class QFTSandbox extends JFrame {
         // make display panel
         getContentPane().add(_displayPanel, BorderLayout.CENTER);
         _displayPanel.setBackground(BACKGROUND_COLOR);
-        _timeLabel.setForeground(Color.WHITE);
+
+        // set font color on labels
+        _timeLabel.setForeground(lblColor);
+        lblTime.setForeground(lblColor);
+        lblDragAndDrop.setForeground(Color.DARK_GRAY);
+        lblMomentumSpace.setForeground(lblColor);
+        lblMom1P.setForeground(lblColor);
+        lblMom2P.setForeground(lblColor);
+        lblMomRest.setForeground(lblColor);
+        lblMomVacuum.setForeground(lblColor);
+        lblPositionSpace.setForeground(lblColor);
+        lblPos1P.setForeground(lblColor);
+        lblPos2P.setForeground(lblColor);
+        lblPosRest.setForeground(lblColor);
+        lblPosVacuum.setForeground(lblColor);
 
         // set layout @formatter:off
         _displayPanel.setLayout(new FormLayout(new ColumnSpec[] {
-                FormFactory.UNRELATED_GAP_COLSPEC,
-                ColumnSpec.decode("84px"),
-                FormFactory.UNRELATED_GAP_COLSPEC,
-                ColumnSpec.decode("max(149dlu;default)"),
-                FormFactory.UNRELATED_GAP_COLSPEC,
-                ColumnSpec.decode("max(155dlu;default)"),
                 FormFactory.RELATED_GAP_COLSPEC,
-                ColumnSpec.decode("max(40dlu;default)"),},
+                ColumnSpec.decode("75px"),
+                FormFactory.RELATED_GAP_COLSPEC,
+                ColumnSpec.decode("300px"),
+                FormFactory.RELATED_GAP_COLSPEC,
+                ColumnSpec.decode("300px"),
+                FormFactory.RELATED_GAP_COLSPEC,
+                ColumnSpec.decode("80px"),
+                FormFactory.RELATED_GAP_COLSPEC,
+                ColumnSpec.decode("14px"),},
             new RowSpec[] {
                 FormFactory.RELATED_GAP_ROWSPEC,
-                FormFactory.DEFAULT_ROWSPEC,
-                FormFactory.UNRELATED_GAP_ROWSPEC,
-                RowSpec.decode("311px"),
-                FormFactory.MIN_ROWSPEC,
-                RowSpec.decode("309px"),
-                FormFactory.UNRELATED_GAP_ROWSPEC,})); // @formatter:on
+                RowSpec.decode("15px"),
+                RowSpec.decode("25px"),
+                RowSpec.decode("300px"),
+                FormFactory.RELATED_GAP_ROWSPEC,
+                RowSpec.decode("15px"),
+                RowSpec.decode("25px"),
+                RowSpec.decode("300px"),
+                FormFactory.RELATED_GAP_ROWSPEC,
+                RowSpec.decode("15px"),})); // @formatter:on
     }
 
     protected void setupControlPanel() {
@@ -330,6 +322,71 @@ public class QFTSandbox extends JFrame {
 
         // setup buttons (calculate, play, reset)
         setupButtons();
+    }
+
+    // draw plots after calculation
+    protected void drawPlots() {
+
+        // clean display panel
+        _displayPanel.removeAll();
+
+        // plot labels
+        _displayPanel.add(lblMomentumSpace, "2, 2, 3, 1, left, center");
+        _displayPanel.add(lblMomVacuum, "2, 3, right, bottom");
+        _displayPanel.add(lblMom1P, "4, 3, center, bottom");
+        _displayPanel.add(lblMom2P, "6, 3, center, bottom");
+        _displayPanel.add(lblMomRest, "8, 3, right, bottom");
+
+        _displayPanel.add(lblPositionSpace, "2, 6, 3, 1, left, center");
+        _displayPanel.add(lblPosVacuum, "2, 7, right, bottom");
+        _displayPanel.add(lblPos1P, "4, 7, center, bottom");
+        _displayPanel.add(lblPos2P, "6, 7, center, bottom");
+        _displayPanel.add(lblPosRest, "8, 7, right, bottom");
+
+        // time label
+        _timeLabel.setText("");
+        _displayPanel.add(lblTime, "6, 10, right, top");
+        _displayPanel.add(_timeLabel, "8, 10, 3, 1, left, top");
+
+        // tip labels
+        _displayPanel.add(lblDragAndDrop, "2, 10, 3, 1, left, top");
+
+        // get coefficients
+        Complex c0p = _state.get0P();
+        Complex[] c1p = _state.get1PMom();
+        Complex[][] c2p = _state.get2PMom();
+        Double rest = _state.getRemainingProbability();
+
+        // make and add plots (only if they exist)
+        _momPlotVacuum = new FunctionPlot(c0p, 0.0, 1.0, PLOT_HEIGHT);
+        _posPlotVacuum = new FunctionPlot(c0p, 0.0, 1.0, PLOT_HEIGHT);
+        _displayPanel.add(_momPlotVacuum, "2, 4, center, center");
+        _displayPanel.add(_posPlotVacuum, "2, 8, center, center");
+
+        if (c1p != null) {
+            _momPlot1P = new FunctionPlot(c1p, 0.0, 1.0, PLOT_WIDTH, PLOT_HEIGHT);
+            _posPlot1P = new FunctionPlot(_ft.transform(c1p), 0.0, 1.0, PLOT_WIDTH, PLOT_HEIGHT);
+            _displayPanel.add(_momPlot1P, "4, 4, center, center");
+            _displayPanel.add(_posPlot1P, "4, 8, center, center");
+        }
+
+        if (c2p != null) {
+            _momDensityPlot2P = new DensityPlot(c2p, 0.0, 1.0, PLOT_WIDTH, PLOT_HEIGHT);
+            _posDensityPlot2P = new DensityPlot(_ft.transform2D(c2p), 0.0, 1.0, PLOT_WIDTH, PLOT_HEIGHT);
+            _displayPanel.add(_momDensityPlot2P, "6, 4, center, center");
+            _displayPanel.add(_posDensityPlot2P, "6, 8, center, center");
+        }
+        if (rest != null) {
+            _momPlotRest = new FunctionPlot(Complex.one().times(Math.sqrt(rest)), 0.0, 1.0, PLOT_HEIGHT);
+            _posPlotRest = new FunctionPlot(Complex.one().times(Math.sqrt(rest)), 0.0, 1.0, PLOT_HEIGHT);
+            _displayPanel.add(_momPlotRest, "8, 4, center, center");
+            _displayPanel.add(_posPlotRest, "8, 8, center, center");
+        }
+
+        setupInteractivePlots();
+
+        // update the frame
+        frameUpdate();
     }
 
     protected void setupPresetSelector() {

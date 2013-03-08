@@ -15,12 +15,12 @@ public abstract class Plot extends Canvas {
     private final static String   SCALE_TEXT            = "Scale: ";
 
     protected final static double RESCALE_UPPER_ABS_LIM = 1.0;
-    protected final static double RESCALE_LOWER_ABS_LIM = 0.02;
+    protected final static double RESCALE_LOWER_ABS_LIM = 0.05;
     protected final static double RESCALE_UPPER_REL_LIM = 0.90;
-    protected final static double RESCALE_LOWER_REL_LIM = 0.30;
-    protected final static int    RESCALE_AT_SCORE  = 50;
-    protected final static int    SCORE_SCALE  = 20;
-    protected final static double RESCALE_TO_MULTIPLE   = 2;
+    protected final static double RESCALE_LOWER_REL_LIM = 0.20;
+    protected final static int    RESCALE_AT_SCORE      = 50;
+    protected final static int    SCORE_SCALE           = 100;
+    protected final static double RESCALE_TO_MULTIPLE   = 1.7;
 
     private final static int      PLOT_PADDING          = 3;
     private final static int      FRAME_PADDING         = 15;
@@ -37,7 +37,7 @@ public abstract class Plot extends Canvas {
     protected double              _min                  = Double.MAX_VALUE;
     protected double              _max                  = Double.MIN_VALUE;
 
-    protected int                 _rescaleScore  = 0;
+    protected int                 _rescaleScore         = 0;
 
     protected abstract void plot(Graphics g);
 
@@ -138,16 +138,16 @@ public abstract class Plot extends Canvas {
 
     // rescales the plot dynamically to avoid tiny bars and dark densities
     protected void rescale(double highest) {
-        
+
         // don't rescale if 1D plot
         if (_width <= FunctionPlot.PLOT_1D_WIDTH)
             return;
 
         // if outside rescaling limits, add to rescaling counter
         if (highest > RESCALE_UPPER_REL_LIM)
-            _rescaleScore += (int)(SCORE_SCALE*(highest-RESCALE_UPPER_REL_LIM));
-        else if(highest < RESCALE_LOWER_REL_LIM)
-            _rescaleScore += (int)(SCORE_SCALE*(RESCALE_LOWER_REL_LIM-highest));
+            _rescaleScore += (int) (SCORE_SCALE * (highest - RESCALE_UPPER_REL_LIM) * (highest - RESCALE_UPPER_REL_LIM));
+        else if (highest < RESCALE_LOWER_REL_LIM)
+            _rescaleScore += (int) (SCORE_SCALE * (RESCALE_LOWER_REL_LIM - highest) * (RESCALE_LOWER_REL_LIM - highest));
         else
             _rescaleScore = 0;
 
