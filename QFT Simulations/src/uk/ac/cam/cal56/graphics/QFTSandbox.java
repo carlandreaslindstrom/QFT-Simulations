@@ -332,16 +332,7 @@ public class QFTSandbox extends JFrame {
 
         // plot labels
         _displayPanel.add(lblMomentumSpace, "2, 2, 3, 1, left, center");
-        _displayPanel.add(lblMomVacuum, "2, 3, right, bottom");
-        _displayPanel.add(lblMom1P, "4, 3, center, bottom");
-        _displayPanel.add(lblMom2P, "6, 3, center, bottom");
-        _displayPanel.add(lblMomRest, "8, 3, right, bottom");
-
         _displayPanel.add(lblPositionSpace, "2, 6, 3, 1, left, center");
-        _displayPanel.add(lblPosVacuum, "2, 7, right, bottom");
-        _displayPanel.add(lblPos1P, "4, 7, center, bottom");
-        _displayPanel.add(lblPos2P, "6, 7, center, bottom");
-        _displayPanel.add(lblPosRest, "8, 7, right, bottom");
 
         // time label
         _timeLabel.setText("");
@@ -357,29 +348,41 @@ public class QFTSandbox extends JFrame {
         Complex[][] c2p = _state.get2PMom();
         Double rest = _state.getRemainingProbability();
 
-        // make and add plots (only if they exist)
+        // make and add plots and labels (only if they exist)
+        _displayPanel.add(lblMomVacuum, "2, 3, right, bottom");
         _momPlotVacuum = new FunctionPlot(c0p, 0.0, 1.0, PLOT_HEIGHT);
-        _posPlotVacuum = new FunctionPlot(c0p, 0.0, 1.0, PLOT_HEIGHT);
         _displayPanel.add(_momPlotVacuum, "2, 4, center, center");
+
+        _displayPanel.add(lblPosVacuum, "2, 7, right, bottom");
+        _posPlotVacuum = new FunctionPlot(c0p, 0.0, 1.0, PLOT_HEIGHT);
         _displayPanel.add(_posPlotVacuum, "2, 8, center, center");
 
         if (c1p != null) {
+            _displayPanel.add(lblMom1P, "4, 3, center, bottom");
             _momPlot1P = new FunctionPlot(c1p, 0.0, 1.0, PLOT_WIDTH, PLOT_HEIGHT);
-            _posPlot1P = new FunctionPlot(_ft.transform(c1p), 0.0, 1.0, PLOT_WIDTH, PLOT_HEIGHT);
             _displayPanel.add(_momPlot1P, "4, 4, center, center");
+
+            _displayPanel.add(lblPos1P, "4, 7, center, bottom");
+            _posPlot1P = new FunctionPlot(_ft.transform(c1p), 0.0, 1.0, PLOT_WIDTH, PLOT_HEIGHT);
             _displayPanel.add(_posPlot1P, "4, 8, center, center");
         }
 
         if (c2p != null) {
+            _displayPanel.add(lblMom2P, "6, 3, center, bottom");
             _momDensityPlot2P = new DensityPlot(c2p, 0.0, 1.0, PLOT_WIDTH, PLOT_HEIGHT);
-            _posDensityPlot2P = new DensityPlot(_ft.transform2D(c2p), 0.0, 1.0, PLOT_WIDTH, PLOT_HEIGHT);
             _displayPanel.add(_momDensityPlot2P, "6, 4, center, center");
+
+            _displayPanel.add(lblPos2P, "6, 7, center, bottom");
+            _posDensityPlot2P = new DensityPlot(_ft.transform2D(c2p), 0.0, 1.0, PLOT_WIDTH, PLOT_HEIGHT);
             _displayPanel.add(_posDensityPlot2P, "6, 8, center, center");
         }
         if (rest != null) {
+            _displayPanel.add(lblMomRest, "8, 3, right, bottom");
             _momPlotRest = new FunctionPlot(Complex.one().times(Math.sqrt(rest)), 0.0, 1.0, PLOT_HEIGHT);
-            _posPlotRest = new FunctionPlot(Complex.one().times(Math.sqrt(rest)), 0.0, 1.0, PLOT_HEIGHT);
             _displayPanel.add(_momPlotRest, "8, 4, center, center");
+
+            _displayPanel.add(lblPosRest, "8, 7, right, bottom");
+            _posPlotRest = new FunctionPlot(Complex.one().times(Math.sqrt(rest)), 0.0, 1.0, PLOT_HEIGHT);
             _displayPanel.add(_posPlotRest, "8, 8, center, center");
         }
 

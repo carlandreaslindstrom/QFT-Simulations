@@ -22,6 +22,13 @@ public class ComplexTest {
 
         assertEquals(w.mod(), 2.0 * Math.sqrt(2.0), epsilon);
         assertEquals(w.arg(), Math.PI / 4, epsilon);
+        
+
+        Complex x = new Complex(0, 0);
+        Complex y = new Complex(-1, 0);
+        
+        assertEquals(x.arg(), 0.0, epsilon);
+        assertEquals(y.arg(), Math.PI, epsilon);
     }
 
     @Test(expected = IllegalArgumentException.class)

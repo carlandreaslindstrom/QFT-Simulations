@@ -47,8 +47,8 @@ public class FFT implements FourierTransform {
         Complex[] y = new Complex[N];
         for (int k = 0; k < N / 2; k++) {
             double kth = -2 * k * Math.PI / N;
-            y[k] = q[k].plus(r[k].timesexpi(kth));
-            y[k + N / 2] = q[k].minus(r[k].timesexpi(kth));
+            y[k] = q[k].plus(r[k].timesexpi(-kth));
+            y[k + N / 2] = q[k].minus(r[k].timesexpi(-kth));
         }
 
         return y;

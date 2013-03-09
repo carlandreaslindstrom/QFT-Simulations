@@ -17,7 +17,7 @@ public class DFT implements FourierTransform {
         for (int p = 0; p < N; p++) {
             Complex element = Complex.zero();
             for (int x = 0; x < N; x++)
-                element = element.plus(f[x].timesexpi(-2 * Math.PI * p * x / N));
+                element = element.plus(f[x].timesexpi(2 * Math.PI * p * x / N));
             F[p] = element.divide(Math.sqrt(N));
         }
         return F;

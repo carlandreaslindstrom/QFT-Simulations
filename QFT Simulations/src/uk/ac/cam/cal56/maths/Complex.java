@@ -59,7 +59,7 @@ public class Complex {
     }
 
     public double arg() {
-        if (_imag < EPSILON && _real < EPSILON)
+        if (Math.abs(_imag) < EPSILON && Math.abs(_real) < EPSILON)
             return 0.0;
         return Math.atan2(_imag, _real);
     };

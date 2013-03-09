@@ -40,13 +40,14 @@ public class DensityPlot extends Plot {
         for (int i = 0; i < imax; i++) {
             for (int j = 0; j < jmax; j++) {
                 // convert complex coefficient to a percentage of plot height
-                double value = (_data[i * _sampling][j * _sampling].modSquared() - _min) / (_max - _min);
+                double mod = (_data[i * _sampling][j * _sampling].modSquared() - _min) / (_max - _min);
+                double arg = _data[i * _sampling][j * _sampling].arg();
                 // determine colour/shade and draw in on the canvas
-                g.setColor(toDensityColor(value));
+                g.setColor(toDensityColor(mod, arg));
                 g.fillRect(i * _pointsize + PADDING, (jmax - 1 - j) * _pointsize, _pointsize, _pointsize);
                 // determine if highest
-                if (value > highest)
-                    highest = value;
+                if (mod > highest)
+                    highest = mod;
             }
         }
 

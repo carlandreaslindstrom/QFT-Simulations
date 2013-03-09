@@ -41,13 +41,14 @@ public class FunctionPlot extends Plot {
         // draw rectangular bars with length corresponding to data
         int imax = _data.length / _sampling;
         for (int i = 0; i < imax; i++) {
-            double value = (_data[i].modSquared() - _min) / (_max - _min);
-            g.setColor(toFunctionColor(value));
-            int barHeight = (int) (_height * value);
+            double mod = (_data[i].modSquared() - _min) / (_max - _min);
+            double arg = _data[i].arg();
+            g.setColor(toFunctionColor(mod, arg));
+            int barHeight = (int) (_height * mod);
             g.fillRect(i * _pointsize + PADDING, _height - barHeight, _pointsize, barHeight);
             // determine if highest
-            if (value > highest)
-                highest = value;
+            if (mod > highest)
+                highest = mod;
         }
 
         // rescale if necessary
@@ -124,7 +125,7 @@ public class FunctionPlot extends Plot {
         Complex[] data = new Complex[N];
         for (int i = 0; i < N; i++) {
             double z1 = 5.0 * (i - N / 2) / N;
-            data[i] = Complex.one().times(Math.exp(-z1 * z1));
+            data[i] = Complex.one().times(Math.exp(-z1 * z1)).timesexpi(2*Math.PI*i/N);
         }
 
         // make plot

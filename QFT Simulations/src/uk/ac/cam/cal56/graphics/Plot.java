@@ -15,11 +15,11 @@ public abstract class Plot extends Canvas {
     private final static String   SCALE_TEXT            = "Scale: ";
 
     protected final static double RESCALE_UPPER_ABS_LIM = 1.0;
-    protected final static double RESCALE_LOWER_ABS_LIM = 0.05;
+    protected final static double RESCALE_LOWER_ABS_LIM = 0.03;
     protected final static double RESCALE_UPPER_REL_LIM = 0.90;
-    protected final static double RESCALE_LOWER_REL_LIM = 0.20;
-    protected final static int    RESCALE_AT_SCORE      = 50;
-    protected final static int    SCORE_SCALE           = 100;
+    protected final static double RESCALE_LOWER_REL_LIM = 0.30;
+    protected final static int    RESCALE_AT_SCORE      = 70;
+    protected final static int    SCORE_SCALE           = 90;
     protected final static double RESCALE_TO_MULTIPLE   = 1.7;
 
     private final static int      PLOT_PADDING          = 3;
@@ -28,7 +28,7 @@ public abstract class Plot extends Canvas {
     public final static int       PADDING               = PLOT_PADDING + FRAME_PADDING;
 
     protected final static Color  AXIS_COLOR            = Color.GRAY;
-    protected final static Color  OVERFLOW_COLOUR       = Color.RED;
+    protected final static Color  OVERFLOW_COLOUR       = Color.WHITE;
 
     protected int                 _width;
     protected int                 _height;
@@ -100,18 +100,31 @@ public abstract class Plot extends Canvas {
     }
 
     // shaded lemon-lime color scheme
-    protected static Color toDensityColor(double num) {
-        if (num > 1.0)
+    protected static Color toDensityColor(double mod, double arg) {
+        if (mod > 1.0)
             return OVERFLOW_COLOUR;
-        return doubleToGrayScale(num);
+        double phase = 2.0;
+        int offset =  128; // lower offset => stronger color
+        int scale = 127-offset/2;
+        int red = (int)(mod*(offset + scale * (1.0 + Math.sin(arg + (phase + 2.0) * Math.PI / 3))));
+        int green = (int)(mod*(offset + scale * (1.0 + Math.sin(arg + (phase + 4.0) * Math.PI / 3))));
+        int blue = (int)(mod*(offset + scale * (1.0 + Math.sin(arg + (phase) * Math.PI / 3))));
+        return new Color(red, green, blue);
         // return new Color((int) ((191 + 64 * num) * num), (int) ((255 - 45 * num) * num), (int) (48 * num));
     }
-
+    
     // bright lemon-lime color scheme
-    protected static Color toFunctionColor(double num) {
-        if (num > 1.0)
+    protected static Color toFunctionColor(double mod, double arg) {
+        if (mod > 1.0)
             return OVERFLOW_COLOUR;
-        return Color.LIGHT_GRAY;
+        double phase = 2.0;
+        int offset =  128; // lower offset => stronger color
+        int scale = 127-offset/2;
+        int red = offset + (int) (scale * (1.0 + Math.sin(arg + (phase + 2.0) * Math.PI / 3)));
+        int green = offset + (int) (scale * (1.0 + Math.sin(arg + (phase + 4.0) * Math.PI / 3)));
+        int blue = offset + (int) (scale * (1.0 + Math.sin(arg + (phase) * Math.PI / 3)));
+        return new Color(red, green, blue);
+        // return Color.LIGHT_GRAY;
         // return new Color((int) (191 + 64 * num), (int) (255 - 45 * num), 48);
     }
 
