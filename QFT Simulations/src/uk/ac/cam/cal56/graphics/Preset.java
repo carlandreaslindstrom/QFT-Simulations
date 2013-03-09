@@ -8,9 +8,12 @@ public class Preset {
     public static final Preset   FREE_1P_FAST = new Preset("1 free fast particle", 64, 1, 1e-1, 1, 1e-3, 256, 0, 0, 48);
     public static final Preset   FREE_2P_FAST = new Preset("2 free particles colliding", 32, 2, 1e-1, 1, 3.7e-3, 25, 0,
                                                   0, 28, 4);
+    public static final Preset   INT_2P_FAST  = new Preset("2 interacting particles colliding", 32, 2, 1e-1, 1, 7.4e-4,
+                                                  25, 0, 2.7e0, 27, 5);
 
     // list of all presets
-    public static final Preset[] all          = new Preset[] { VACUUM, FREE_1P_SLOW, FREE_1P_FAST, FREE_2P_FAST };
+    public static final Preset[] all          = new Preset[] { VACUUM, FREE_1P_SLOW, FREE_1P_FAST, FREE_2P_FAST,
+        INT_2P_FAST                          };
 
     // preset values
     public final String          name;

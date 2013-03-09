@@ -7,37 +7,39 @@ import java.awt.Image;
 import java.awt.Rectangle;
 import java.text.DecimalFormat;
 
+import uk.ac.cam.cal56.graphics.impl.DensityPlot;
 import uk.ac.cam.cal56.graphics.impl.FunctionPlot;
 
 @SuppressWarnings("serial")
 public abstract class Plot extends Canvas {
 
-    private final static String   SCALE_TEXT            = "Scale: ";
+    private final static String   SCALE_TEXT             = "Scale: ";
 
-    protected final static double RESCALE_UPPER_ABS_LIM = 1.0;
-    protected final static double RESCALE_LOWER_ABS_LIM = 0.03;
-    protected final static double RESCALE_UPPER_REL_LIM = 0.90;
-    protected final static double RESCALE_LOWER_REL_LIM = 0.30;
-    protected final static int    RESCALE_AT_SCORE      = 70;
-    protected final static int    SCORE_SCALE           = 90;
-    protected final static double RESCALE_TO_MULTIPLE   = 1.7;
+    protected final static double RESCALE_UPPER_ABS_LIM  = 1.0;
+    protected final static double RESCALE_LOWER_ABS_LIM  = 0.03;
+    protected final static double RESCALE_UPPER_REL_LIM  = 0.90;
+    protected final static double RESCALE_LOWER_REL_LIM  = 0.30;
+    protected final static int    RESCALE_AT_SCORE       = 130;
+    protected final static int    SCORE_SCALE            = 90;
+    protected final static double RESCALE_TO_MULTIPLE_1P = 1.7;
+    protected final static double RESCALE_TO_MULTIPLE_2P = 1.4;
 
-    private final static int      PLOT_PADDING          = 3;
-    private final static int      FRAME_PADDING         = 15;
-    private final static int      TICK_SIZE             = 2;
-    public final static int       PADDING               = PLOT_PADDING + FRAME_PADDING;
+    private final static int      PLOT_PADDING           = 3;
+    private final static int      FRAME_PADDING          = 3;
+    private final static int      TICK_SIZE              = 2;
+    public final static int       PADDING                = PLOT_PADDING + FRAME_PADDING;
 
-    protected final static Color  AXIS_COLOR            = Color.GRAY;
-    protected final static Color  OVERFLOW_COLOUR       = Color.WHITE;
+    protected final static Color  AXIS_COLOR             = Color.GRAY;
+    protected final static Color  OVERFLOW_COLOUR        = Color.WHITE;
 
     protected int                 _width;
     protected int                 _height;
     protected int                 _sampling;
     protected int                 _pointsize;
-    protected double              _min                  = Double.MAX_VALUE;
-    protected double              _max                  = Double.MIN_VALUE;
+    protected double              _min                   = Double.MAX_VALUE;
+    protected double              _max                   = Double.MIN_VALUE;
 
-    protected int                 _rescaleScore         = 0;
+    protected int                 _rescaleScore          = 0;
 
     protected abstract void plot(Graphics g);
 
@@ -70,10 +72,11 @@ public abstract class Plot extends Canvas {
         g.drawLine(PADDING, _height + PLOT_PADDING, PADDING, _height + PLOT_PADDING + TICK_SIZE);
         g.drawLine(_width + PADDING - 1, _height + PLOT_PADDING, _width + PADDING - 1, _height + PLOT_PADDING +
                                                                                        TICK_SIZE);
-
+        // scale label
         if (_width > FunctionPlot.PLOT_1D_WIDTH)
             g.drawChars((SCALE_TEXT + new DecimalFormat("0.00").format(_max)).toCharArray(), 0,
                         SCALE_TEXT.length() + 4, _width + PADDING - 70, 10);
+
     }
 
     /* Copyright (c) 1996 by Groupe Bull. All Rights Reserved */
@@ -104,22 +107,22 @@ public abstract class Plot extends Canvas {
         if (mod > 1.0)
             return OVERFLOW_COLOUR;
         double phase = 2.0;
-        int offset =  128; // lower offset => stronger color
-        int scale = 127-offset/2;
-        int red = (int)(mod*(offset + scale * (1.0 + Math.sin(arg + (phase + 2.0) * Math.PI / 3))));
-        int green = (int)(mod*(offset + scale * (1.0 + Math.sin(arg + (phase + 4.0) * Math.PI / 3))));
-        int blue = (int)(mod*(offset + scale * (1.0 + Math.sin(arg + (phase) * Math.PI / 3))));
+        int offset = 128; // lower offset => stronger color
+        int scale = 127 - offset / 2;
+        int red = (int) (mod * (offset + scale * (1.0 + Math.sin(arg + (phase + 2.0) * Math.PI / 3))));
+        int green = (int) (mod * (offset + scale * (1.0 + Math.sin(arg + (phase + 4.0) * Math.PI / 3))));
+        int blue = (int) (mod * (offset + scale * (1.0 + Math.sin(arg + (phase) * Math.PI / 3))));
         return new Color(red, green, blue);
         // return new Color((int) ((191 + 64 * num) * num), (int) ((255 - 45 * num) * num), (int) (48 * num));
     }
-    
+
     // bright lemon-lime color scheme
     protected static Color toFunctionColor(double mod, double arg) {
         if (mod > 1.0)
             return OVERFLOW_COLOUR;
         double phase = 2.0;
-        int offset =  128; // lower offset => stronger color
-        int scale = 127-offset/2;
+        int offset = 128; // lower offset => stronger color
+        int scale = 127 - offset / 2;
         int red = offset + (int) (scale * (1.0 + Math.sin(arg + (phase + 2.0) * Math.PI / 3)));
         int green = offset + (int) (scale * (1.0 + Math.sin(arg + (phase + 4.0) * Math.PI / 3)));
         int blue = offset + (int) (scale * (1.0 + Math.sin(arg + (phase) * Math.PI / 3)));
@@ -167,7 +170,8 @@ public abstract class Plot extends Canvas {
         // if counter has passed the threshold, rescale (find new _max)
         if (_rescaleScore > RESCALE_AT_SCORE) {
             // reconstruct data value
-            double newmax = ((_max - _min) * highest + _min) * RESCALE_TO_MULTIPLE;
+            double newmax = ((_max - _min) * highest + _min) *
+                            (getClass() == DensityPlot.class ? RESCALE_TO_MULTIPLE_2P : RESCALE_TO_MULTIPLE_1P);
             if (newmax > RESCALE_UPPER_ABS_LIM)
                 newmax = RESCALE_UPPER_ABS_LIM;
             else if (newmax < RESCALE_LOWER_ABS_LIM)

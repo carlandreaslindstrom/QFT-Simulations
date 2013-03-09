@@ -16,7 +16,7 @@ import uk.ac.cam.cal56.qft.statelabelling.StateLabelling;
 
 public abstract class BaseState implements State {
 
-    private static final double             PEAK_PROBABILITY_DEFAULT = 0.5;
+    private static final double             PEAK_PROBABILITY_DEFAULT = 0.3;
 
     protected final int                     _N;                            // number of lattice points
     protected double                        _dt;                           // time step
@@ -91,18 +91,19 @@ public abstract class BaseState implements State {
         else if (particleMomenta.length == 1) {
             // calculate Gaussian and normalisation
             double sigma = 1.0 / (Math.sqrt(Math.PI) * peakProbability);
-            int p = particleMomenta[0];
+            int pPeak = particleMomenta[0];
             double[] values = new double[_N];
             double norm = 0.0;
-            for (int i = 0; i < _N; i++) {
-                double z1 = (i - p) / (sigma);
-                double z2 = ((i - _N - p)) / (sigma);
-                double z3 = ((i + _N - p)) / (sigma);
+            for (int p = 0; p < _N; p++) {
+                double z1 = (p - pPeak) / sigma;
+                double z2 = (p - _N - pPeak) / sigma;
+                double z3 = (p + _N - pPeak) / sigma;
                 double value = Math.sqrt(peakProbability) *
                                (Math.exp(-z1 * z1 / 2) + Math.exp(-z2 * z2 / 2) + Math.exp(-z3 * z3 / 2));
-                values[i] = value;
+                values[p] = value;
                 norm += value * value;
             }
+            norm = Math.sqrt(norm);
             // set all coefficients = 0, apart from 1 particle states
             _c[0] = Complex.zero();
             for (int i = 0; i < _N; i++)
@@ -125,22 +126,16 @@ public abstract class BaseState implements State {
             double[] values = new double[S3 - S2];
             double norm = 0.0;
             for (int p = 0; p < _N; p++) {
-                double z1p = (p - pPeak) / (sigma);
-                double z2p = ((p - _N - pPeak)) / (sigma);
-                double z3p = ((p + _N - pPeak)) / (sigma);
+                double z1p = (p - pPeak) / sigma;
                 for (int q = p; q < _N; q++) {
-                    double z1q = (q - qPeak) / (sigma);
-                    double z2q = ((q - _N - qPeak)) / (sigma);
-                    double z3q = ((q + _N - qPeak)) / (sigma);
-                    double value = Math.sqrt(peakProbability) *
-                                   (Math.exp(-(z1p * z1p + z1q * z1q) / 2) + Math.exp(-(z2p * z2p + z2q * z2q) / 2) + Math.exp(-(z3p *
-                                                                                                                                 z3p + z3q *
-                                                                                                                                       z3q) / 2));
+                    double z1q = (q - qPeak) / sigma;
+                    double value = Math.sqrt(peakProbability) * (Math.exp(-(z1p * z1p + z1q * z1q) / 2));
                     int i = StateLabelling.index(Arrays.asList(p, q), _N) - S2;
                     values[i] = value;
                     norm += value * value;
                 }
             }
+            norm = Math.sqrt(norm);
 
             // set all coefficients = 0, apart from 2 particle states
             for (int i = 0; i < S2; i++)
@@ -208,7 +203,8 @@ public abstract class BaseState implements State {
     @Override
     public Double getRemainingProbability() {
         int S2 = Combinatorics.S(_N, 2);
-        if(S2>=_S) return null; // if only 2 particles, return null
+        if (S2 >= _S)
+            return null; // if only 2 particles, return null
         double probSquared = 0;
         for (int n = S2; n < _S; n++)
             probSquared += _c[n].modSquared(); // add up remaining probabilities
