@@ -6,14 +6,19 @@ import java.util.Map.Entry;
 import uk.ac.cam.cal56.maths.Complex;
 import uk.ac.cam.cal56.qft.interactingtheory.Hamiltonian;
 import uk.ac.cam.cal56.qft.interactingtheory.Interaction;
+import uk.ac.cam.cal56.qft.interactingtheory.WavePacket;
 
 public class SecondOrderSymplecticState extends BaseState {
 
     private Complex[] _prevc;    // c_n(t-dt)
 
+    public SecondOrderSymplecticState(int N, int Pmax, double m, double dx, double dt, Map<Interaction, Double> lambdas) {
+        super(N, Pmax, m, dx, dt, lambdas, new MomentumWavePacket(N));
+    }
+
     public SecondOrderSymplecticState(int N, int Pmax, double m, double dx, double dt,
-            Map<Interaction, Double> lambdas, int... particleMomenta) {
-        super(N, Pmax, m, dx, dt, lambdas, particleMomenta);
+            Map<Interaction, Double> lambdas, WavePacket wavepacket) {
+        super(N, Pmax, m, dx, dt, lambdas, wavepacket);
     }
 
     // first order Euler backward step to calculate _prevc

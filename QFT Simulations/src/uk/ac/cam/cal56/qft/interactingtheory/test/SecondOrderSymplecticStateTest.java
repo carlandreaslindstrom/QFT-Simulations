@@ -11,6 +11,7 @@ import uk.ac.cam.cal56.maths.Complex;
 import uk.ac.cam.cal56.qft.interactingtheory.Interaction;
 import uk.ac.cam.cal56.qft.interactingtheory.State;
 import uk.ac.cam.cal56.qft.interactingtheory.impl.EvenOrderSymplecticState;
+import uk.ac.cam.cal56.qft.interactingtheory.impl.MomentumWavePacket;
 import uk.ac.cam.cal56.qft.interactingtheory.impl.SecondOrderSymplecticState;
 
 public class SecondOrderSymplecticStateTest {
@@ -27,7 +28,7 @@ public class SecondOrderSymplecticStateTest {
         Map<Interaction, Double> lambdas = new HashMap<Interaction, Double>();
         lambdas.put(Interaction.PHI_CUBED, 1.0);
         State _state = new SecondOrderSymplecticState(_N, _Pmax, _m, _dx, _dt, lambdas); // recalculate
-        _state.reset(0);
+        _state.reset(new MomentumWavePacket(_N));
 
         try {
             // Create file
@@ -77,7 +78,7 @@ public class SecondOrderSymplecticStateTest {
             for (double steps = 1; steps < 100000000 + 1; steps *= 10) {
                 double dt = tfinal / steps;
                 state.setTimeStep(dt);
-                state.reset(0); // set to single zero momentum particle
+                state.reset(); // set to single zero momentum particle
                 for (int i = 0; i < steps; i++)
                     state.step();
                 Complex calc = ((SecondOrderSymplecticState) state).get(0);
@@ -118,8 +119,8 @@ public class SecondOrderSymplecticStateTest {
                 double dt = tfinal / steps;
                 state.setTimeStep(dt);
                 otherState.setTimeStep(dt);
-                state.reset(0); // set to single zero momentum particle
-                otherState.reset(0);
+                state.reset(); // set to single zero momentum particle
+                otherState.reset();
                 for (int i = 0; i < steps; i++) {
                     state.step();
                     otherState.step();
@@ -134,8 +135,8 @@ public class SecondOrderSymplecticStateTest {
             dtInitial = 0.001;
             state.setTimeStep(dtInitial);
             otherState.setTimeStep(dtInitial);
-            state.reset(0);
-            otherState.reset(0);
+            state.reset();
+            otherState.reset();
             tfinal = 100;
             int counter = 0;
             while (state.getTime() < tfinal) {

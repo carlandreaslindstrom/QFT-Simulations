@@ -119,12 +119,12 @@ public class Complex {
     }
 
     // equals operator
-    public Boolean equals(Complex z) {
+    public boolean equals(Complex z) {
         return (Math.abs(z.real() - _real) < EPSILON && Math.abs(z.imag() - _imag) < EPSILON);
     }
 
     // zero bool operator
-    public Boolean isZero() {
+    public boolean isZero() {
         return equals(Complex.zero());
     }
 

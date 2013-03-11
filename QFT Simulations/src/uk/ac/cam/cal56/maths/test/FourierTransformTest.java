@@ -1,5 +1,6 @@
 package uk.ac.cam.cal56.maths.test;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.awt.EventQueue;
@@ -16,6 +17,8 @@ import uk.ac.cam.cal56.maths.impl.DFT;
 import uk.ac.cam.cal56.maths.impl.FFT;
 
 public class FourierTransformTest {
+
+    private static final double EPSILON = 1e-10;
 
     // check if transforming, then inverse transforming
     // using FFT gives back same answer
@@ -94,10 +97,10 @@ public class FourierTransformTest {
         int M = 128;
         Complex[][] f = new Complex[N][M];
         for (int i = 0; i < N; i++) {
+            double sigma1 = N * 0.1;
+            double z1 = 1.0 * (i - N / 2) / sigma1;
             Complex[] row = new Complex[M];
             for (int j = 0; j < M; j++) {
-                double sigma1 = N * 0.1;
-                double z1 = 1.0 * (i - N / 2) / sigma1;
                 double sigma2 = M * 0.03;
                 double z2 = 1.0 * (j - M / 2) / sigma2;
                 row[j] = Complex.one().times(Math.exp(-z1 * z1 - z2 * z2));
@@ -115,6 +118,54 @@ public class FourierTransformTest {
                 assertTrue(g[i][j].equals(f[i][j]));
             }
         }
+    }
+
+    // test if Fourier Transform preserves normalisation
+    @Test
+    public void testNormalisationPreservation() {
+        int N = 64;
+        
+        double norm = 0.0;
+        double[][] values = new double[N][N];
+        for (int i = 0; i < N; i++) {
+            double sigma1 = N * 0.1;
+            double z1 = 1.0 * (i - N / 2) / sigma1;
+            for (int j = 0; j < N; j++) {
+                double sigma2 = N * 0.03;
+                double z2 = 1.0 * (j - N / 2) / sigma2;
+                double value = Math.exp(-z1 * z1 - z2 * z2);
+                values[i][j] = value;
+                norm += value*value;
+            }
+        }
+        norm = Math.sqrt(norm);
+        
+        double normTester = 0.0;
+        Complex[][] f = new Complex[N][N];
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < N; j++) {
+                f[i][j] = Complex.one().times(values[i][j]/norm);
+                normTester += f[i][j].modSquared();
+            }
+        }
+        
+        assertEquals(normTester, 1.0, EPSILON);
+        
+        Complex[][] F = new FFT().inversetransform2D(f);
+        Complex[][] G = new FFT().transform2D(f);
+        
+        double normFTester = 0.0;
+        double normGTester = 0.0;
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < N; j++) {
+                normFTester += F[i][j].modSquared();
+                normGTester += G[i][j].modSquared();
+            }
+        }
+        
+        assertEquals(normFTester, 1.0, EPSILON);
+        assertEquals(normGTester, 1.0, EPSILON);
+        
     }
 
     public static double[][] testFFT2D() {

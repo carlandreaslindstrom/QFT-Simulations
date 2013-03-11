@@ -8,6 +8,7 @@ import uk.ac.cam.cal56.maths.Combinatorics;
 import uk.ac.cam.cal56.maths.Complex;
 import uk.ac.cam.cal56.qft.interactingtheory.Hamiltonian;
 import uk.ac.cam.cal56.qft.interactingtheory.Interaction;
+import uk.ac.cam.cal56.qft.interactingtheory.WavePacket;
 
 public class EvenOrderSymplecticState extends BaseState {
 
@@ -17,7 +18,12 @@ public class EvenOrderSymplecticState extends BaseState {
 
     public EvenOrderSymplecticState(int order, int N, int Pmax, double m, double dx, double dt,
             Map<Interaction, Double> lambdas) {
-        super(N, Pmax, m, dx, dt, lambdas);
+        this(order, N, Pmax, m, dx, dt, lambdas, new MomentumWavePacket(N));
+    }
+
+    public EvenOrderSymplecticState(int order, int N, int Pmax, double m, double dx, double dt,
+            Map<Interaction, Double> lambdas, WavePacket wavepacket) {
+        super(N, Pmax, m, dx, dt, lambdas, wavepacket);
         _K = order - (order % 2) + 2; // ensure even numbers and add 2 due to accumulative effects of integration
     }
 

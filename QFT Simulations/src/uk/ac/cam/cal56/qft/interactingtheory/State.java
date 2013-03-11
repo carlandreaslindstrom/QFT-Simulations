@@ -8,8 +8,12 @@ public interface State {
 
     public void step(int numSteps);
 
-    public void reset(int... particleMomenta);
+    public void reset();
+    
+    public void reset(WavePacket wavePacket);
 
+    public int getN();
+    
     public double getTime();
 
     public double getModSquared();

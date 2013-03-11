@@ -12,24 +12,29 @@ import uk.ac.cam.cal56.maths.Complex;
 import uk.ac.cam.cal56.qft.interactingtheory.Hamiltonian;
 import uk.ac.cam.cal56.qft.interactingtheory.Interaction;
 import uk.ac.cam.cal56.qft.interactingtheory.State;
+import uk.ac.cam.cal56.qft.interactingtheory.WavePacket;
 import uk.ac.cam.cal56.qft.statelabelling.StateLabelling;
 
 public abstract class BaseState implements State {
 
-    private static final double             PEAK_PROBABILITY_DEFAULT = 0.3;
-
-    protected final int                     _N;                            // number of lattice points
-    protected double                        _dt;                           // time step
-    protected final int                     _S;                            // S(N,Pmax) = number of coefficients
-    protected FreeHamiltonian               _Hfree;                        // free theory Hamiltonian
-    protected Map<Interaction, Hamiltonian> _hamiltonians;                 // interaction Hamiltonians
-    protected Map<Interaction, Double>      _lambdas;                      // interaction strength
+    protected final int                     _N;           // number of lattice points
+    protected double                        _dt;          // time step
+    protected final int                     _S;           // S(N,Pmax) = number of
+                                                           // coefficients
+    protected FreeHamiltonian               _Hfree;       // free theory Hamiltonian
+    protected Map<Interaction, Hamiltonian> _hamiltonians;                           // interaction Hamiltonians
+    protected Map<Interaction, Double>      _lambdas;     // interaction strength
 
     protected double                        _time;
-    protected Complex[]                     _c;                            // {c_n(t)}
+    protected Complex[]                     _c;           // {c_n(t)}
 
-    public BaseState(int N, int Pmax, double m, double dx, double dt, Map<Interaction, Double> lambdas,
-            int... particleMomenta) {
+    private WavePacket                      _wavePacket;
+
+    public BaseState(int N, int Pmax, double m, double dx, double dt, Map<Interaction, Double> lambdas) {
+        this(N, Pmax, m, dx, dt, lambdas, new MomentumWavePacket(N));
+    }
+                     
+    public BaseState(int N, int Pmax, double m, double dx, double dt, Map<Interaction, Double> lambdas, WavePacket wp) {
         // initialise parameters
         _N = N;
         _dt = dt;
@@ -53,7 +58,7 @@ public abstract class BaseState implements State {
             h.getValue().calculateElements();
 
         // set coefficients (to pure vacuum) and do first step
-        reset(particleMomenta);
+        reset(wp);
     }
 
     protected abstract void firstStep();
@@ -67,85 +72,21 @@ public abstract class BaseState implements State {
     }
 
     @Override
-    public void reset(int... particleMomenta) {
-        reset(PEAK_PROBABILITY_DEFAULT, particleMomenta);
+    public int getN() {
+        return _N;
     }
 
-    public void reset(double peakProbability, int... particleMomenta) {
+    @Override
+    public void reset() {
+        _c = _wavePacket.getCoefficients(_S);
         _time = 0.0;
-        setWavePackets(peakProbability, particleMomenta);
         firstStep();
     }
 
-    public void setWavePackets(double peakProbability, int... particleMomenta) {
-
-        // TODO: implement something for more than 2 particles
-        // VACUUM
-        if (particleMomenta.length == 0 || particleMomenta.length > 2) {
-            // set all coefficients = 0, apart from vacuum = 1
-            _c[0] = Complex.one();
-            for (int i = 1; i < _S; i++)
-                _c[i] = Complex.zero();
-        }
-        // ONE PARTICLE WAVE PACKET
-        else if (particleMomenta.length == 1) {
-            // calculate Gaussian and normalisation
-            double sigma = 1.0 / (Math.sqrt(Math.PI) * peakProbability);
-            int pPeak = particleMomenta[0];
-            double[] values = new double[_N];
-            double norm = 0.0;
-            for (int p = 0; p < _N; p++) {
-                double z1 = (p - pPeak) / sigma;
-                double z2 = (p - _N - pPeak) / sigma;
-                double z3 = (p + _N - pPeak) / sigma;
-                double value = Math.sqrt(peakProbability) *
-                               (Math.exp(-z1 * z1 / 2) + Math.exp(-z2 * z2 / 2) + Math.exp(-z3 * z3 / 2));
-                values[p] = value;
-                norm += value * value;
-            }
-            norm = Math.sqrt(norm);
-            // set all coefficients = 0, apart from 1 particle states
-            _c[0] = Complex.zero();
-            for (int i = 0; i < _N; i++)
-                _c[i + 1] = Complex.one().times(values[i] / norm);
-            for (int i = _N + 1; i < _S; i++)
-                _c[i] = Complex.zero();
-        }
-
-        // TWO PARTICLE WAVE PACKETS
-        else if (particleMomenta.length == 2) {
-
-            // find start and stop labels for 2P states
-            int S2 = Combinatorics.S(_N, 1);
-            int S3 = Combinatorics.S(_N, 2);
-
-            double sigma = 1.0 / (Math.sqrt(Math.PI) * peakProbability);
-            int pPeak = Math.min(particleMomenta[0], particleMomenta[1]);
-            int qPeak = Math.max(particleMomenta[0], particleMomenta[1]);
-
-            double[] values = new double[S3 - S2];
-            double norm = 0.0;
-            for (int p = 0; p < _N; p++) {
-                double z1p = (p - pPeak) / sigma;
-                for (int q = p; q < _N; q++) {
-                    double z1q = (q - qPeak) / sigma;
-                    double value = Math.sqrt(peakProbability) * (Math.exp(-(z1p * z1p + z1q * z1q) / 2));
-                    int i = StateLabelling.index(Arrays.asList(p, q), _N) - S2;
-                    values[i] = value;
-                    norm += value * value;
-                }
-            }
-            norm = Math.sqrt(norm);
-
-            // set all coefficients = 0, apart from 2 particle states
-            for (int i = 0; i < S2; i++)
-                _c[i] = Complex.zero();
-            for (int i = S2; i < S3; i++) {
-                _c[i] = Complex.one().times(values[i - S2] / norm);
-            }
-            for (int i = S3; i < _S; i++)
-                _c[i] = Complex.zero();
-        }
+    @Override
+    public void reset(WavePacket wavePacket) {
+        _wavePacket = wavePacket;
+        reset();
     }
 
     @Override

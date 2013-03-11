@@ -7,7 +7,6 @@ import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -33,7 +32,9 @@ import uk.ac.cam.cal56.maths.FourierTransform;
 import uk.ac.cam.cal56.maths.impl.FFT;
 import uk.ac.cam.cal56.qft.interactingtheory.Interaction;
 import uk.ac.cam.cal56.qft.interactingtheory.State;
-import uk.ac.cam.cal56.qft.interactingtheory.impl.BaseState;
+import uk.ac.cam.cal56.qft.interactingtheory.WavePacket;
+import uk.ac.cam.cal56.qft.interactingtheory.impl.MomentumWavePacket;
+import uk.ac.cam.cal56.qft.interactingtheory.impl.PositionWavePacket;
 import uk.ac.cam.cal56.qft.interactingtheory.impl.SecondOrderSymplecticState;
 
 import com.jgoodies.forms.factories.FormFactory;
@@ -117,6 +118,7 @@ public class QFTSandbox extends JFrame {
     /* QUANTUM STATE VARIABLES */
     // quantum state
     protected State             _state;
+    protected WavePacket        _wavepacket;
 
     /* PLOT DATA VARIABLES */
     // Momentum space plots
@@ -159,7 +161,6 @@ public class QFTSandbox extends JFrame {
 
     // Preset Selector
     private final JComboBox     _presetSelector      = new JComboBox();
-    private int[]               _particleMomenta     = new int[] {};
 
     // Sliders
     protected JSlider           _NSlider             = new JSlider(N_MIN, N_MAX, N_DEFAULT);
@@ -197,9 +198,11 @@ public class QFTSandbox extends JFrame {
         Map<Interaction, Double> lambdas = new HashMap<Interaction, Double>();
         lambdas.put(Interaction.PHI_SQUARED, decode(_lambdaSquaredSlider.getValue()));
         lambdas.put(Interaction.PHI_CUBED, decode(_lambdaCubedSlider.getValue()));
-        _state = new SecondOrderSymplecticState(_NSlider.getValue(), _PmaxSlider.getValue(),
-            decode(_mSlider.getValue()), decode(_dxSlider.getValue()), decode(_dtSlider.getValue()), lambdas,
-            _particleMomenta);
+        int N = _NSlider.getValue();
+        if (_wavepacket == null)
+            _wavepacket = new MomentumWavePacket(N);
+        _state = new SecondOrderSymplecticState(N, _PmaxSlider.getValue(), decode(_mSlider.getValue()),
+            decode(_dxSlider.getValue()), decode(_dtSlider.getValue()), lambdas, _wavepacket);
     }
 
     // fired every time frame is updated
@@ -226,11 +229,12 @@ public class QFTSandbox extends JFrame {
         }
         if (c2p != null) {
             _momDensityPlot2P.update(c2p);
-            _posDensityPlot2P.update(_ft.transform2D(c2p));
+            _posDensityPlot2P.update(_ft.transform2D(c2p)); // TODO: check if symmetry is right
         }
         if (rest != null) {
-            _momPlotRest.update(Complex.one().times(Math.sqrt(rest)));
-            _posPlotRest.update(Complex.one().times(Math.sqrt(rest)));
+            Complex restCoeff = Complex.one().times(Math.sqrt(rest));
+            _momPlotRest.update(restCoeff);
+            _posPlotRest.update(restCoeff);
         }
 
         _state.step(_stepsSlider.getValue());
@@ -479,7 +483,7 @@ public class QFTSandbox extends JFrame {
                     _stepsSlider.setValue(preset.steps);
                     _lambdaSquaredSlider.setValue(encode(preset.lambda2));
                     _lambdaCubedSlider.setValue(encode(preset.lambda3));
-                    _particleMomenta = preset.particleMomenta;
+                    _wavepacket = preset.wavepacket;
                     calculate();
                 }
             }
@@ -562,32 +566,22 @@ public class QFTSandbox extends JFrame {
     protected void setupButtons() {
         _resetButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                _resetButton.setEnabled(false);
-                _animator.stopAnimation();
-                _playButton.setText(BUTTON_PLAY);
-                if (_state != null)
-                    _state.reset(_particleMomenta); // reset quantum state
-                frameUpdate();
+                reset();
             }
         });
         _playButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                if (_playButton.getText() == BUTTON_PLAY) {
-                    _animator.startAnimation();
-                    _playButton.setText(BUTTON_STOP);
-                    _resetButton.setEnabled(true);
-                }
-                else if (_playButton.getText() == BUTTON_STOP) {
-                    _animator.stopAnimation();
-                    _playButton.setText(BUTTON_PLAY);
-                }
-                frameUpdate();
+                if (_playButton.getText() == BUTTON_PLAY)
+                    start();
+                else if (_playButton.getText() == BUTTON_STOP)
+                    stop();
             }
         });
 
         // add appropriate action listeners
         _calculateButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
+                _wavepacket = null;
                 calculate();
             }
         });
@@ -611,6 +605,28 @@ public class QFTSandbox extends JFrame {
         _playButton.setEnabled(true);
         _resetButton.setEnabled(false);
         _calculateButton.setEnabled(false);
+    }
+
+    protected void start() {
+        _animator.startAnimation();
+        _playButton.setText(BUTTON_STOP);
+        _resetButton.setEnabled(true);
+        frameUpdate();
+    }
+
+    protected void stop() {
+        _animator.stopAnimation();
+        _playButton.setText(BUTTON_PLAY);
+        frameUpdate();
+    }
+
+    protected void reset() {
+        _resetButton.setEnabled(false);
+        _animator.stopAnimation();
+        _playButton.setText(BUTTON_PLAY);
+        if (_state != null)
+            _state.reset(); // reset quantum state
+        frameUpdate();
     }
 
     /**** functions to encode doubles as slider values (integers) ****/
@@ -642,64 +658,92 @@ public class QFTSandbox extends JFrame {
 
         // TODO: add drag option for placing in the other space
 
+        // momentum and position vacuum mouse clickability (sets to vacuum)
         if (_momPlotVacuum != null) {
-            MouseListener vacuumListener = new MouseListener() {
-                public void mouseClicked(MouseEvent e) {
-                    _state.reset();
-                    frameUpdate();
+            PlotListener vacuumListener = new PlotListener(this, _momPlotVacuum) {
+                public void setWavePacket(MouseEvent e) {
+                    _wavepacket = new MomentumWavePacket(_state.getN());
                 }
-
-                // @formatter:off
-            public void mouseEntered(MouseEvent e) {}
-            public void mouseExited(MouseEvent e) {}
-            public void mousePressed(MouseEvent e) {}
-            public void mouseReleased(MouseEvent e) {}
-            // @formatter:on
             };
             _momPlotVacuum.addMouseListener(vacuumListener);
             _posPlotVacuum.addMouseListener(vacuumListener);
         }
 
         if (_momPlot1P != null) {
-            MouseListener oneParticleListener = new MouseListener() {
-                public void mouseClicked(MouseEvent e) {
-                    Plot plot = (Plot) e.getSource();
-                    int N = _NSlider.getValue();
-                    int p = (int) (1.0 * N * (e.getX() - Plot.PADDING) / plot._width);
-                    double peakProbability = 1.0 - 1.0 * e.getY() / plot._height;
-                    ((BaseState) _state).reset(peakProbability, p);
-                    frameUpdate();
+            // momentum 1 particle mouse clickability (sets to wave packet peaking at click)
+            PlotListener mom1PListener = new PlotListener(this, _momPlot1P) {
+                public void setWavePacket(MouseEvent e) {
+                    if (!e.isShiftDown()) {
+                        double phase = 2 * Math.PI * (e.getX() - x_init) / width;
+                        _wavepacket = new MomentumWavePacket(N, new int[] { p1_or_x1_init }, new double[] { phase },
+                            peakProb_init);
+                    }
+                    else {
+                        int p = (int) (1.0 * N * (e.getX() - Plot.PADDING) / width);
+                        double peakProb = 1.0 - 1.0 * e.getY() / height;
+                        _wavepacket = new MomentumWavePacket(N, new int[] { p }, new double[] { 0 }, peakProb);
+                    }
                 }
-
-                // @formatter:off
-            public void mouseEntered(MouseEvent e) {}
-            public void mouseExited(MouseEvent e) {}
-            public void mousePressed(MouseEvent e) {}
-            public void mouseReleased(MouseEvent e) {}
-            // @formatter:on
             };
-            _momPlot1P.addMouseListener(oneParticleListener);
+            _momPlot1P.addMouseListener(mom1PListener);
+            _momPlot1P.addMouseMotionListener(mom1PListener);
+
+            // position 1 particle mouse clickability (sets to wave packet peaking at click)
+            PlotListener pos1PListener = new PlotListener(this, _posPlot1P) {
+                public void setWavePacket(MouseEvent e) {
+                    if (!e.isShiftDown()) {
+                        double phase = 2 * Math.PI * (e.getX() - x_init) / width;
+                        _wavepacket = new PositionWavePacket(N, new int[] { p1_or_x1_init }, new double[] { phase },
+                            peakProb_init);
+                    }
+                    else {
+                        int x = (int) (1.0 * N * (e.getX() - Plot.PADDING) / width);
+                        double peakProb = 1.0 - 1.0 * e.getY() / height;
+                        _wavepacket = new PositionWavePacket(N, new int[] { x }, new double[] { 0 }, peakProb);
+                    }
+                }
+            };
+            _posPlot1P.addMouseListener(pos1PListener);
+            _posPlot1P.addMouseMotionListener(pos1PListener);
         }
 
         if (_momDensityPlot2P != null) {
-            MouseListener twoParticleListener = new MouseListener() {
-                public void mouseClicked(MouseEvent e) {
-                    Plot plot = (Plot) e.getSource();
-                    int N = _NSlider.getValue();
-                    int p = (int) (1.0 * N * (e.getX() - Plot.PADDING) / plot._width);
-                    int q = (int) (N * (1.0 - 1.0 * e.getY() / plot._height));
-                    ((BaseState) _state).reset(p, q);
-                    frameUpdate();
+            // momentum 2 particle mouse clickability (sets to wave packet peaking at click)
+            PlotListener mom2PListener = new PlotListener(this, _momDensityPlot2P) {
+                public void setWavePacket(MouseEvent e) {
+                    if (!e.isShiftDown()) {
+                        double phase1 = 2 * Math.PI * (e.getX() - x_init) / width;
+                        double phase2 = 2 * Math.PI * (1.0 - 1.0 * e.getY() / height);
+                        _wavepacket = new MomentumWavePacket(N, new int[] { p1_or_x1_init, p2_or_x2_init },
+                            new double[] { phase1, phase2 });
+                    }
+                    else {
+                        int p1 = (int) (1.0 * N * (e.getX() - Plot.PADDING) / width);
+                        int p2 = (int) (N * (1.0 - 1.0 * e.getY() / height));
+                        _wavepacket = new MomentumWavePacket(N, new int[] { p1, p2 }, new double[] { 0, 0 });
+                    }
                 }
-
-                // @formatter:off
-            public void mouseEntered(MouseEvent e) {}
-            public void mouseExited(MouseEvent e) {}
-            public void mousePressed(MouseEvent e) {}
-            public void mouseReleased(MouseEvent e) {}
-            // @formatter:on
             };
-            _momDensityPlot2P.addMouseListener(twoParticleListener);
+            _momDensityPlot2P.addMouseListener(mom2PListener);
+            _momDensityPlot2P.addMouseMotionListener(mom2PListener);
+
+            PlotListener pos2PListener = new PlotListener(this, _posDensityPlot2P) {
+                public void setWavePacket(MouseEvent e) {
+                    if (!e.isShiftDown()) {
+                        double phase1 = 2 * Math.PI * (e.getX() - x_init) / width;
+                        double phase2 = 2 * Math.PI * (1.0 - 1.0 * e.getY() / height);
+                        _wavepacket = new PositionWavePacket(N, new int[] { p1_or_x1_init, p2_or_x2_init },
+                            new double[] { phase1, phase2 });
+                    }
+                    else {
+                        int x1 = (int) (1.0 * N * (e.getX() - Plot.PADDING) / width);
+                        int x2 = (int) (N * (1.0 - 1.0 * e.getY() / height));
+                        _wavepacket = new PositionWavePacket(N, new int[] { x1, x2 }, new double[] { 0, 0 });
+                    }
+                }
+            };
+            _posDensityPlot2P.addMouseListener(pos2PListener);
+            _posDensityPlot2P.addMouseMotionListener(pos2PListener);
         }
     }
 

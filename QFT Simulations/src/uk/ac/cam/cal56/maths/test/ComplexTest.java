@@ -31,12 +31,6 @@ public class ComplexTest {
         assertEquals(y.arg(), Math.PI, epsilon);
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testUndefinedArgument() {
-        Complex z = Complex.zero();
-        z.arg();
-    }
-
     @Test
     public void testEqualsAndToString() {
         Complex z = new Complex(4, -3);

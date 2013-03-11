@@ -10,20 +10,22 @@ import org.junit.Test;
 import uk.ac.cam.cal56.maths.Complex;
 import uk.ac.cam.cal56.qft.interactingtheory.Interaction;
 import uk.ac.cam.cal56.qft.interactingtheory.State;
+import uk.ac.cam.cal56.qft.interactingtheory.WavePacket;
 import uk.ac.cam.cal56.qft.interactingtheory.impl.EvenOrderSymplecticState;
+import uk.ac.cam.cal56.qft.interactingtheory.impl.MomentumWavePacket;
 import uk.ac.cam.cal56.qft.interactingtheory.impl.SecondOrderSymplecticState;
 
 public class EvenOrderSymplecticStateTest {
 
-    private final double EPSILON = 1.0e-10;
+    private final double             EPSILON  = 1.0e-10;
 
-    private final int    _N      = 5;
-    private final int    _Pmax   = 3;
-    private final double _m      = 1.0;
-    private final double _dx     = 0.1;
-    private final double _dt     = 0.01;
-    private double       _lambda = 0.01;
-    
+    private final int                _N       = 5;
+    private final int                _Pmax    = 3;
+    private final double             _m       = 1.0;
+    private final double             _dx      = 0.1;
+    private final double             _dt      = 0.01;
+    private double                   _lambda  = 0.01;
+
     private Map<Interaction, Double> _lambdas = new HashMap<Interaction, Double>();
 
     @Test
@@ -43,8 +45,9 @@ public class EvenOrderSymplecticStateTest {
         lambdas.put(Interaction.PHI_CUBED, _lambda);
         State otherState = new SecondOrderSymplecticState(_N, _Pmax, _m, _dx, _dt, lambdas);
 
-        state.reset(0);
-        otherState.reset(0);
+        WavePacket wp = new MomentumWavePacket(_N, new int[] { 0 }, new double[] { 0 });
+        state.reset(wp);
+        otherState.reset(wp);
 
         double tfinal = 1.0;
         while (state.getTime() < tfinal) {
@@ -60,7 +63,8 @@ public class EvenOrderSymplecticStateTest {
     @Test
     public void testSymplecticity() {
         State _state = new EvenOrderSymplecticState(8, _N, _Pmax, _m, _dx, _dt, _lambdas); // recalculate
-        _state.reset(0);
+        WavePacket wp = new MomentumWavePacket(_N, new int[] { 0 }, new double[] { 0 });
+        _state.reset(wp);
 
         try {
             // Create file
@@ -91,7 +95,8 @@ public class EvenOrderSymplecticStateTest {
     public void testExactComparison() {
         _lambdas.put(Interaction.PHI_CUBED, 0.0);
         State state = new EvenOrderSymplecticState(2, _N, _Pmax, _m, _dx, _dt, _lambdas);
-
+        WavePacket wp = new MomentumWavePacket(_N, new int[] { 0 }, new double[] { 0 });
+        state.reset(wp);
         try {
             // Create file
             // String filename = "gnuplot/SymplecticNthOrderErrorVsDt.txt";
@@ -104,7 +109,7 @@ public class EvenOrderSymplecticStateTest {
             for (double steps = 1; steps < 100000000 + 1; steps *= 10) {
                 double dt = tfinal / steps;
                 state.setTimeStep(dt);
-                state.reset(0); // set to single zero momentum particle
+                state.reset(); // set to single zero momentum particle
                 for (int i = 0; i < steps; i++)
                     state.step();
                 Complex calc = ((EvenOrderSymplecticState) state).get(0);
