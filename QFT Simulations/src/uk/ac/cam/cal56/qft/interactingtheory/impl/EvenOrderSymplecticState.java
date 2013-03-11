@@ -12,7 +12,7 @@ import uk.ac.cam.cal56.qft.interactingtheory.WavePacket;
 
 public class EvenOrderSymplecticState extends BaseState {
 
-    private final int _K;    // order (local), global order = _K - 2
+    private final int _K;    // global order, (local order = _K + 2)
 
     private Complex[] _prevc;
 
