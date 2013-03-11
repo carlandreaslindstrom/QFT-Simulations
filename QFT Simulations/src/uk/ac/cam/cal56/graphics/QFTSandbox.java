@@ -50,70 +50,70 @@ public class QFTSandbox extends JFrame {
     /* STATIC VARIABLES */
     public static final String  FRAME_TITLE          = "QFT Sandbox";
     public static final Color   BACKGROUND_COLOR     = Color.BLACK;
-    private static final int    FRAME_WIDTH          = 1110;
-    private static final int    FRAME_HEIGHT         = 750;
+    protected static final int    FRAME_WIDTH          = 1110;
+    protected static final int    FRAME_HEIGHT         = 750;
 
-    private static final int    PLOT_WIDTH           = 256;
-    private static final int    PLOT_HEIGHT          = 256;
+    protected static final int    PLOT_WIDTH           = 256;
+    protected static final int    PLOT_HEIGHT          = 256;
 
-    private static final int    N_MIN                = 2;
-    private static final int    N_DEFAULT            = 16;
-    private static final int    N_MAX                = 128;
+    protected static final int    N_MIN                = 2;
+    protected static final int    N_DEFAULT            = 16;
+    protected static final int    N_MAX                = 128;
 
-    private static final int    PMAX_MIN             = 1;
-    private static final int    PMAX_DEFAULT         = 3;
-    private static final int    PMAX_MAX             = 7;
+    protected static final int    PMAX_MIN             = 1;
+    protected static final int    PMAX_DEFAULT         = 3;
+    protected static final int    PMAX_MAX             = 7;
 
-    private static final double DX_MIN               = 1.0e-3;
-    private static final double DX_DEFAULT           = 1.0;
-    private static final double DX_MAX               = 10.0;
+    protected static final double DX_MIN               = 1.0e-3;
+    protected static final double DX_DEFAULT           = 1.0;
+    protected static final double DX_MAX               = 10.0;
 
-    private static final double M_MIN                = 1.0e-3;
-    private static final double M_DEFAULT            = 1.0;
-    private static final double M_MAX                = 10.0;
+    protected static final double M_MIN                = 1.0e-3;
+    protected static final double M_DEFAULT            = 1.0;
+    protected static final double M_MAX                = 10.0;
 
-    private static final double DT_MIN               = 1.0e-5;
-    private static final double DT_DEFAULT           = 3.0e-4;
-    private static final double DT_MAX               = 1.0e-1;
+    protected static final double DT_MIN               = 1.0e-5;
+    protected static final double DT_DEFAULT           = 3.0e-4;
+    protected static final double DT_MAX               = 1.0e-1;
 
-    private static final int    STEPS_MIN            = 1;
-    private static final int    STEPS_DEFAULT        = 16;
-    private static final int    STEPS_MAX            = 256;
+    protected static final int    STEPS_MIN            = 1;
+    protected static final int    STEPS_DEFAULT        = 16;
+    protected static final int    STEPS_MAX            = 256;
 
-    private static final double LAMBDA_MIN           = 1.0e-7;
-    private static final double LAMBDA_DEFAULT       = 1.0e1;
-    private static final double LAMBDA_MAX           = 1.0e2;
+    protected static final double LAMBDA_MIN           = 1.0e-7;
+    protected static final double LAMBDA_DEFAULT       = 1.0e1;
+    protected static final double LAMBDA_MAX           = 1.0e2;
 
     // Explanatory labels
-    private static final String LABEL_MOM_SPACE      = "<html><strong>Momentum Space:</strong></html>";
-    private static final String LABEL_POS_SPACE      = "<html><strong>Position Space:</strong></html>";
-    private static final String LABEL_VACUUM         = "Vacuum";
-    private static final String LABEL_1P_MOM         = "<html>1 particle of momentum <em>p</em></html>";
-    private static final String LABEL_1P_POS         = "<html>1 particle of position <em>x</em></html>";
-    private static final String LABEL_2P_MOM         = "<html>2 particles of momenta <em>p<sub>1</sub></em> and <em>p<sub>2</sub></em></html>";
-    private static final String LABEL_2P_POS         = "<html>2 particles of positions <em>x<sub>1</sub></em> and <em>x<sub>2</sub></em></html>";
-    private static final String LABEL_3P_PLUS        = "3+ particles";
+    protected static final String LABEL_MOM_SPACE      = "<html><strong>Momentum Space:</strong></html>";
+    protected static final String LABEL_POS_SPACE      = "<html><strong>Position Space:</strong></html>";
+    protected static final String LABEL_VACUUM         = "Vacuum";
+    protected static final String LABEL_1P_MOM         = "<html>1 particle of momentum <em>p</em></html>";
+    protected static final String LABEL_1P_POS         = "<html>1 particle of position <em>x</em></html>";
+    protected static final String LABEL_2P_MOM         = "<html>2 particles of momenta <em>p<sub>1</sub></em> and <em>p<sub>2</sub></em></html>";
+    protected static final String LABEL_2P_POS         = "<html>2 particles of positions <em>x<sub>1</sub></em> and <em>x<sub>2</sub></em></html>";
+    protected static final String LABEL_3P_PLUS        = "3+ particles";
 
-    private static final String LABEL_PROBABILITY    = "<html>&phi;<sup>2</sup></html>";
-    private static final String LABEL_MOMENTUM_P     = "p";
-    private static final String LABEL_MOMENTUM_P1    = "<html>p<sub>1</sub></html>";
-    private static final String LABEL_MOMENTUM_P2    = "<html>p<sub>2</sub></html>";
-    private static final String LABEL_POSITION_X     = "x";
-    private static final String LABEL_POSITION_X1    = "<html>x<sub>1</sub></html>";
-    private static final String LABEL_POSITION_X2    = "<html>x<sub>2</sub></html>";
+    protected static final String LABEL_PROBABILITY    = "<html>&phi;<sup>2</sup></html>";
+    protected static final String LABEL_MOMENTUM_P     = "p";
+    protected static final String LABEL_MOMENTUM_P1    = "<html>p<sub>1</sub></html>";
+    protected static final String LABEL_MOMENTUM_P2    = "<html>p<sub>2</sub></html>";
+    protected static final String LABEL_POSITION_X     = "x";
+    protected static final String LABEL_POSITION_X1    = "<html>x<sub>1</sub></html>";
+    protected static final String LABEL_POSITION_X2    = "<html>x<sub>2</sub></html>";
 
-    private static final String LABEL_TIME           = "Time: ";
-    private static final String LABEL_TOTAL_PROB     = "Total probability: ";
-    private static final String LABEL_CLICK_AND_DRAG = "(Tip: Click the plots to place particles)";
+    protected static final String LABEL_TIME           = "Time: ";
+    protected static final String LABEL_TOTAL_PROB     = "Total probability: ";
+    protected static final String LABEL_CLICK_AND_DRAG = "(Tip: Click the plots to place particles)";
 
-    private static final String SELECTOR_DEFAULT     = "Select a preset...";
+    protected static final String SELECTOR_DEFAULT     = "Select a preset...";
 
-    private static final String BUTTON_CALCULATE     = "Calculate";
-    private static final String BUTTON_PLAY          = "Play";
-    private static final String BUTTON_STOP          = "Stop";
-    private static final String BUTTON_RESET         = "Reset";
+    protected static final String BUTTON_CALCULATE     = "Calculate";
+    protected static final String BUTTON_PLAY          = "Play";
+    protected static final String BUTTON_STOP          = "Stop";
+    protected static final String BUTTON_RESET         = "Reset";
 
-    private static final Color  DEFAULT_LABEL_COLOR  = Color.GRAY;
+    protected static final Color  DEFAULT_LABEL_COLOR  = Color.GRAY;
 
     /* QUANTUM STATE VARIABLES */
     // quantum state
@@ -122,45 +122,45 @@ public class QFTSandbox extends JFrame {
 
     /* PLOT DATA VARIABLES */
     // Momentum space plots
-    private Plot                _momPlotVacuum;
-    private Plot                _momPlot1P;
-    private Plot                _momDensityPlot2P;
-    private Plot                _momPlotRest;
+    protected Plot                _momPlotVacuum;
+    protected Plot                _momPlot1P;
+    protected Plot                _momDensityPlot2P;
+    protected Plot                _momPlotRest;
 
     // Position space plots
-    private Plot                _posPlotVacuum;
-    private Plot                _posPlot1P;
-    private Plot                _posDensityPlot2P;
-    private Plot                _posPlotRest;
+    protected Plot                _posPlotVacuum;
+    protected Plot                _posPlot1P;
+    protected Plot                _posDensityPlot2P;
+    protected Plot                _posPlotRest;
 
     /* FOURIER TRANSFORM */
-    private FourierTransform    _ft                  = new FFT();
+    protected FourierTransform    _ft                  = new FFT();
 
     /* ANIMATION VARIABLES */
     // Animation parameters and objects
-    private double              _framerate           = 30.0;
-    private Animator            _animator            = new Animator();
+    protected double              _framerate           = 30.0;
+    protected Animator            _animator            = new Animator();
 
     /* FRAME SETUP VARIABLES */
     // Panels
-    private JPanel              _controlPanel        = new JPanel();
-    private JPanel              _displayPanel        = new JPanel();
+    protected JPanel              _controlPanel        = new JPanel();
+    protected JPanel              _displayPanel        = new JPanel();
 
     // Value Labels
-    private JLabel              _NValue              = new JLabel(N_DEFAULT + "");
-    private JLabel              _PmaxValue           = new JLabel(PMAX_DEFAULT + "");
-    private JLabel              _dxValue             = new JLabel(format(DX_DEFAULT));
-    private JLabel              _mValue              = new JLabel(format(M_DEFAULT));
-    private JLabel              _dtValue             = new JLabel(format(DT_DEFAULT));
-    private JLabel              _stepsValue          = new JLabel(STEPS_DEFAULT + "");
-    private JLabel              _lambdaSquaredValue  = new JLabel(format(LAMBDA_DEFAULT));
-    private JLabel              _lambdaCubedValue    = new JLabel(format(LAMBDA_DEFAULT));
+    protected JLabel              _NValue              = new JLabel(N_DEFAULT + "");
+    protected JLabel              _PmaxValue           = new JLabel(PMAX_DEFAULT + "");
+    protected JLabel              _dxValue             = new JLabel(format(DX_DEFAULT));
+    protected JLabel              _mValue              = new JLabel(format(M_DEFAULT));
+    protected JLabel              _dtValue             = new JLabel(format(DT_DEFAULT));
+    protected JLabel              _stepsValue          = new JLabel(STEPS_DEFAULT + "");
+    protected JLabel              _lambdaSquaredValue  = new JLabel(format(LAMBDA_DEFAULT));
+    protected JLabel              _lambdaCubedValue    = new JLabel(format(LAMBDA_DEFAULT));
 
-    private JLabel              _timeLabel           = new JLabel();
-    private JLabel              _totalProbLabel      = new JLabel();
+    protected JLabel              _timeLabel           = new JLabel();
+    protected JLabel              _totalProbLabel      = new JLabel();
 
     // Preset Selector
-    private final JComboBox     _presetSelector      = new JComboBox();
+    protected final JComboBox     _presetSelector      = new JComboBox();
 
     // Sliders
     protected JSlider           _NSlider             = new JSlider(N_MIN, N_MAX, N_DEFAULT);
@@ -174,14 +174,14 @@ public class QFTSandbox extends JFrame {
     protected JSlider           _lambdaCubedSlider   = new JSlider(encode(LAMBDA_MIN), encode(LAMBDA_MAX),
                                                          encode(LAMBDA_DEFAULT));
     // Separators
-    private final Component     _separator           = Box.createVerticalStrut(50);
-    private final int           SEPARATOR_ROW        = 6;
-    private final Component     _separator2          = Box.createVerticalStrut(50);
+    protected final Component     _separator           = Box.createVerticalStrut(50);
+    protected final int           SEPARATOR_ROW        = 6;
+    protected final Component     _separator2          = Box.createVerticalStrut(50);
 
     // Buttons
-    private JButton             _calculateButton     = new JButton(BUTTON_CALCULATE);
-    private JButton             _playButton          = new JButton(BUTTON_PLAY);
-    private JButton             _resetButton         = new JButton(BUTTON_RESET);
+    protected JButton             _calculateButton     = new JButton(BUTTON_CALCULATE);
+    protected JButton             _playButton          = new JButton(BUTTON_PLAY);
+    protected JButton             _resetButton         = new JButton(BUTTON_RESET);
 
     /***** FUNCTIONS *****/
 
@@ -371,7 +371,7 @@ public class QFTSandbox extends JFrame {
         frameUpdate();
     }
 
-    private void setupPlotLabels(boolean show1P, boolean show2P, boolean showRest) {
+    protected void setupPlotLabels(boolean show1P, boolean show2P, boolean showRest) {
 
         // define plot labels (if plots exist)
         JLabel lblMomentumSpace = new JLabel(LABEL_MOM_SPACE);
