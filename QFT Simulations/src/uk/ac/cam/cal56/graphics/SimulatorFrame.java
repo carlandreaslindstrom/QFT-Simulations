@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.swing.Box;
+import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -19,6 +20,7 @@ import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JSlider;
 import javax.swing.Timer;
 import javax.swing.border.LineBorder;
@@ -133,6 +135,10 @@ public abstract class SimulatorFrame extends JFrame {
     protected JSlider                            _mSlider              = new JSlider(encode(M_MIN), encode(M_MAX));
     protected JSlider                            _dtSlider             = new JSlider(encode(DT_MIN), encode(DT_MAX));
     protected JSlider                            _stepsSlider          = new JSlider(STEPS_MIN, STEPS_MAX);
+
+    protected JRadioButton                       _scalarButton         = new JRadioButton("Scalars");
+    protected JRadioButton                       _fermionButton        = new JRadioButton("Fermions");
+    protected JRadioButton                       _bothButton           = new JRadioButton("Both");
 
     // Explanatory labels
     protected final JLabel                       lblMomentumSpace      = new JLabel(
@@ -308,18 +314,48 @@ public abstract class SimulatorFrame extends JFrame {
                 FormFactory.MIN_ROWSPEC,
                 FormFactory.MIN_ROWSPEC,
                 FormFactory.MIN_ROWSPEC,
+                FormFactory.MIN_ROWSPEC,
+                FormFactory.MIN_ROWSPEC,
                 FormFactory.RELATED_GAP_ROWSPEC,
                 FormFactory.DEFAULT_ROWSPEC,}));// @formatter:on
 
         // setup preset selector
         setupPresetSelector();
 
+        // set up scalar-fermion radiobuttons
+        setupScalarFermionRadioButtions();
+
         // setup sliders
-        setupSliders();
+        setupSlidersAndButtons();
 
         // setup buttons (calculate, play, reset)
         setupButtons();
 
+    }
+
+    protected void setupScalarFermionRadioButtions() {
+        // make button group
+        ButtonGroup group = new ButtonGroup();
+        group.add(_scalarButton);
+        group.add(_fermionButton);
+        group.add(_bothButton);
+
+        // set default
+        _scalarButton.setSelected(true);
+        _bothButton.setEnabled(false); // disable the "both"-button for the moment
+
+        // add change listener
+        _scalarButton.addChangeListener(new ChangeListener() {
+            public void stateChanged(ChangeEvent e) {
+                _calculateButton.setEnabled(true);
+            }
+        });
+        _fermionButton.addChangeListener(_scalarButton.getChangeListeners()[0]); // reuse change listener
+        _bothButton.addChangeListener(_scalarButton.getChangeListeners()[0]); // reuse change listener
+
+        _controlPanel.add(_scalarButton, "1, " + (_controlPanelRowAdder) + ", 3, 1, left, center");
+        _controlPanel.add(_fermionButton, "1, " + (_controlPanelRowAdder) + ", 3, 1, center, center");
+        _controlPanel.add(_bothButton, "1, " + (_controlPanelRowAdder++) + ", 3, 1, right, center");
     }
 
     // draw plots after calculation
@@ -480,7 +516,7 @@ public abstract class SimulatorFrame extends JFrame {
         calculate(preset.wavepacket);
     }
 
-    protected void setupSliders() {
+    protected void setupSlidersAndButtons() {
         // add calculate sliders
         setupGeneralSlider(_NSlider, N_MIN, N_MAX, int.class, "Number of lattice points");
         setupGeneralSlider(_PmaxSlider, PMAX_MIN, PMAX_MAX, int.class, "Number of particles considered");
@@ -488,8 +524,11 @@ public abstract class SimulatorFrame extends JFrame {
         setupGeneralSlider(_mSlider, encode(M_MIN), encode(M_MAX), double.class, "Particle mass");
 
         setupCheckboxes();
-        _controlPanel.add(Box.createVerticalStrut(50), "2, " + _controlPanelRowAdder);
         _recalculateBeforeRow = _controlPanelRowAdder++;
+
+        // add buttons to control panel
+        _controlPanel.add(_calculateButton, "2, " + (_controlPanelRowAdder++));
+        _controlPanel.add(Box.createVerticalStrut(30), "2, " + (_controlPanelRowAdder++));
 
         // add real time sliders...
         setupGeneralSlider(_dtSlider, encode(DT_MIN), encode(DT_MAX), double.class, "Time step");
@@ -519,6 +558,10 @@ public abstract class SimulatorFrame extends JFrame {
         // separator
         _controlPanel.add(Box.createVerticalStrut(30), "2, " + _controlPanelRowAdder++);
 
+        // play and reset buttons
+        _controlPanel.add(_playButton, "2, " + _controlPanelRowAdder++);
+        _controlPanel.add(_resetButton, "2, " + _controlPanelRowAdder++);
+
     }
 
     private void setupCheckboxes() {
@@ -545,15 +588,17 @@ public abstract class SimulatorFrame extends JFrame {
         slider.setPaintTicks(true);
         slider.setPaintLabels(true);
 
+        final int row = _controlPanelRowAdder;
+
         JLabel icon = new JLabel("");
-        icon.setIcon(new ImageIcon(getClass().getResource("icons/" + _controlPanelRowAdder + ".png")));
+        icon.setIcon(new ImageIcon(getClass().getResource("icons/" + row + ".png")));
         icon.setToolTipText(toolTip);
 
         final JLabel value = new JLabel();
 
-        _controlPanel.add(icon, "1, " + _controlPanelRowAdder + ", center, center");
-        _controlPanel.add(slider, "2, " + _controlPanelRowAdder + ", left, top");
-        _controlPanel.add(value, "3, " + _controlPanelRowAdder + ", center, center");
+        _controlPanel.add(icon, "1, " + row + ", center, center");
+        _controlPanel.add(slider, "2, " + row + ", left, top");
+        _controlPanel.add(value, "3, " + row + ", center, center");
 
         slider.addChangeListener(new ChangeListener() {
             public void stateChanged(ChangeEvent e) {
@@ -562,7 +607,7 @@ public abstract class SimulatorFrame extends JFrame {
                 else if (type == int.class)
                     value.setText(slider.getValue() + "");
                 // if the slider necessitates recalculation, enable the calculate button (if not already)
-                if (_controlPanelRowAdder < _recalculateBeforeRow)
+                if (row < _recalculateBeforeRow)
                     _calculateButton.setEnabled(true);
             }
         });
@@ -592,11 +637,6 @@ public abstract class SimulatorFrame extends JFrame {
                 calculate(new MomentumWavePacket(_NSlider.getValue()));
             }
         });
-
-        // add buttons to control panel
-        _controlPanel.add(_calculateButton, "2, " + _controlPanelRowAdder++);
-        _controlPanel.add(_playButton, "2, " + _controlPanelRowAdder++);
-        _controlPanel.add(_resetButton, "2, " + _controlPanelRowAdder++);
 
         // initially disable the play and reset buttons
         _playButton.setEnabled(false);
