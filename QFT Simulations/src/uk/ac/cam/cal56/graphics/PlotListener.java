@@ -3,21 +3,25 @@ package uk.ac.cam.cal56.graphics;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
+import uk.ac.cam.cal56.qft.WavePacket;
+
 public abstract class PlotListener extends MouseAdapter {
 
-    private QFTSandbox _sandbox;
+    private SimulatorFrame _sandbox;
 
-    protected int      N;
-    protected int      width;
-    protected int      height;
-    
-    protected Integer  x_init;
-    protected Integer  y_init;
-    protected Integer  p1_or_x1_init;
-    protected Integer  p2_or_x2_init;
-    protected Double   peakProb_init;
+    protected int          N;
+    protected int          width;
+    protected int          height;
 
-    public PlotListener(QFTSandbox sandbox, Plot plot) {
+    protected Integer      x_init;
+    protected Integer      y_init;
+    protected Integer      p1_or_x1_init;
+    protected Integer      p2_or_x2_init;
+    protected Double       peakProb_init;
+
+    protected WavePacket   wavePacket;
+
+    public PlotListener(SimulatorFrame sandbox, Plot plot) {
         _sandbox = sandbox;
         N = sandbox._state.getN();
         width = plot._width;
@@ -26,7 +30,7 @@ public abstract class PlotListener extends MouseAdapter {
 
     public void mousePressed(MouseEvent e) {
         _sandbox.stop();
-        
+
         // remember parameters
         if (x_init == null) {
             x_init = e.getX();
@@ -37,13 +41,13 @@ public abstract class PlotListener extends MouseAdapter {
         }
 
         setWavePacket(e);
-        _sandbox._state.reset(_sandbox._wavepacket);
+        _sandbox._state.setWavePacket(wavePacket);
         _sandbox.frameUpdate();
     }
 
     public void mouseDragged(MouseEvent e) {
         setWavePacket(e);
-        _sandbox._state.reset(_sandbox._wavepacket);
+        _sandbox._state.setWavePacket(wavePacket);
         _sandbox.frameUpdate();
     }
 
@@ -54,7 +58,7 @@ public abstract class PlotListener extends MouseAdapter {
         p1_or_x1_init = null;
         p2_or_x2_init = null;
         peakProb_init = null;
-        
+
         _sandbox.start();
     }
 
