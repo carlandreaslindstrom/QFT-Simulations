@@ -1,5 +1,6 @@
 package uk.ac.cam.cal56.graphics;
 
+import java.awt.Color;
 import java.awt.EventQueue;
 import java.util.HashMap;
 import java.util.Map;
@@ -15,6 +16,32 @@ import uk.ac.cam.cal56.qft.scalars.impl.ScalarState;
 
 @SuppressWarnings("serial")
 public class QFTSandbox extends SimulatorFrame {
+
+    // @formatter:off
+    protected String getFrameTitle()    { return "Quantum Field Theory on a Ring"; }
+    protected Color getDisplayColor()   { return Color.BLACK; }
+    protected Color getLabelColor()     { return Color.GRAY; }
+    protected int getFrameWidth()       { return 1240; }
+    protected int getFrameHeight()      { return 900; }
+    protected int getPlotWidth()        { return 324; }
+    protected int getPlotHeight()       { return getPlotWidth(); }
+    protected int getNMin()             { return 2; }
+    protected int getNMax()             { return 128; }
+    protected int getPmaxMin()          { return 1; }
+    protected int getPmaxMax()          { return 7; }
+    protected double getDxMin()         { return 1.0e-3; }
+    protected double getDxMax()         { return 10.0; }
+    protected double getMMin()          { return 1.0e-3; }
+    protected double getMMax()          { return 10.0; }
+    protected double getDtMin()         { return 1.0e-5; }
+    protected double getDtMax()         { return 1.0e-1; }
+    protected int getStepsMin()         { return 1; }
+    protected int getStepsMax()         { return 256; }
+    protected double getLambdaMin()     { return 1.0e-7; }
+    protected double getLambdaMax()     { return 1.0e2; }
+    protected Preset getDefaultPreset() { return Preset.INT_2P_FAST; }
+    // @formatter:on
+
     public QFTSandbox() {
     }
 

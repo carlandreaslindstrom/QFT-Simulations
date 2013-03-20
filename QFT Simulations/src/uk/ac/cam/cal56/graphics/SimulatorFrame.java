@@ -49,37 +49,6 @@ public abstract class SimulatorFrame extends JFrame {
     /***** VARIABLES *****/
 
     /* STATIC VARIABLES */
-    protected static final String                FRAME_TITLE           = "Quantum Field Theory on a Ring";
-    protected static final Color                 BACKGROUND_COLOR      = Color.BLACK;
-    protected static final Color                 LABEL_COLOR           = Color.GRAY;
-    protected static final int                   FRAME_WIDTH           = 1240;
-    protected static final int                   FRAME_HEIGHT          = 900;
-
-    protected static final int                   PLOT_WIDTH            = 324;
-    protected static final int                   PLOT_HEIGHT           = PLOT_WIDTH;
-
-    protected static final int                   N_MIN                 = 2;
-    protected static final int                   N_MAX                 = 128;
-
-    protected static final int                   PMAX_MIN              = 1;
-    protected static final int                   PMAX_MAX              = 7;
-
-    protected static final double                DX_MIN                = 1.0e-3;
-    protected static final double                DX_MAX                = 10.0;
-
-    protected static final double                M_MIN                 = 1.0e-3;
-    protected static final double                M_MAX                 = 10.0;
-
-    protected static final double                DT_MIN                = 1.0e-5;
-    protected static final double                DT_MAX                = 1.0e-1;
-
-    protected static final int                   STEPS_MIN             = 1;
-    protected static final int                   STEPS_MAX             = 256;
-
-    protected static final double                LAMBDA_MIN            = 1.0e-7;
-    protected static final double                LAMBDA_MAX            = 1.0e2;
-
-    protected static final Preset                PRESET_DEFAULT        = Preset.INT_2P_FAST;
 
     protected static final String                LABEL_TIME            = "Time: ";
     protected static final String                LABEL_TOTAL_PROB      = "Total probability: ";
@@ -129,12 +98,15 @@ public abstract class SimulatorFrame extends JFrame {
     protected JLabel                             _totalProbLabel       = new JLabel();
 
     // Sliders
-    protected JSlider                            _NSlider              = new JSlider(N_MIN, N_MAX);
-    protected JSlider                            _PmaxSlider           = new JSlider(PMAX_MIN, PMAX_MAX);
-    protected JSlider                            _dxSlider             = new JSlider(encode(DX_MIN), encode(DX_MAX));
-    protected JSlider                            _mSlider              = new JSlider(encode(M_MIN), encode(M_MAX));
-    protected JSlider                            _dtSlider             = new JSlider(encode(DT_MIN), encode(DT_MAX));
-    protected JSlider                            _stepsSlider          = new JSlider(STEPS_MIN, STEPS_MAX);
+    protected JSlider                            _NSlider              = new JSlider(getNMin(), getNMax());
+    protected JSlider                            _PmaxSlider           = new JSlider(getPmaxMin(), getPmaxMax());
+    protected JSlider                            _dxSlider             = new JSlider(encode(getDxMin()),
+                                                                           encode(getDxMax()));
+    protected JSlider                            _mSlider              = new JSlider(encode(getMMin()),
+                                                                           encode(getMMax()));
+    protected JSlider                            _dtSlider             = new JSlider(encode(getDtMin()),
+                                                                           encode(getDtMax()));
+    protected JSlider                            _stepsSlider          = new JSlider(getStepsMin(), getStepsMax());
 
     protected JRadioButton                       _scalarButton         = new JRadioButton("Scalars");
     protected JRadioButton                       _fermionButton        = new JRadioButton("Fermions");
@@ -187,17 +159,7 @@ public abstract class SimulatorFrame extends JFrame {
     protected static Map<Interaction, String>    _interactionToolTips  = new HashMap<Interaction, String>();
 
     static {
-        _checkBoxes.put(Interaction.PHI_SQUARED, new JCheckBox("<html>&Phi;<sup>2</sup></html>"));
-        _checkBoxes.put(Interaction.PHI_CUBED, new JCheckBox("<html>&Phi;<sup>3</sup></html>"));
-        _checkBoxes.put(Interaction.PHI_FOURTH, new JCheckBox("<html>&Phi;<sup>4</sup></html>"));
 
-        _interactionSliders.put(Interaction.PHI_SQUARED, new JSlider(encode(LAMBDA_MIN), encode(LAMBDA_MAX)));
-        _interactionSliders.put(Interaction.PHI_CUBED, new JSlider(encode(LAMBDA_MIN), encode(LAMBDA_MAX)));
-        _interactionSliders.put(Interaction.PHI_FOURTH, new JSlider(encode(LAMBDA_MIN), encode(LAMBDA_MAX)));
-
-        _interactionToolTips.put(Interaction.PHI_SQUARED, "2-vertex interaction strength");
-        _interactionToolTips.put(Interaction.PHI_CUBED, "3-vertex interaction strength");
-        _interactionToolTips.put(Interaction.PHI_FOURTH, "4-vertex interaction strength");
     }
 
     /**** ABSTRACT METHODS ****/
@@ -205,14 +167,54 @@ public abstract class SimulatorFrame extends JFrame {
     // quantum state and plots representing it
     protected abstract void setupQuantumState(WavePacket wavePacket);
 
+    // @formatter:off
+    protected abstract String getFrameTitle();
+    protected abstract Color getDisplayColor();
+    protected abstract Color getLabelColor();
+    protected abstract int getFrameWidth();
+    protected abstract int getFrameHeight();
+    protected abstract int getPlotWidth();
+    protected abstract int getPlotHeight();
+    protected abstract int getNMin();
+    protected abstract int getNMax();
+    protected abstract int getPmaxMin();
+    protected abstract int getPmaxMax();
+    protected abstract double getDxMin();
+    protected abstract double getDxMax();
+    protected abstract double getMMin();
+    protected abstract double getMMax();
+    protected abstract double getDtMin();
+    protected abstract double getDtMax();
+    protected abstract int getStepsMin();
+    protected abstract int getStepsMax();
+    protected abstract double getLambdaMin();
+    protected abstract double getLambdaMax();
+    protected abstract Preset getDefaultPreset();
+    // @formatter:on
+
     /***** FUNCTIONS *****/
 
     // Constructor
     public SimulatorFrame() {
+        setupInteractions();
         setupFrame();
         setupControlPanel();
         setupDisplayPanel();
-        applyPreset(PRESET_DEFAULT);
+        applyPreset(getDefaultPreset());
+    }
+
+    protected void setupInteractions() {
+        _checkBoxes.put(Interaction.PHI_SQUARED, new JCheckBox("<html>&Phi;<sup>2</sup></html>"));
+        _checkBoxes.put(Interaction.PHI_CUBED, new JCheckBox("<html>&Phi;<sup>3</sup></html>"));
+        _checkBoxes.put(Interaction.PHI_FOURTH, new JCheckBox("<html>&Phi;<sup>4</sup></html>"));
+
+        _interactionSliders.put(Interaction.PHI_SQUARED, new JSlider(encode(getLambdaMin()), encode(getLambdaMax())));
+        _interactionSliders.put(Interaction.PHI_CUBED, new JSlider(encode(getLambdaMin()), encode(getLambdaMax())));
+        _interactionSliders.put(Interaction.PHI_FOURTH, new JSlider(encode(getLambdaMin()), encode(getLambdaMax())));
+
+        _interactionToolTips.put(Interaction.PHI_SQUARED, "2-vertex interaction strength");
+        _interactionToolTips.put(Interaction.PHI_CUBED, "3-vertex interaction strength");
+        _interactionToolTips.put(Interaction.PHI_FOURTH, "4-vertex interaction strength");
     }
 
     // fired every time frame is updated
@@ -252,8 +254,8 @@ public abstract class SimulatorFrame extends JFrame {
     }
 
     protected void setupFrame() {
-        setTitle(FRAME_TITLE);
-        setBounds(0, 0, FRAME_WIDTH, FRAME_HEIGHT);
+        setTitle(getFrameTitle());
+        setBounds(0, 0, getFrameWidth(), getFrameHeight());
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         getContentPane().setLayout(new BorderLayout(0, 0));
     }
@@ -261,7 +263,7 @@ public abstract class SimulatorFrame extends JFrame {
     protected void setupDisplayPanel() {
         // make display panel
         getContentPane().add(_displayPanel, BorderLayout.CENTER);
-        _displayPanel.setBackground(BACKGROUND_COLOR);
+        _displayPanel.setBackground(getDisplayColor());
 
         // set layout @formatter:off
         _displayPanel.setLayout(new FormLayout(new ColumnSpec[] {
@@ -269,20 +271,20 @@ public abstract class SimulatorFrame extends JFrame {
                 ColumnSpec.decode("25px"),
                 ColumnSpec.decode("60px"),
                 ColumnSpec.decode("25px"),
-                ColumnSpec.decode((PLOT_WIDTH+15)+"px"),
+                ColumnSpec.decode((getPlotWidth()+15)+"px"),
                 ColumnSpec.decode("25px"),
-                ColumnSpec.decode((PLOT_WIDTH+15)+"px"),
+                ColumnSpec.decode((getPlotWidth()+15)+"px"),
                 ColumnSpec.decode("25px"),
                 ColumnSpec.decode("60px"),},
             new RowSpec[] {
                 FormFactory.RELATED_GAP_ROWSPEC,
                 RowSpec.decode("30px"),
                 RowSpec.decode("25px"),
-                RowSpec.decode((PLOT_HEIGHT+15)+"px"),
+                RowSpec.decode((getPlotHeight()+15)+"px"),
                 RowSpec.decode("25px"),
                 RowSpec.decode("30px"),
                 RowSpec.decode("25px"),
-                RowSpec.decode((PLOT_HEIGHT+15)+"px"),
+                RowSpec.decode((getPlotHeight()+15)+"px"),
                 RowSpec.decode("25px"),
                 RowSpec.decode("15px"),})); // @formatter:on
     }
@@ -371,32 +373,32 @@ public abstract class SimulatorFrame extends JFrame {
         Double rest = _state.getRemainingProbability();
 
         // make and add plots (only if they exist)
-        _momPlotVacuum = new FunctionPlot(c0p, 0.0, 1.0, PLOT_HEIGHT);
+        _momPlotVacuum = new FunctionPlot(c0p, 0.0, 1.0, getPlotHeight());
         _displayPanel.add(_momPlotVacuum, "3, 4, left, top");
 
-        _posPlotVacuum = new FunctionPlot(c0p, 0.0, 1.0, PLOT_HEIGHT);
+        _posPlotVacuum = new FunctionPlot(c0p, 0.0, 1.0, getPlotHeight());
         _displayPanel.add(_posPlotVacuum, "3, 8, left, top");
 
         if (c1p != null) {
-            _momPlot1P = new FunctionPlot(c1p, 0.0, 1.0, PLOT_WIDTH, PLOT_HEIGHT);
+            _momPlot1P = new FunctionPlot(c1p, 0.0, 1.0, getPlotWidth(), getPlotHeight());
             _displayPanel.add(_momPlot1P, "5, 4, left, top");
 
-            _posPlot1P = new FunctionPlot(_ft.transform(c1p), 0.0, 1.0, PLOT_WIDTH, PLOT_HEIGHT);
+            _posPlot1P = new FunctionPlot(_ft.transform(c1p), 0.0, 1.0, getPlotWidth(), getPlotHeight());
             _displayPanel.add(_posPlot1P, "5, 8, left, top");
         }
 
         if (c2p != null) {
-            _momDensityPlot2P = new DensityPlot(c2p, 0.0, 1.0, PLOT_WIDTH, PLOT_HEIGHT);
+            _momDensityPlot2P = new DensityPlot(c2p, 0.0, 1.0, getPlotWidth(), getPlotHeight());
             _displayPanel.add(_momDensityPlot2P, "7, 4, left, top");
 
-            _posDensityPlot2P = new DensityPlot(_ft.transform2D(c2p), 0.0, 1.0, PLOT_WIDTH, PLOT_HEIGHT);
+            _posDensityPlot2P = new DensityPlot(_ft.transform2D(c2p), 0.0, 1.0, getPlotWidth(), getPlotHeight());
             _displayPanel.add(_posDensityPlot2P, "7, 8, left, top");
         }
         if (rest != null) {
-            _momPlotRest = new FunctionPlot(Complex.one().times(Math.sqrt(rest)), 0.0, 1.0, PLOT_HEIGHT);
+            _momPlotRest = new FunctionPlot(Complex.one().times(Math.sqrt(rest)), 0.0, 1.0, getPlotHeight());
             _displayPanel.add(_momPlotRest, "9, 4, left, top");
 
-            _posPlotRest = new FunctionPlot(Complex.one().times(Math.sqrt(rest)), 0.0, 1.0, PLOT_HEIGHT);
+            _posPlotRest = new FunctionPlot(Complex.one().times(Math.sqrt(rest)), 0.0, 1.0, getPlotHeight());
             _displayPanel.add(_posPlotRest, "9, 8, left, top");
         }
 
@@ -418,7 +420,7 @@ public abstract class SimulatorFrame extends JFrame {
             lblMom1P, lblMom2P, lblMomRest, lblMomVacuum, lblPositionSpace, lblPos1P, lblPos2P, lblPosRest,
             lblPosVacuum };
         for (JLabel label : labels)
-            label.setForeground(LABEL_COLOR);
+            label.setForeground(getLabelColor());
         lblClickAndDrag.setForeground(Color.DARK_GRAY); // tips are darker
 
         // time label
@@ -518,10 +520,10 @@ public abstract class SimulatorFrame extends JFrame {
 
     protected void setupSlidersAndButtons() {
         // add calculate sliders
-        setupGeneralSlider(_NSlider, N_MIN, N_MAX, int.class, "Number of lattice points");
-        setupGeneralSlider(_PmaxSlider, PMAX_MIN, PMAX_MAX, int.class, "Number of particles considered");
-        setupGeneralSlider(_dxSlider, encode(DX_MIN), encode(DX_MAX), double.class, "Lattice point separation");
-        setupGeneralSlider(_mSlider, encode(M_MIN), encode(M_MAX), double.class, "Particle mass");
+        setupGeneralSlider(_NSlider, getNMin(), getNMax(), int.class, "Number of lattice points");
+        setupGeneralSlider(_PmaxSlider, getPmaxMin(), getPmaxMax(), int.class, "Number of particles considered");
+        setupGeneralSlider(_dxSlider, encode(getDxMin()), encode(getDxMax()), double.class, "Lattice point separation");
+        setupGeneralSlider(_mSlider, encode(getMMin()), encode(getMMax()), double.class, "Particle mass");
 
         setupCheckboxes();
         _recalculateBeforeRow = _controlPanelRowAdder++;
@@ -531,7 +533,7 @@ public abstract class SimulatorFrame extends JFrame {
         _controlPanel.add(Box.createVerticalStrut(30), "2, " + (_controlPanelRowAdder++));
 
         // add real time sliders...
-        setupGeneralSlider(_dtSlider, encode(DT_MIN), encode(DT_MAX), double.class, "Time step");
+        setupGeneralSlider(_dtSlider, encode(getDtMin()), encode(getDtMax()), double.class, "Time step");
         // ... with a real time update listener...
         _dtSlider.addChangeListener(new ChangeListener() { // update time step
             public void stateChanged(ChangeEvent e) {
@@ -539,14 +541,14 @@ public abstract class SimulatorFrame extends JFrame {
                     _state.setTimeStep(decode(_dtSlider.getValue()));
             }
         });
-        setupGeneralSlider(_stepsSlider, STEPS_MIN, STEPS_MAX, int.class, "Steps calculated per frame");
+        setupGeneralSlider(_stepsSlider, getStepsMin(), getStepsMax(), int.class, "Steps calculated per frame");
 
         // ... including interaction sliders (with change listeners)
         for (Entry<Interaction, JSlider> entry : _interactionSliders.entrySet()) {
             final Interaction interaction = entry.getKey();
             final JSlider slider = entry.getValue();
             String toolTip = _interactionToolTips.get(interaction);
-            setupGeneralSlider(slider, encode(LAMBDA_MIN), encode(LAMBDA_MAX), double.class, toolTip);
+            setupGeneralSlider(slider, encode(getLambdaMin()), encode(getLambdaMax()), double.class, toolTip);
             slider.addChangeListener(new ChangeListener() { // update interaction strength
                 public void stateChanged(ChangeEvent e) {
                     if (_state != null)
