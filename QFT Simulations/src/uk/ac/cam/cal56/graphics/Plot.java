@@ -16,7 +16,7 @@ public abstract class Plot extends Canvas {
     private final static String   SCALE_TEXT             = "Scale: ";
 
     protected final static double RESCALE_UPPER_ABS_LIM  = 1.0;
-    protected final static double RESCALE_LOWER_ABS_LIM  = 0.03;
+    protected final static double RESCALE_LOWER_ABS_LIM  = 0.001;
     protected final static double RESCALE_UPPER_REL_LIM  = 0.90;
     protected final static double RESCALE_LOWER_REL_LIM  = 0.30;
     protected final static int    RESCALE_AT_SCORE       = 130;
@@ -74,8 +74,8 @@ public abstract class Plot extends Canvas {
                                                                                        TICK_SIZE);
         // scale label
         if (_width > FunctionPlot.PLOT_1D_WIDTH)
-            g.drawChars((SCALE_TEXT + new DecimalFormat("0.00").format(_max)).toCharArray(), 0,
-                        SCALE_TEXT.length() + 4, _width + PADDING - 70, 10);
+            g.drawChars((SCALE_TEXT + new DecimalFormat("0.000").format(_max)).toCharArray(), 0,
+                        SCALE_TEXT.length() + 5, _width + PADDING - 80, 10);
 
     }
 
