@@ -51,7 +51,7 @@ public abstract class SimulatorFrame extends JFrame {
 
     protected static final String                LABEL_TIME            = "Time: ";
     protected static final String                LABEL_TOTAL_PROB      = "Total probability: ";
-    protected static final String                LABEL_TOTAL_ENERGY      = "Total energy: ";
+    protected static final String                LABEL_TOTAL_ENERGY    = "Total energy: ";
 
     protected static final String                SELECTOR_DEFAULT      = "Select a preset...";
 
@@ -220,16 +220,17 @@ public abstract class SimulatorFrame extends JFrame {
         _negativeCheckBoxes.put(Interaction.PHI_FOURTH, new JCheckBox());
     }
 
-    // fired every time frame is updated
+    // FIRED EVERY TIME FRAME
     protected void frameUpdate() {
 
+        // exit if state is not set up
         if (_state == null)
-            return; // exit if state is not set up
+            return;
 
-        // update time and total probability
-        _timeLabel.setText(new DecimalFormat("#.#######").format(_state.getTime()));
-        _totalProbLabel.setText(LABEL_TOTAL_PROB + new DecimalFormat("##0%").format(_state.getModSquared()));
+        // update time, total probability, total energy
         _totalEnergyLabel.setText(LABEL_TOTAL_ENERGY + new DecimalFormat("#.#E0 GeV").format(_state.getTotalEnergy()));
+        _totalProbLabel.setText(LABEL_TOTAL_PROB + new DecimalFormat("##0%").format(_state.getModSquared()));
+        _timeLabel.setText("<html>" + new DecimalFormat("0.000").format(_state.getTime()) + " GeV<sup>-1</sup></html>");
 
         // get coefficients
         Complex c0p = _state.getVacuum();
@@ -302,7 +303,7 @@ public abstract class SimulatorFrame extends JFrame {
         _controlPanel.setLayout(new FormLayout(new ColumnSpec[] {
                 ColumnSpec.decode("40px"),
                 ColumnSpec.decode("175px:grow"),
-                ColumnSpec.decode("64px"),
+                ColumnSpec.decode("74px"),
                 FormFactory.LABEL_COMPONENT_GAP_COLSPEC,},
             new RowSpec[] {
                 FormFactory.MIN_ROWSPEC,
@@ -540,10 +541,11 @@ public abstract class SimulatorFrame extends JFrame {
 
         // add buttons to control panel
         _controlPanel.add(_calculateButton, "2, " + (_controlPanelRowAdder++));
-        _controlPanel.add(Box.createVerticalStrut(30), "2, " + (_controlPanelRowAdder++));
+        _controlPanel.add(Box.createVerticalStrut(20), "2, " + (_controlPanelRowAdder++));
 
         // add real time sliders...
         setupGeneralSlider(_dtSlider, encode(getDtMin()), encode(getDtMax()), double.class, null, "Time step");
+
         // ... with a real time update listener...
         _dtSlider.addChangeListener(new ChangeListener() { // update time step
             public void stateChanged(ChangeEvent e) {
@@ -556,27 +558,12 @@ public abstract class SimulatorFrame extends JFrame {
         // ... including interaction sliders (with change listeners)
         Interaction[] interactionsInOrder = new Interaction[] { Interaction.PHI_SQUARED, Interaction.PHI_CUBED,
             Interaction.PHI_FOURTH };
-        for (final Interaction interaction : interactionsInOrder) {
-            final JSlider slider = _interactionSliders.get(interaction);
-            final JCheckBox checkbox = _negativeCheckBoxes.get(interaction);
-            String toolTip = _interactionToolTips.get(interaction);
-            setupGeneralSlider(slider, encode(getLambdaMin()), encode(getLambdaMax()), double.class, interaction,
-                               toolTip);
-            ChangeListener cl = new ChangeListener() { // update interaction strength
-                public void stateChanged(ChangeEvent e) {
-                    if (_state != null) {
-                        int negativeFactor = checkbox.isSelected() ? -1 : 1;
-                        _state.setInteractionStrength(interaction, negativeFactor * decode( slider.getValue()));
-                    }
-
-                }
-            };
-            slider.addChangeListener(cl);
-            checkbox.addChangeListener(cl);
-        }
+        for (final Interaction interaction : interactionsInOrder)
+            setupGeneralSlider(_interactionSliders.get(interaction), encode(getLambdaMin()), encode(getLambdaMax()),
+                               double.class, interaction, _interactionToolTips.get(interaction));
 
         // separator
-        _controlPanel.add(Box.createVerticalStrut(30), "2, " + _controlPanelRowAdder++);
+        _controlPanel.add(Box.createVerticalStrut(20), "2, " + _controlPanelRowAdder++);
 
         // play and reset buttons
         _controlPanel.add(_playButton, "2, " + _controlPanelRowAdder++);
@@ -628,15 +615,38 @@ public abstract class SimulatorFrame extends JFrame {
 
         slider.addChangeListener(new ChangeListener() {
             public void stateChanged(ChangeEvent e) {
-                if (type == double.class)
+                if (interaction != null) {
+                    final JCheckBox checkbox = _negativeCheckBoxes.get(interaction);
+                    ChangeListener cl = new ChangeListener() { // update interaction strength
+                        public void stateChanged(ChangeEvent e) {
+                            if (_state != null) {
+                                int negativeFactor = checkbox.isSelected() ? -1 : 1;
+                                _state.setInteractionStrength(interaction, negativeFactor * decode(slider.getValue()));
+                            }
+                            boolean negative = _negativeCheckBoxes.get(interaction).isSelected();
+                            value.setText(decodeText(slider.getValue(), negative));
+                        }
+                    };
+
+                    slider.addChangeListener(cl);
+                    checkbox.addChangeListener(cl);
+                }
+                else if (type == double.class) {
                     value.setText(decodeText(slider.getValue()));
+                }
                 else if (type == int.class)
                     value.setText(slider.getValue() + "");
+
                 // if the slider necessitates recalculation, enable the calculate button (if not already)
                 if (row < _recalculateBeforeRow)
                     _calculateButton.setEnabled(true);
             }
         });
+
+        // trigger events initially to show values
+        ChangeEvent ce = new ChangeEvent(slider);
+        for (ChangeListener cl : slider.getChangeListeners())
+            cl.stateChanged(ce);
 
         _controlPanelRowAdder++; // increment row
     }
@@ -658,7 +668,7 @@ public abstract class SimulatorFrame extends JFrame {
         });
         _groundStateButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                reset();
+                stop();
                 _state.setToGroundState();
                 start();
             }
@@ -688,8 +698,10 @@ public abstract class SimulatorFrame extends JFrame {
         drawPlotsAndLabels();
 
         // update interaction sliders
-        for (Interaction interaction : _interactionSliders.keySet())
+        for (Interaction interaction : _interactionSliders.keySet()) {
             _interactionSliders.get(interaction).setEnabled(_checkBoxes.get(interaction).isSelected());
+            _negativeCheckBoxes.get(interaction).setEnabled(_checkBoxes.get(interaction).isSelected());
+        }
 
         // update buttons and start animation
         _playButton.setEnabled(true);
@@ -732,15 +744,16 @@ public abstract class SimulatorFrame extends JFrame {
 
     // converts to scientific notation
     protected static String decodeText(int encoded) {
-        double number = decode(encoded);
-        int power = (int) Math.floor(Math.log10(number));
-        double mantissa = number / Math.pow(10, power);
-        String digit = (new DecimalFormat("#.#").format(mantissa));
-        return "<html>" + (digit.equals("1") ? "" : digit + "x") + "10<sup>" + power + "</sup></html>";
+        return decodeText(encoded, false);
     }
 
-    protected static String format(double d) {
-        return decodeText(encode(d));
+    protected static String decodeText(int encoded, boolean negative) {
+        double number = decode(encoded);
+        int exponent = (int) Math.floor(Math.log10(number));
+        double mantissa = number / Math.pow(10, exponent);
+        String digit = (new DecimalFormat("#.#").format(mantissa));
+        return "<html>" + (negative ? "-" : "") + (digit.equals("1") ? "" : digit + "x") + "10<sup>" + exponent +
+               "</sup></html>";
     }
 
     /**** INTERACTIVE PLOTS ****/

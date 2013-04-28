@@ -8,7 +8,7 @@ public class Preset {
     
     // definitions of presets, NOTE: THE 2nd ARGUMENT AND THE 1st WAVEPACKET ARGUMENT MUST BE EQUAL
     public static final Preset VACUUM       = new Preset("Interacting vacuum", 16, 3, 1e-1, 1, 1e-4, 10, 1.0, 1.0, null, 
-                                                         new MomentumWavePacket(16));
+                                                         WavePacket.getVacuum(16));
     public static final Preset FREE_1P_SLOW = new Preset("1 free slow particle", 64, 1, 1e-1, 1, 1e-3, 100, 0.0, 0.0, null,
                                                          new MomentumWavePacket(64, new int[] { 4 }, new double[] { 0 }));
     public static final Preset FREE_1P_FAST = new Preset("1 free fast particle", 64, 1, 1e-1, 1, 1e-3, 256, 0.0, 0.0, null,

@@ -22,7 +22,7 @@ public class QFTSandbox extends SimulatorFrame {
     protected Color getDisplayColor()   { return Color.BLACK; }
     protected Color getLabelColor()     { return Color.GRAY; }
     protected int getFrameWidth()       { return 1100; }
-    protected int getFrameHeight()      { return 800; }
+    protected int getFrameHeight()      { return 775; }
     protected int getPlotWidth()        { return 256; }
     protected int getPlotHeight()       { return getPlotWidth(); }
     protected int getNMin()             { return 2; }

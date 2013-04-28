@@ -1,6 +1,7 @@
 package uk.ac.cam.cal56.qft;
 
 import uk.ac.cam.cal56.maths.Complex;
+import uk.ac.cam.cal56.qft.impl.MomentumWavePacket;
 
 public abstract class WavePacket {
 
@@ -18,6 +19,10 @@ public abstract class WavePacket {
         _phases = phases;
         if (particles.length != phases.length || particles.length > 2)
             throw new RuntimeException();
+    }
+
+    public static WavePacket getVacuum(int N) {
+        return new MomentumWavePacket(N);
     }
 
     public abstract Complex[] getCoefficients(int S);

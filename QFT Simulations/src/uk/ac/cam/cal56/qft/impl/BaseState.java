@@ -106,19 +106,70 @@ public abstract class BaseState implements State {
         _dt = dt;
         firstStep();
     }
-    
+
     @Override
     public void setToGroundState() {
-        // TODO
+        _wavePacket = WavePacket.getVacuum(_N); // set to vacuum
+        _c = _wavePacket.getCoefficients(_S);
+
+        Complex[] groundc = new Complex[_S];
+        
+        // power iteration parameters
+        double eps = 1e-3;
+        double tolerance = 1e-8;
+        int maxcount = 100000;
+        
+        double energy = getTotalEnergy();
+        double error = 1;
+        
+        for(int i = 0; i < maxcount && error > tolerance; i++) { 
+            
+            double lastEnergy = energy;
+            
+            for (int n = 0; n < _c.length; n++) {
+                
+                // first add free theory
+                Complex H = _c[n].times(_Hfree.getEnergy(n));
+
+                // then interactions
+                for (Entry<Interaction, Hamiltonian> h : _hamiltonians.entrySet()) {
+                    Complex subsum = Complex.zero();
+                    for (Entry<Integer, Double> h_mn : h.getValue().getRow(n).entrySet())
+                        subsum = subsum.plus(_c[h_mn.getKey()].times(h_mn.getValue()));
+                    H = H.plus(subsum.times(_lambdas.get(h.getKey())));
+                }
+
+                // |c> -> (1-e*H)|c>
+                groundc[n] = _c[n].minus(H.times(eps));
+            }
+            
+            _c = groundc;
+            normalise();
+            
+            energy = getTotalEnergy();
+            
+            error = Math.abs((lastEnergy-energy)/energy);
+            //System.out.println(error);
+        }
+
+        _time = 0.0;
+        firstStep();
     }
-    
+
+    // normalise coefficients
+    private void normalise() {
+        double norm = Math.sqrt(getModSquared());
+        for (int n = 0; n < _c.length; n++)
+            _c[n] = _c[n].divide(norm);
+    }
+
     public double getTotalEnergy() {
-     
+
         Complex energy = Complex.zero();
-        for(int n = 0; n < _c.length; n++) {
-         // first add free theory
+        for (int n = 0; n < _c.length; n++) {
+            // first add free theory
             Complex sum = _c[n].times(_Hfree.getEnergy(n));
-    
+
             // then interactions
             for (Entry<Interaction, Hamiltonian> h : _hamiltonians.entrySet()) {
                 Complex subsum = Complex.zero();
@@ -126,11 +177,11 @@ public abstract class BaseState implements State {
                     subsum = subsum.plus(_c[h_mn.getKey()].times(h_mn.getValue()));
                 sum = sum.plus(subsum.times(_lambdas.get(h.getKey())));
             }
-            
+
             // E = <c|(H|c>)
-            energy = energy.plus(_c[n].conj().times(sum));
+            energy = energy.plus((_c[n].conj()).times(sum));
         }
-        
+
         // assume this is real, ignore imaginary part (mod is mathematically equivalent)
         return energy.real();
     }
