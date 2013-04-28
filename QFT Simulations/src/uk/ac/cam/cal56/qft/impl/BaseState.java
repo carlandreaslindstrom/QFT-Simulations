@@ -2,6 +2,7 @@ package uk.ac.cam.cal56.qft.impl;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import uk.ac.cam.cal56.maths.Complex;
 import uk.ac.cam.cal56.qft.Hamiltonian;
@@ -109,6 +110,29 @@ public abstract class BaseState implements State {
     @Override
     public void setToGroundState() {
         // TODO
+    }
+    
+    public double getTotalEnergy() {
+     
+        Complex energy = Complex.zero();
+        for(int n = 0; n < _c.length; n++) {
+         // first add free theory
+            Complex sum = _c[n].times(_Hfree.getEnergy(n));
+    
+            // then interactions
+            for (Entry<Interaction, Hamiltonian> h : _hamiltonians.entrySet()) {
+                Complex subsum = Complex.zero();
+                for (Entry<Integer, Double> h_mn : h.getValue().getRow(n).entrySet())
+                    subsum = subsum.plus(_c[h_mn.getKey()].times(h_mn.getValue()));
+                sum = sum.plus(subsum.times(_lambdas.get(h.getKey())));
+            }
+            
+            // E = <c|(H|c>)
+            energy = energy.plus(_c[n].conj().times(sum));
+        }
+        
+        // assume this is real, ignore imaginary part (mod is mathematically equivalent)
+        return energy.real();
     }
 
 }

@@ -51,6 +51,7 @@ public abstract class SimulatorFrame extends JFrame {
 
     protected static final String                LABEL_TIME            = "Time: ";
     protected static final String                LABEL_TOTAL_PROB      = "Total probability: ";
+    protected static final String                LABEL_TOTAL_ENERGY      = "Total energy: ";
 
     protected static final String                SELECTOR_DEFAULT      = "Select a preset...";
 
@@ -58,8 +59,7 @@ public abstract class SimulatorFrame extends JFrame {
     protected static final String                BUTTON_PLAY           = "Play";
     protected static final String                BUTTON_STOP           = "Stop";
     protected static final String                BUTTON_RESET          = "Reset";
-    protected static final String                BUTTON_GROUNDSTATE          = "Set to ground state";
-    
+    protected static final String                BUTTON_GROUNDSTATE    = "Set to ground state";
 
     protected static int                         _recalculateBeforeRow;
     private int                                  _controlPanelRowAdder = 1;
@@ -97,6 +97,7 @@ public abstract class SimulatorFrame extends JFrame {
     // Value Labels
     protected JLabel                             _timeLabel            = new JLabel();
     protected JLabel                             _totalProbLabel       = new JLabel();
+    protected JLabel                             _totalEnergyLabel     = new JLabel();
 
     // Sliders
     protected JSlider                            _NSlider              = new JSlider(getNMin(), getNMax());
@@ -145,15 +146,14 @@ public abstract class SimulatorFrame extends JFrame {
     protected final JLabel                       prob3Ppos             = new JLabel(prob0Pmom.getText());
 
     protected final JLabel                       lblTime               = new JLabel(LABEL_TIME);
-    protected final JLabel                       lblTotalProb          = new JLabel(LABEL_TOTAL_PROB);
     protected final JLabel                       lblClickAndDrag       = new JLabel(
-                                                                           "(Tip: Click the plots to place particles)");
+                                                                           "(Click on plots to place particles)");
 
     // Buttons
     protected JButton                            _calculateButton      = new JButton(BUTTON_CALCULATE);
     protected JButton                            _playButton           = new JButton(BUTTON_PLAY);
     protected JButton                            _resetButton          = new JButton(BUTTON_RESET);
-    protected JButton                            _groundStateButton          = new JButton(BUTTON_GROUNDSTATE);
+    protected JButton                            _groundStateButton    = new JButton(BUTTON_GROUNDSTATE);
 
     // Interaction sliders and checkboxes
     protected static Map<Interaction, JCheckBox> _checkBoxes           = new HashMap<Interaction, JCheckBox>();
@@ -214,7 +214,7 @@ public abstract class SimulatorFrame extends JFrame {
         _interactionToolTips.put(Interaction.PHI_SQUARED, "2-vertex interaction strength");
         _interactionToolTips.put(Interaction.PHI_CUBED, "3-vertex interaction strength");
         _interactionToolTips.put(Interaction.PHI_FOURTH, "4-vertex interaction strength");
-        
+
         _negativeCheckBoxes.put(Interaction.PHI_SQUARED, new JCheckBox());
         _negativeCheckBoxes.put(Interaction.PHI_CUBED, new JCheckBox());
         _negativeCheckBoxes.put(Interaction.PHI_FOURTH, new JCheckBox());
@@ -229,6 +229,7 @@ public abstract class SimulatorFrame extends JFrame {
         // update time and total probability
         _timeLabel.setText(new DecimalFormat("#.#######").format(_state.getTime()));
         _totalProbLabel.setText(LABEL_TOTAL_PROB + new DecimalFormat("##0%").format(_state.getModSquared()));
+        _totalEnergyLabel.setText(LABEL_TOTAL_ENERGY + new DecimalFormat("#.#E0 GeV").format(_state.getTotalEnergy()));
 
         // get coefficients
         Complex c0p = _state.getVacuum();
@@ -420,7 +421,7 @@ public abstract class SimulatorFrame extends JFrame {
 
         // set font color on labels
         JLabel[] labels = new JLabel[] { prob0Pmom, prob0Ppos, prob1Pmom, plbl, prob1Ppos, xlbl, p2lbl, p1lbl, x2lbl,
-            x1lbl, prob3Pmom, prob3Ppos, _timeLabel, lblTime, _totalProbLabel, lblTotalProb, lblMomentumSpace,
+            x1lbl, prob3Pmom, prob3Ppos, _timeLabel, lblTime, _totalProbLabel, _totalEnergyLabel, lblMomentumSpace,
             lblMom1P, lblMom2P, lblMomRest, lblMomVacuum, lblPositionSpace, lblPos1P, lblPos2P, lblPosRest,
             lblPosVacuum };
         for (JLabel label : labels)
@@ -435,6 +436,10 @@ public abstract class SimulatorFrame extends JFrame {
         // total probability label
         _totalProbLabel.setText("");
         _displayPanel.add(_totalProbLabel, "7, 10, 2, 1, left, top");
+
+        // total energy label
+        _totalEnergyLabel.setText("");
+        _displayPanel.add(_totalEnergyLabel, "3, 10, 3, 1, right, top");
 
         // tip labels
         _displayPanel.add(lblClickAndDrag, "2, 10, 3, 1, left, top");
@@ -555,14 +560,15 @@ public abstract class SimulatorFrame extends JFrame {
             final JSlider slider = _interactionSliders.get(interaction);
             final JCheckBox checkbox = _negativeCheckBoxes.get(interaction);
             String toolTip = _interactionToolTips.get(interaction);
-            setupGeneralSlider(slider, encode(getLambdaMin()), encode(getLambdaMax()), double.class, interaction, toolTip);
+            setupGeneralSlider(slider, encode(getLambdaMin()), encode(getLambdaMax()), double.class, interaction,
+                               toolTip);
             ChangeListener cl = new ChangeListener() { // update interaction strength
                 public void stateChanged(ChangeEvent e) {
                     if (_state != null) {
                         int negativeFactor = checkbox.isSelected() ? -1 : 1;
-                        _state.setInteractionStrength(interaction, decode(negativeFactor*slider.getValue()));
+                        _state.setInteractionStrength(interaction, negativeFactor * decode( slider.getValue()));
                     }
-                        
+
                 }
             };
             slider.addChangeListener(cl);
@@ -613,7 +619,7 @@ public abstract class SimulatorFrame extends JFrame {
         final JLabel value = new JLabel();
 
         // add negative value checkboxes
-        if (interaction!=null)
+        if (interaction != null)
             _controlPanel.add(_negativeCheckBoxes.get(interaction), "1, " + row + ", left, top");
 
         _controlPanel.add(icon, "1, " + row + ", center, center");

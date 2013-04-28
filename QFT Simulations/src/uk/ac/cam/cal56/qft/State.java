@@ -27,6 +27,8 @@ public interface State {
     public Complex[][] get2PMom();
 
     public Double getRemainingProbability();
+    
+    public double getTotalEnergy();
 
     // remember to recalculate ALL the coefficients (not only current)
     public void setInteractionStrength(Interaction interaction, double lambda);
