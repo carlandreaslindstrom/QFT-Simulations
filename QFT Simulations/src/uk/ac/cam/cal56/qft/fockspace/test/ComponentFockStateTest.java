@@ -18,7 +18,7 @@ public class ComponentFockStateTest {
         ComponentFockState f = new ComponentFockState(N, Pmax, m, dx);
 
         for (int i : f) {
-            System.out.println(i + " " + f.toList());
+            System.out.println(i + " " + f.getParticles());
         }
     }
 

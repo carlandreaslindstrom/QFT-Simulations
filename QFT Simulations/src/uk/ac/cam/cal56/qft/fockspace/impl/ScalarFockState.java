@@ -24,7 +24,6 @@ public class ScalarFockState extends SingleFieldFockState {
                 particleIncrementer(index - 1);
                 particle = _particles.get(index - 1);
             }
-
         }
         _particles.set(index, particle);
     }
@@ -56,14 +55,14 @@ public class ScalarFockState extends SingleFieldFockState {
     // in that momentum with n creation operators and m annihilation operators. Complete
     // combinatoric factor is obtained by the product these for all momenta.
     // F_p(l,n,m) = sqrt( (Product[a=1->n](l-m+a)) * (Product[b=1->m](l+1-b) )
-    public static double F_p(int l_p, int n_p, int m_p) {
+    public static double F_p(int l_p, int n_p, int m_p, double L) {
         if (m_p > l_p)
             return 0;
-        int squaredProduct = 1;
+        double squaredProduct = 1;
         for (int a = 1; a <= n_p; a++)
-            squaredProduct *= (l_p - m_p + a);
+            squaredProduct *= L * (l_p - m_p + a);
         for (int b = 1; b <= m_p; b++)
-            squaredProduct *= (l_p + 1 - b);
+            squaredProduct *= L * (l_p + 1 - b);
         return Math.sqrt(squaredProduct);
     }
 

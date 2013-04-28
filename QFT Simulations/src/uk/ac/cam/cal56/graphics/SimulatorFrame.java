@@ -9,7 +9,6 @@ import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import javax.swing.Box;
 import javax.swing.ButtonGroup;
@@ -59,6 +58,8 @@ public abstract class SimulatorFrame extends JFrame {
     protected static final String                BUTTON_PLAY           = "Play";
     protected static final String                BUTTON_STOP           = "Stop";
     protected static final String                BUTTON_RESET          = "Reset";
+    protected static final String                BUTTON_GROUNDSTATE          = "Set to ground state";
+    
 
     protected static int                         _recalculateBeforeRow;
     private int                                  _controlPanelRowAdder = 1;
@@ -152,15 +153,13 @@ public abstract class SimulatorFrame extends JFrame {
     protected JButton                            _calculateButton      = new JButton(BUTTON_CALCULATE);
     protected JButton                            _playButton           = new JButton(BUTTON_PLAY);
     protected JButton                            _resetButton          = new JButton(BUTTON_RESET);
+    protected JButton                            _groundStateButton          = new JButton(BUTTON_GROUNDSTATE);
 
     // Interaction sliders and checkboxes
     protected static Map<Interaction, JCheckBox> _checkBoxes           = new HashMap<Interaction, JCheckBox>();
     protected static Map<Interaction, JSlider>   _interactionSliders   = new HashMap<Interaction, JSlider>();
     protected static Map<Interaction, String>    _interactionToolTips  = new HashMap<Interaction, String>();
-
-    static {
-
-    }
+    protected static Map<Interaction, JCheckBox> _negativeCheckBoxes   = new HashMap<Interaction, JCheckBox>();
 
     /**** ABSTRACT METHODS ****/
 
@@ -215,6 +214,10 @@ public abstract class SimulatorFrame extends JFrame {
         _interactionToolTips.put(Interaction.PHI_SQUARED, "2-vertex interaction strength");
         _interactionToolTips.put(Interaction.PHI_CUBED, "3-vertex interaction strength");
         _interactionToolTips.put(Interaction.PHI_FOURTH, "4-vertex interaction strength");
+        
+        _negativeCheckBoxes.put(Interaction.PHI_SQUARED, new JCheckBox());
+        _negativeCheckBoxes.put(Interaction.PHI_CUBED, new JCheckBox());
+        _negativeCheckBoxes.put(Interaction.PHI_FOURTH, new JCheckBox());
     }
 
     // fired every time frame is updated
@@ -301,6 +304,7 @@ public abstract class SimulatorFrame extends JFrame {
                 ColumnSpec.decode("64px"),
                 FormFactory.LABEL_COMPONENT_GAP_COLSPEC,},
             new RowSpec[] {
+                FormFactory.MIN_ROWSPEC,
                 FormFactory.MIN_ROWSPEC,
                 FormFactory.MIN_ROWSPEC,
                 FormFactory.MIN_ROWSPEC,
@@ -520,10 +524,11 @@ public abstract class SimulatorFrame extends JFrame {
 
     protected void setupSlidersAndButtons() {
         // add calculate sliders
-        setupGeneralSlider(_NSlider, getNMin(), getNMax(), int.class, "Number of lattice points");
-        setupGeneralSlider(_PmaxSlider, getPmaxMin(), getPmaxMax(), int.class, "Number of particles considered");
-        setupGeneralSlider(_dxSlider, encode(getDxMin()), encode(getDxMax()), double.class, "Lattice point separation");
-        setupGeneralSlider(_mSlider, encode(getMMin()), encode(getMMax()), double.class, "Particle mass");
+        setupGeneralSlider(_NSlider, getNMin(), getNMax(), int.class, null, "Number of lattice points");
+        setupGeneralSlider(_PmaxSlider, getPmaxMin(), getPmaxMax(), int.class, null, "Number of particles considered");
+        setupGeneralSlider(_dxSlider, encode(getDxMin()), encode(getDxMax()), double.class, null,
+                           "Lattice point separation");
+        setupGeneralSlider(_mSlider, encode(getMMin()), encode(getMMax()), double.class, null, "Particle mass");
 
         setupCheckboxes();
         _recalculateBeforeRow = _controlPanelRowAdder++;
@@ -533,7 +538,7 @@ public abstract class SimulatorFrame extends JFrame {
         _controlPanel.add(Box.createVerticalStrut(30), "2, " + (_controlPanelRowAdder++));
 
         // add real time sliders...
-        setupGeneralSlider(_dtSlider, encode(getDtMin()), encode(getDtMax()), double.class, "Time step");
+        setupGeneralSlider(_dtSlider, encode(getDtMin()), encode(getDtMax()), double.class, null, "Time step");
         // ... with a real time update listener...
         _dtSlider.addChangeListener(new ChangeListener() { // update time step
             public void stateChanged(ChangeEvent e) {
@@ -541,20 +546,27 @@ public abstract class SimulatorFrame extends JFrame {
                     _state.setTimeStep(decode(_dtSlider.getValue()));
             }
         });
-        setupGeneralSlider(_stepsSlider, getStepsMin(), getStepsMax(), int.class, "Steps calculated per frame");
+        setupGeneralSlider(_stepsSlider, getStepsMin(), getStepsMax(), int.class, null, "Steps calculated per frame");
 
         // ... including interaction sliders (with change listeners)
-        for (Entry<Interaction, JSlider> entry : _interactionSliders.entrySet()) {
-            final Interaction interaction = entry.getKey();
-            final JSlider slider = entry.getValue();
+        Interaction[] interactionsInOrder = new Interaction[] { Interaction.PHI_SQUARED, Interaction.PHI_CUBED,
+            Interaction.PHI_FOURTH };
+        for (final Interaction interaction : interactionsInOrder) {
+            final JSlider slider = _interactionSliders.get(interaction);
+            final JCheckBox checkbox = _negativeCheckBoxes.get(interaction);
             String toolTip = _interactionToolTips.get(interaction);
-            setupGeneralSlider(slider, encode(getLambdaMin()), encode(getLambdaMax()), double.class, toolTip);
-            slider.addChangeListener(new ChangeListener() { // update interaction strength
+            setupGeneralSlider(slider, encode(getLambdaMin()), encode(getLambdaMax()), double.class, interaction, toolTip);
+            ChangeListener cl = new ChangeListener() { // update interaction strength
                 public void stateChanged(ChangeEvent e) {
-                    if (_state != null)
-                        _state.setInteractionStrength(interaction, decode(slider.getValue()));
+                    if (_state != null) {
+                        int negativeFactor = checkbox.isSelected() ? -1 : 1;
+                        _state.setInteractionStrength(interaction, decode(negativeFactor*slider.getValue()));
+                    }
+                        
                 }
-            });
+            };
+            slider.addChangeListener(cl);
+            checkbox.addChangeListener(cl);
         }
 
         // separator
@@ -563,6 +575,7 @@ public abstract class SimulatorFrame extends JFrame {
         // play and reset buttons
         _controlPanel.add(_playButton, "2, " + _controlPanelRowAdder++);
         _controlPanel.add(_resetButton, "2, " + _controlPanelRowAdder++);
+        _controlPanel.add(_groundStateButton, "2, " + _controlPanelRowAdder++);
 
     }
 
@@ -579,7 +592,10 @@ public abstract class SimulatorFrame extends JFrame {
             checkBox.addChangeListener(calculateButtonEnabler);
     }
 
-    protected void setupGeneralSlider(final JSlider slider, int min, int max, final Class<?> type, String toolTip) {
+    protected void setupGeneralSlider(final JSlider slider, int min, int max, final Class<?> type,
+                                      final Interaction interaction, String toolTip) {
+        final int row = _controlPanelRowAdder;
+
         if (type == double.class) {
             Hashtable<Integer, JLabel> labelTable = new Hashtable<Integer, JLabel>();
             labelTable.put(min, new JLabel(decodeText(min)));
@@ -590,13 +606,15 @@ public abstract class SimulatorFrame extends JFrame {
         slider.setPaintTicks(true);
         slider.setPaintLabels(true);
 
-        final int row = _controlPanelRowAdder;
-
         JLabel icon = new JLabel("");
         icon.setIcon(new ImageIcon(getClass().getResource("icons/" + row + ".png")));
         icon.setToolTipText(toolTip);
 
         final JLabel value = new JLabel();
+
+        // add negative value checkboxes
+        if (interaction!=null)
+            _controlPanel.add(_negativeCheckBoxes.get(interaction), "1, " + row + ", left, top");
 
         _controlPanel.add(icon, "1, " + row + ", center, center");
         _controlPanel.add(slider, "2, " + row + ", left, top");
@@ -632,7 +650,13 @@ public abstract class SimulatorFrame extends JFrame {
                     stop();
             }
         });
-
+        _groundStateButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                reset();
+                _state.setToGroundState();
+                start();
+            }
+        });
         // add appropriate action listeners
         _calculateButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {

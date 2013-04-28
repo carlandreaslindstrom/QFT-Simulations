@@ -1,5 +1,7 @@
 package uk.ac.cam.cal56.qft.fockspace.labelling;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import uk.ac.cam.cal56.qft.fockspace.impl.ComponentFockState;
@@ -36,6 +38,41 @@ public class FermionLabelling {
 
         // return result
         return sum;
+    }
+
+    public static Integer braIndex(FermionFockState ket, int[] bdaggers, int[] cdaggers, int[] cs, int[] bs, int N) {
+        // particles
+        List<Integer> braParticles = new ArrayList<Integer>(ket.getParticles());
+        for (int b : bs) {
+            b = mod(b, N);
+            if (braParticles.contains(b))
+                braParticles.remove((Integer) b); // first subtract annihilators
+            else
+                return null; // stop if annihilating entire state
+        }
+        for (int bdagger : bdaggers)
+            braParticles.add(mod(bdagger, N)); // then add creators
+        Collections.sort(braParticles);
+
+        // antiparticles
+        List<Integer> braAntiParticles = new ArrayList<Integer>(ket.getAntiParticles());
+        for (int c : cs) {
+            c = mod(c, N);
+            if (braAntiParticles.contains(c))
+                braAntiParticles.remove((Integer) c); // first subtract annihilators
+            else
+                return null; // stop if annihilating entire state
+        }
+        for (int cdagger : cdaggers)
+            braAntiParticles.add(mod(cdagger, N)); // then add creators
+        Collections.sort(braAntiParticles);
+
+        // find label
+        return label(braParticles, braAntiParticles, N);
+    }
+
+    private static int mod(int p, int N) {
+        return (p + 2 * N) % N;
     }
 
 }

@@ -42,8 +42,12 @@ public class FermionFockState extends FockState {
         return _particles.getParticleNumber() + _antiparticles.getParticleNumber();
     }
 
-    public String toString() {
-        return _particles.toString() + " " + _antiparticles.toString();
+    public List<Integer> getParticles() {
+        return _particles.getParticles();
+    }
+
+    public List<Integer> getAntiParticles() {
+        return _antiparticles.getParticles();
     }
 
     // stepping function for two fields (complicated, follow comments carefully to understand)
@@ -117,11 +121,15 @@ public class FermionFockState extends FockState {
         return Combinatorics.choose(2 * N, p); // times 2 due to particles and antiparticles
     }
 
-    public List<Integer> getParticles() {
-        return _particles.toList();
+    // Combinatoric factor from a given momentum from sandwiching a state of l particles
+    // in that momentum with n creation operators and m annihilation operators. Complete
+    // combinatoric factor is obtained by the product these for all momenta.
+    // F_p(l,n,m) = sqrt( (Product[a=1->n](l-m+a)) * (Product[b=1->m](l+1-b) )
+    public static double F_p(int l_p, int n_p, int m_p, double L) {
+        int k_p = l_p + n_p - m_p;
+        if (m_p > l_p || n_p > k_p || l_p > 1 || n_p > 1 || m_p > 1 || k_p > 1)
+            return 0;
+        return Math.pow(L, (n_p + m_p) / 2.0);
     }
 
-    public List<Integer> getAntiParticles() {
-        return _antiparticles.toList();
-    }
 }

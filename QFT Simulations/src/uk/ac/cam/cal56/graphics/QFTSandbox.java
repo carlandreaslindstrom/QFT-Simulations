@@ -12,7 +12,7 @@ import javax.swing.JSlider;
 import uk.ac.cam.cal56.qft.Interaction;
 import uk.ac.cam.cal56.qft.WavePacket;
 import uk.ac.cam.cal56.qft.fermions.FermionState;
-import uk.ac.cam.cal56.qft.scalars.impl.ScalarState;
+import uk.ac.cam.cal56.qft.scalars.ScalarState;
 
 @SuppressWarnings("serial")
 public class QFTSandbox extends SimulatorFrame {
@@ -21,9 +21,9 @@ public class QFTSandbox extends SimulatorFrame {
     protected String getFrameTitle()    { return "Quantum Field Theory on a Ring"; }
     protected Color getDisplayColor()   { return Color.BLACK; }
     protected Color getLabelColor()     { return Color.GRAY; }
-    protected int getFrameWidth()       { return 1240; }
-    protected int getFrameHeight()      { return 900; }
-    protected int getPlotWidth()        { return 324; }
+    protected int getFrameWidth()       { return 1100; }
+    protected int getFrameHeight()      { return 800; }
+    protected int getPlotWidth()        { return 256; }
     protected int getPlotHeight()       { return getPlotWidth(); }
     protected int getNMin()             { return 2; }
     protected int getNMax()             { return 128; }
@@ -41,9 +41,6 @@ public class QFTSandbox extends SimulatorFrame {
     protected double getLambdaMax()     { return 1.0e2; }
     protected Preset getDefaultPreset() { return Preset.INT_2P_FAST; }
     // @formatter:on
-
-    public QFTSandbox() {
-    }
 
     // quantum state and plots representing it
     protected void setupQuantumState(WavePacket wavePacket) {

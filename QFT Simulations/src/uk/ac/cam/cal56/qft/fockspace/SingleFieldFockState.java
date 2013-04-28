@@ -24,7 +24,7 @@ public abstract class SingleFieldFockState extends FockState {
     }
 
     // particle entries as list (for unit testing)
-    public List<Integer> toList() {
+    public List<Integer> getParticles() {
         return _particles;
     }
 

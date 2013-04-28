@@ -12,13 +12,13 @@ import uk.ac.cam.cal56.qft.Hamiltonian;
 import uk.ac.cam.cal56.qft.Interaction;
 import uk.ac.cam.cal56.qft.fockspace.FockState;
 import uk.ac.cam.cal56.qft.fockspace.impl.ScalarFockState;
-import uk.ac.cam.cal56.qft.scalars.impl.InteractionHamiltonian;
+import uk.ac.cam.cal56.qft.scalars.ScalarInteractionHamiltonian;
 
-public class InteractionHamiltonianTest {
+public class ScalarInteractionHamiltonianTest {
 
     private final double      EPSILON      = 1.0e-10;
 
-    private final int         _N           = 16;
+    private final int         _N           = 24;
     private final int         _Pmax        = 3;
     private final double      _mass        = 1.0;
     private final double      _dx          = 0.1;
@@ -30,7 +30,7 @@ public class InteractionHamiltonianTest {
 
     @Before
     public void setUp() throws Exception {
-        _ih = new InteractionHamiltonian(_N, _Pmax, _mass, _dx, _interaction);
+        _ih = new ScalarInteractionHamiltonian(_N, _Pmax, _mass, _dx, _interaction);
         _ih.calculateElements();
     }
 
@@ -46,8 +46,8 @@ public class InteractionHamiltonianTest {
                 assertTrue(element.getValue() > 0.0);
             }
         }
-        assertEquals(total, 12191.019844742212, EPSILON);
-        assertEquals(elementCount, 4488);
+        assertEquals(total, 511.65845858874883, EPSILON);
+        assertEquals(elementCount, 14668);
     }
 
     @Test

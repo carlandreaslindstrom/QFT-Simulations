@@ -14,7 +14,7 @@ import uk.ac.cam.cal56.qft.WavePacket;
 import uk.ac.cam.cal56.qft.impl.EvenOrderSymplecticState;
 import uk.ac.cam.cal56.qft.impl.MomentumWavePacket;
 import uk.ac.cam.cal56.qft.impl.SecondOrderSymplecticState;
-import uk.ac.cam.cal56.qft.scalars.impl.ScalarState;
+import uk.ac.cam.cal56.qft.scalars.ScalarState;
 
 public class EvenOrderSymplecticStateTest {
 

@@ -73,10 +73,17 @@ public class MomentumWavePacket extends WavePacket {
             double norm = 0.0;
             for (int p = 0; p < _N; p++) {
                 double z1p = (p - pPeak) / sigma;
+                double z2p = (p - qPeak) / sigma;
+                double z3p = (p + _N - qPeak) / sigma;
                 for (int q = p; q < _N; q++) {
                     double z1q = (q - qPeak) / sigma;
-                    double value = Math.sqrt(_peakProbability) * (Math.exp(-(z1p * z1p + z1q * z1q) / 2));
-                    int i = ScalarLabelling.index(Arrays.asList(p, q), _N) - S2;
+                    double z2q = (q - _N - pPeak) / sigma;
+                    double z3q = (q - pPeak) / sigma;
+                    double value = Math.exp(-(z1p * z1p + z1q * z1q) / 2);
+                    value += Math.exp(-(z2p * z2p + z2q * z2q) / 2);
+                    value += Math.exp(-(z3p * z3p + z3q * z3q) / 2);
+                    value *= Math.sqrt(_peakProbability);
+                    int i = ScalarLabelling.label(Arrays.asList(p, q), _N) - S2;
                     values[i] = Complex.expi(-_phases[0] * p - _phases[1] * q).times(value);
                     norm += value * value;
                 }
@@ -90,8 +97,6 @@ public class MomentumWavePacket extends WavePacket {
             }
 
         }
-
-        // TODO: more particle wave packets
 
         // return the result
         return coeffs;

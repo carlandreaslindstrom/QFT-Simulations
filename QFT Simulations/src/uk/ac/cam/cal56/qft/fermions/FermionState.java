@@ -3,8 +3,10 @@ package uk.ac.cam.cal56.qft.fermions;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import uk.ac.cam.cal56.maths.Complex;
+import uk.ac.cam.cal56.qft.Hamiltonian;
 import uk.ac.cam.cal56.qft.Interaction;
 import uk.ac.cam.cal56.qft.WavePacket;
 import uk.ac.cam.cal56.qft.fockspace.impl.FermionFockState;
@@ -26,12 +28,12 @@ public class FermionState extends SecondOrderSymplecticState {
         _Hfree = new FreeHamiltonian(N, Pmax, m, dx, FermionFockState.class);
 
         // add interaction Hamiltonians
-        // for (Entry<Interaction, Double> lambda : lambdas.entrySet())
-        // _hamiltonians.put(lambda.getKey(), new InteractionHamiltonian(N, Pmax, m, dx, lambda.getKey()));
+        for (Entry<Interaction, Double> lambda : lambdas.entrySet())
+            _hamiltonians.put(lambda.getKey(), new FermionInteractionHamiltonian(N, Pmax, m, dx, lambda.getKey()));
 
         // calculate elements of these
-        // for (Entry<Interaction, Hamiltonian> h : _hamiltonians.entrySet())
-        // h.getValue().calculateElements();
+        for (Entry<Interaction, Hamiltonian> h : _hamiltonians.entrySet())
+            h.getValue().calculateElements();
 
         // set coefficients (to pure vacuum) and do first step
         setWavePacket(wavepacket);

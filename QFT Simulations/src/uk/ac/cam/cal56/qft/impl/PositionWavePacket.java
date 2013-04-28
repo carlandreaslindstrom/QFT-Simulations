@@ -79,10 +79,17 @@ public class PositionWavePacket extends WavePacket {
             double norm = 0.0;
             for (int p = 0; p < _N; p++) {
                 double z1p = (p - pPeak) / sigma;
+                double z2p = (p - qPeak) / sigma;
+                double z3p = (p + _N - qPeak) / sigma;
                 for (int q = p; q < _N; q++) {
                     double z1q = (q - qPeak) / sigma;
-                    double value = Math.sqrt(_peakProbability) * (Math.exp(-(z1p * z1p + z1q * z1q) / 2));
-                    int i = ScalarLabelling.index(Arrays.asList(p, q), _N) - S2;
+                    double z2q = (q - _N - pPeak) / sigma;
+                    double z3q = (q - pPeak) / sigma;
+                    double value = Math.exp(-(z1p * z1p + z1q * z1q) / 2);
+                    value += Math.exp(-(z2p * z2p + z2q * z2q) / 2);
+                    value += Math.exp(-(z3p * z3p + z3q * z3q) / 2);
+                    value *= Math.sqrt(_peakProbability);
+                    int i = ScalarLabelling.label(Arrays.asList(p, q), _N) - S2;
                     values[i] = value;
                     norm += value * value;
                 }
@@ -94,7 +101,7 @@ public class PositionWavePacket extends WavePacket {
             Complex[][] inverseCoeffs = new Complex[_N][_N]; // now incorrectly normalised, will normalised when FT'ed
             for (int p = 0; p < _N; p++) {
                 for (int q = p; q < _N; q++) {
-                    int i = ScalarLabelling.index(Arrays.asList(p, q), _N) - S2;
+                    int i = ScalarLabelling.label(Arrays.asList(p, q), _N) - S2;
                     double value = values[i] / norm;
                     Complex coeff = Complex.expi(_phases[0] * p + _phases[1] * q).times(value);
                     inverseCoeffs[p][q] = coeff;
@@ -119,7 +126,7 @@ public class PositionWavePacket extends WavePacket {
             // normalise and save coefficients
             for (int p = 0; p < _N; p++)
                 for (int q = p; q < _N; q++)
-                    coeffs[ScalarLabelling.index(Arrays.asList(p, q), _N)] = inverseCoeffs[p][q].divide(norm);
+                    coeffs[ScalarLabelling.label(Arrays.asList(p, q), _N)] = inverseCoeffs[p][q].divide(norm);
         }
         else if (S3 <= S) {
             for (int i = S2; i < S3; i++)

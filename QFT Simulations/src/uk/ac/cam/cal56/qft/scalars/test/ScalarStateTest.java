@@ -12,7 +12,7 @@ import uk.ac.cam.cal56.qft.Interaction;
 import uk.ac.cam.cal56.qft.State;
 import uk.ac.cam.cal56.qft.impl.MomentumWavePacket;
 import uk.ac.cam.cal56.qft.impl.SecondOrderSymplecticState;
-import uk.ac.cam.cal56.qft.scalars.impl.ScalarState;
+import uk.ac.cam.cal56.qft.scalars.ScalarState;
 
 public class ScalarStateTest {
 

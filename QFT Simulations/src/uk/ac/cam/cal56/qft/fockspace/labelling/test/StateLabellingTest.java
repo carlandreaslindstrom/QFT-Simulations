@@ -23,7 +23,7 @@ public class StateLabellingTest {
         assertEquals(ScalarFockState.S(N, Pmax), 383306);
         ScalarFockState phi = new ScalarFockState(N, Pmax, m, dx);
         for (int i : phi)
-            assertEquals(i, ScalarLabelling.index(phi.toList(), N));
+            assertEquals(i, ScalarLabelling.label(phi.getParticles(), N));
         assertFalse(phi.getLabel() == -1); // fails if not stepped
 
         N = 12;
@@ -31,7 +31,7 @@ public class StateLabellingTest {
         assertEquals(ScalarFockState.S(N, Pmax), 646646);
         phi = new ScalarFockState(N, Pmax, m, dx);
         for (int i : phi)
-            assertEquals(i, ScalarLabelling.index(phi.toList(), N));
+            assertEquals(i, ScalarLabelling.label(phi.getParticles(), N));
         assertFalse(phi.getLabel() == -1); // fails if not stepped
     }
 
@@ -91,8 +91,8 @@ public class StateLabellingTest {
 
         for (int n : phi) {
             for (int p = 0; p < N; p++) {
-                Integer m = ScalarLabelling.braIndex(phi.toList(), new int[] {}, new int[] { p }, N);
-                assertEquals(phi.toList().contains(p), m != null);
+                Integer m = ScalarLabelling.braIndex(phi.getParticles(), new int[] {}, new int[] { p }, N);
+                assertEquals(phi.getParticles().contains(p), m != null);
             }
         }
 

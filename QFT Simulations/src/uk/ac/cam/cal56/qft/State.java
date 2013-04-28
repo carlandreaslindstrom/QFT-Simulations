@@ -11,6 +11,8 @@ public interface State {
     public void reset();
 
     public void setWavePacket(WavePacket wavepacket);
+    
+    public void setToGroundState();
 
     public int getN();
 

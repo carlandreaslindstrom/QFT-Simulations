@@ -10,7 +10,7 @@ import uk.ac.cam.cal56.qft.fockspace.impl.ScalarFockState;
 
 public class ScalarLabelling {
 
-    public static int index(List<Integer> as, int N) { // a's = creation ladder operators
+    public static int label(List<Integer> as, int N) { // a's = creation ladder operators
         int aP = as.size(); // particle number
         int sum = ScalarFockState.S(N, aP - 1);
         for (int p = 0; p < aP; p++)
@@ -48,18 +48,18 @@ public class ScalarLabelling {
     }
 
     // returns the index of the only bra which gives a non-trivial state sandwich
-    public static Integer braIndex(List<Integer> ketEntries, int[] creators, int[] annihilators, int N) {
-        List<Integer> ks = new ArrayList<Integer>(ketEntries);
-        for (int a : annihilators) {
-            a = (a + 2 * N) % N;
-            if (ks.contains(a))
-                ks.remove((Integer) a); // first subtract annihilators
+    public static Integer braIndex(List<Integer> ketParticles, int[] adaggers, int[] as, int N) {
+        List<Integer> braParticles = new ArrayList<Integer>(ketParticles);
+        for (int a : as) {
+            a = mod(a, N);
+            if (braParticles.contains(a))
+                braParticles.remove((Integer) a); // first subtract annihilators
             else
                 return null; // stop if annihilating entire state
         }
-        for (int c : creators)
-            ks.add((c + 2 * N) % N); // then add creators
-        Collections.sort(ks);
-        return ScalarLabelling.index(ks, N);
+        for (int adagger : adaggers)
+            braParticles.add(mod(adagger, N)); // then add creators
+        Collections.sort(braParticles);
+        return label(braParticles, N);
     }
 }

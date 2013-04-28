@@ -1,4 +1,4 @@
-package uk.ac.cam.cal56.qft.scalars.impl;
+package uk.ac.cam.cal56.qft.scalars;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -27,7 +27,7 @@ public class ScalarState extends SecondOrderSymplecticState {
 
         // add interaction Hamiltonians
         for (Entry<Interaction, Double> lambda : lambdas.entrySet())
-            _hamiltonians.put(lambda.getKey(), new InteractionHamiltonian(N, Pmax, m, dx, lambda.getKey()));
+            _hamiltonians.put(lambda.getKey(), new ScalarInteractionHamiltonian(N, Pmax, m, dx, lambda.getKey()));
 
         // calculate elements of these
         for (Entry<Interaction, Hamiltonian> h : _hamiltonians.entrySet())
@@ -51,7 +51,7 @@ public class ScalarState extends SecondOrderSymplecticState {
         Complex[][] ampls = new Complex[_N][_N];
         for (int p = 0; p < _N; p++)
             for (int q = p; q < _N; q++) {
-                Complex value = _c[ScalarLabelling.index(Arrays.asList(p, q), _N)];
+                Complex value = _c[ScalarLabelling.label(Arrays.asList(p, q), _N)];
                 ampls[p][q] = value;
                 if (p != q)
                     ampls[q][p] = value;

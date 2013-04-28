@@ -105,5 +105,10 @@ public abstract class BaseState implements State {
         _dt = dt;
         firstStep();
     }
+    
+    @Override
+    public void setToGroundState() {
+        // TODO
+    }
 
 }

@@ -21,25 +21,25 @@ public class ScalarFockStateTest {
         // step one state multiple times and verify samples
         f.next();
         assertEquals(f.getLabel(), 0);
-        assertEquals(f.toList(), Arrays.asList());
+        assertEquals(f.getParticles(), Arrays.asList());
 
         f.next();
         assertEquals(f.getLabel(), 1);
-        assertEquals(f.toList(), Arrays.asList(0));
+        assertEquals(f.getParticles(), Arrays.asList(0));
 
         f.next();
         assertEquals(f.getLabel(), 2);
-        assertEquals(f.toList(), Arrays.asList(1));
+        assertEquals(f.getParticles(), Arrays.asList(1));
 
         for (int i = 0; i < 18; i++)
             f.next();
         assertEquals(f.getLabel(), 20);
-        assertEquals(f.toList(), Arrays.asList(0, 1, 2));
+        assertEquals(f.getParticles(), Arrays.asList(0, 1, 2));
 
         for (int i = 0; i < 14; i++)
             f.next();
         assertEquals(f.getLabel(), 34);
-        assertEquals(f.toList(), Arrays.asList(3, 3, 3));
+        assertEquals(f.getParticles(), Arrays.asList(3, 3, 3));
 
         // check that it produces the right number of particles
         for (int P = 0; P < 30; P++) {
@@ -61,7 +61,7 @@ public class ScalarFockStateTest {
         for (int i = 0; i < 18; i++)
             f.next();
         assertEquals(f.getLabel(), 18);
-        assertEquals(f.toList(), Arrays.asList(0, 0, 3));
+        assertEquals(f.getParticles(), Arrays.asList(0, 0, 3));
         assertEquals(f.getParticleNumber(), 3);
         assertEquals(f.getMomentumNumber(), 3);
         assertEquals(f.getEnergy(), 16.17744688, 1e-7);
@@ -80,7 +80,7 @@ public class ScalarFockStateTest {
         }
 
         assertEquals(f.getLabel(), ScalarFockState.S(N, Pmax) - 1);
-        assertEquals(f.toList(), Collections.nCopies(Pmax, N - 1));
+        assertEquals(f.getParticles(), Collections.nCopies(Pmax, N - 1));
     }
 
     @Test
@@ -112,34 +112,38 @@ public class ScalarFockStateTest {
 
     @Test
     public void testF_p() {
-        double epsilon = 1.0e-9;
-        for (int l = 0; l < 200; l++) {
+        double epsilon = 1.0e-6;
+        final double L = 1.4;
+        for (int l = 0; l < 100; l++) {
             // F_p(l,n,0)
-            assertEquals(ScalarFockState.F_p(l, 0, 0), 1, epsilon);
-            assertEquals(ScalarFockState.F_p(l, 1, 0), Math.sqrt(l + 1), epsilon);
-            assertEquals(ScalarFockState.F_p(l, 2, 0), Math.sqrt((l + 1) * (l + 2)), epsilon);
-            assertEquals(ScalarFockState.F_p(l, 3, 0), Math.sqrt((l + 1) * (l + 2) * (l + 3)), epsilon);
-            assertEquals(ScalarFockState.F_p(l, 4, 0), Math.sqrt((l + 1) * (l + 2) * (l + 3) * (l + 4)), epsilon);
-            assertEquals(ScalarFockState.F_p(l, 9, 0), Math.sqrt((l + 1) * (l + 2) * (l + 3) * (l + 4) * (l + 5) *
-                                                                 (l + 6) * (l + 7) * (l + 8) * (l + 9)), epsilon);
+            assertEquals(ScalarFockState.F_p(l, 0, 0, L), 1, epsilon);
+            assertEquals(ScalarFockState.F_p(l, 1, 0, L), Math.sqrt((l + 1) * L), epsilon);
+            assertEquals(ScalarFockState.F_p(l, 2, 0, L), Math.sqrt((l + 1) * L * (l + 2) * L), epsilon);
+            assertEquals(ScalarFockState.F_p(l, 3, 0, L), Math.sqrt((l + 1) * L * (l + 2) * L * (l + 3) * L), epsilon);
+            assertEquals(ScalarFockState.F_p(l, 4, 0, L), Math.sqrt((l + 1) * L * (l + 2) * L * (l + 3) * L * (l + 4) *
+                                                                    L), epsilon);
+            assertEquals(ScalarFockState.F_p(l, 9, 0, L), Math.sqrt((l + 1) * L * (l + 2) * L * (l + 3) * L * (l + 4) *
+                                                                    L * (l + 5) * L * (l + 6) * L * (l + 7) * L *
+                                                                    (l + 8) * L * (l + 9) * L), epsilon);
 
             // F_p(l,0,m) as well as testing m<=l or else = 0
-            assertEquals(ScalarFockState.F_p(l, 0, 1), Math.sqrt(l), epsilon);
-            assertEquals(ScalarFockState.F_p(l, 0, 2), Math.sqrt(l * (l - 1)), epsilon);
-            assertEquals(ScalarFockState.F_p(l, 0, 3), Math.sqrt(l * (l - 1) * (l - 2)), epsilon);
-            assertEquals(ScalarFockState.F_p(l, 0, 4), Math.sqrt(l * (l - 1) * (l - 2) * (l - 3)), epsilon);
-            assertEquals(ScalarFockState.F_p(l, 0, 9), Math.sqrt(l * (l - 1) * (l - 2) * (l - 3) * (l - 4) * (l - 5) *
-                                                                 (l - 6) * (l - 7) * (l - 8)), epsilon);
+            assertEquals(ScalarFockState.F_p(l, 0, 1, L), Math.sqrt(l * L), epsilon);
+            assertEquals(ScalarFockState.F_p(l, 0, 2, L), Math.sqrt(l * L * (l - 1) * L), epsilon);
+            assertEquals(ScalarFockState.F_p(l, 0, 3, L), Math.sqrt(l * L * (l - 1) * L * (l - 2) * L), epsilon);
+            assertEquals(ScalarFockState.F_p(l, 0, 4, L), Math.sqrt(l * L * (l - 1) * L * (l - 2) * L * (l - 3) * L),
+                         epsilon);
+            assertEquals(ScalarFockState.F_p(l, 0, 9, L), Math.sqrt(l * L * (l - 1) * L * (l - 2) * L * (l - 3) * L *
+                                                                    (l - 4) * L * (l - 5) * L * (l - 6) * L * (l - 7) *
+                                                                    L * (l - 8) * L), epsilon);
 
             // other cases
-            assertEquals(ScalarFockState.F_p(l, 1, 1), l, epsilon);
-            assertEquals(ScalarFockState.F_p(l, 2, 1), l * Math.sqrt(l + 1), epsilon);
-            assertEquals(ScalarFockState.F_p(l, 1, 2), (l - 1) * Math.sqrt(l), epsilon);
-            assertEquals(ScalarFockState.F_p(l, 2, 2), (l - 1) * l, epsilon);
-            assertEquals(ScalarFockState.F_p(l, 1, 3), (l - 2) * Math.sqrt(l * (l - 1)), epsilon);
-            assertEquals(ScalarFockState.F_p(l, 3, 1), l * Math.sqrt((l + 1) * (l + 2)), epsilon);
+            assertEquals(ScalarFockState.F_p(l, 1, 1, L), l * L, epsilon);
+            assertEquals(ScalarFockState.F_p(l, 2, 1, L), l * L * Math.sqrt((l + 1) * L), epsilon);
+            assertEquals(ScalarFockState.F_p(l, 1, 2, L), (l - 1) * L * Math.sqrt(l * L), epsilon);
+            assertEquals(ScalarFockState.F_p(l, 2, 2, L), (l - 1) * L * l * L, epsilon);
+            assertEquals(ScalarFockState.F_p(l, 1, 3, L), (l - 2) * L * Math.sqrt(l * L * (l - 1) * L), epsilon);
+            assertEquals(ScalarFockState.F_p(l, 3, 1, L), l * L * Math.sqrt((l + 1) * L * (l + 2) * L), epsilon);
         }
-
     }
 
 }
