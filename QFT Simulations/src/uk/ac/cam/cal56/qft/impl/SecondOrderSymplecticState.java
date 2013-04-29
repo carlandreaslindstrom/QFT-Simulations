@@ -10,10 +10,7 @@ import uk.ac.cam.cal56.qft.WavePacket;
 
 public abstract class SecondOrderSymplecticState extends BaseState {
 
-    private static double  EPSILON     = 0.05;
-    private static Complex DECAYFACTOR = new Complex(1, EPSILON);
-
-    private Complex[]      _prevc;                               // c_n(t-dt) : previous coefficients
+    private Complex[] _prevc;                               // c_n(t-dt) : previous coefficients
 
     protected SecondOrderSymplecticState(int N, int Pmax, double m, double dx, double dt,
             Map<Interaction, Double> lambdas, WavePacket wavepacket) {
@@ -72,51 +69,6 @@ public abstract class SecondOrderSymplecticState extends BaseState {
 
         // increment time
         _time += _dt;
-    }
-
-    // TODO: not really working yet...
-    public void stepWhileDecayToGroundState() { 
-
-        Complex[] nextc = new Complex[_S]; // next coefficients
-        for (int n = 0; n < _S; n++) { // loop over all states
-
-            // first add free theory
-            Complex sum = _c[n].times(_Hfree.getEnergy(n));
-
-            // then interactions
-            for (Entry<Interaction, Hamiltonian> h : _hamiltonians.entrySet()) {
-                Complex subsum = Complex.zero();
-                for (Entry<Integer, Double> h_mn : h.getValue().getRow(n).entrySet())
-                    subsum = subsum.plus(_c[h_mn.getKey()].times(h_mn.getValue()));
-                sum = sum.plus(subsum.times(_lambdas.get(h.getKey())));
-            }
-            Complex cdot = sum.timesi(-1);
-
-            // c_n(t+dt)=c_n(t-dt)+2dt*cdot_n(t)
-            nextc[n] = _prevc[n].plus(DECAYFACTOR.times(cdot.times(2 * _dt)));
-        }
-
-        // swap to new coefficients
-        _prevc = _c;
-        _c = nextc;
-
-        normalise(_c, _prevc);
-
-        // increment time
-        _time += _dt;
-    }
-
-    private void normalise(Complex[] cs, Complex[] prevcs) {
-        double normsquared = 0;
-        for (Complex c : cs)
-            normsquared += c.modSquared();
-        double norm = Math.sqrt(normsquared);
-        if (Math.abs(1 - norm) < EPSILON) {
-            for (int i = 0; i < cs.length; i++) {
-                cs[i] = cs[i].divide(norm);
-                // prevcs[i] = prevcs[i].divide(norm);
-            }
-        }
     }
 
 }

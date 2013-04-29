@@ -46,7 +46,7 @@ public class FermionState extends SecondOrderSymplecticState {
         return Arrays.copyOfRange(_c, 1, _N + 1);
     }
 
-    public Complex[] get1PMomAntiparticle() {
+    public Complex[] get1AntiPMom() {
         if (_S <= 1)
             return null;
         return Arrays.copyOfRange(_c, _N + 1, 2 * _N + 1);
@@ -69,7 +69,7 @@ public class FermionState extends SecondOrderSymplecticState {
         return ampls;
     }
 
-    public Complex[][] get2PMomParticleAntiparticle() {
+    public Complex[][] get1P1AntiPMom() {
         if (_S <= FermionFockState.S(_N, 1)) // ensure more than 1 total particle
             return null;
         Complex[][] ampls = new Complex[_N][_N];
@@ -82,7 +82,7 @@ public class FermionState extends SecondOrderSymplecticState {
         return ampls;
     }
 
-    public Complex[][] get2PMomAntiparticles() {
+    public Complex[][] get2AntiPMom() {
         if (_S <= FermionFockState.S(_N, 1)) // ensure more than 1 total particle
             return null;
         Complex[][] ampls = new Complex[_N][_N];
@@ -96,5 +96,16 @@ public class FermionState extends SecondOrderSymplecticState {
             ampls[p][p] = Complex.zero(); // vanishing diagonal (from Pauli's exclusion principle)
         }
         return ampls;
+    }
+
+    @Override
+    public Double getRemainingProbability() {
+        int S2 = FermionFockState.S(_N, 2);
+        if (S2 >= _S)
+            return null; // if only 2 particles, return null
+        double probSquared = 0;
+        for (int n = S2; n < _S; n++)
+            probSquared += _c[n].modSquared(); // add up remaining probabilities
+        return probSquared;
     }
 }

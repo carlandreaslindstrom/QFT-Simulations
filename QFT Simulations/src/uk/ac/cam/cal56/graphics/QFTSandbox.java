@@ -1,6 +1,5 @@
 package uk.ac.cam.cal56.graphics;
 
-import java.awt.Color;
 import java.awt.EventQueue;
 import java.util.HashMap;
 import java.util.Map;
@@ -19,12 +18,8 @@ public class QFTSandbox extends SimulatorFrame {
 
     // @formatter:off
     protected String getFrameTitle()    { return "Quantum Field Theory on a Ring"; }
-    protected Color getDisplayColor()   { return Color.BLACK; }
-    protected Color getLabelColor()     { return Color.GRAY; }
-    protected int getFrameWidth()       { return 1100; }
-    protected int getFrameHeight()      { return 775; }
-    protected int getPlotWidth()        { return 256; }
-    protected int getPlotHeight()       { return getPlotWidth(); }
+    protected int getFrameWidth()       { return 1110; }
+    protected int getFrameHeight()      { return 790; }
     protected int getNMin()             { return 2; }
     protected int getNMax()             { return 128; }
     protected int getPmaxMin()          { return 1; }
@@ -57,12 +52,12 @@ public class QFTSandbox extends SimulatorFrame {
 
         // make scalar quantum state
         if (_scalarButton.isSelected())
-            _state = new ScalarState(_NSlider.getValue(), _PmaxSlider.getValue(), decode(_mSlider.getValue()),
+            state = new ScalarState(_NSlider.getValue(), _PmaxSlider.getValue(), decode(_mSlider.getValue()),
                 decode(_dxSlider.getValue()), decode(_dtSlider.getValue()), lambdas, wavePacket);
 
         // or a fermion quantum state
         else if (_fermionButton.isSelected())
-            _state = new FermionState(_NSlider.getValue(), _PmaxSlider.getValue(), decode(_mSlider.getValue()),
+            state = new FermionState(_NSlider.getValue(), _PmaxSlider.getValue(), decode(_mSlider.getValue()),
                 decode(_dxSlider.getValue()), decode(_dtSlider.getValue()), lambdas, wavePacket);
     }
 

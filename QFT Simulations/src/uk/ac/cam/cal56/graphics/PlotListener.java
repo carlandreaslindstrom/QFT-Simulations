@@ -23,7 +23,7 @@ public abstract class PlotListener extends MouseAdapter {
 
     public PlotListener(SimulatorFrame sandbox, Plot plot) {
         _sandbox = sandbox;
-        N = sandbox._state.getN();
+        N = sandbox.state.getN();
         width = plot._width;
         height = plot._height;
     }
@@ -41,14 +41,14 @@ public abstract class PlotListener extends MouseAdapter {
         }
 
         setWavePacket(e);
-        _sandbox._state.setWavePacket(wavePacket);
-        _sandbox.frameUpdate();
+        _sandbox.state.setWavePacket(wavePacket);
+        _sandbox.displayPanel.frameUpdate();
     }
 
     public void mouseDragged(MouseEvent e) {
         setWavePacket(e);
-        _sandbox._state.setWavePacket(wavePacket);
-        _sandbox.frameUpdate();
+        _sandbox.state.setWavePacket(wavePacket);
+        _sandbox.displayPanel.frameUpdate();
     }
 
     public void mouseReleased(MouseEvent e) {
