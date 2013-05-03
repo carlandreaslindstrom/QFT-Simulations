@@ -60,8 +60,8 @@ public abstract class SimulatorFrame extends JFrame {
 
     /* ANIMATION VARIABLES */
     // Animation parameters and objects
-    protected double                             _framerate            = 30.0;
-    protected Animator                           _animator             = new Animator();
+    protected double                             framerate             = 30.0;
+    protected Animator                           animator              = new Animator();
 
     /* FRAME SETUP VARIABLES */
     // Panels
@@ -69,31 +69,31 @@ public abstract class SimulatorFrame extends JFrame {
     protected DisplayPanel                       displayPanel;
 
     // Sliders
-    protected JSlider                            _NSlider              = new JSlider(getNMin(), getNMax());
-    protected JSlider                            _PmaxSlider           = new JSlider(getPmaxMin(), getPmaxMax());
-    protected JSlider                            _dxSlider             = new JSlider(encode(getDxMin()),
+    protected JSlider                            NSlider               = new JSlider(getNMin(), getNMax());
+    protected JSlider                            PmaxSlider            = new JSlider(getPmaxMin(), getPmaxMax());
+    protected JSlider                            dxSlider              = new JSlider(encode(getDxMin()),
                                                                            encode(getDxMax()));
-    protected JSlider                            _mSlider              = new JSlider(encode(getMMin()),
+    protected JSlider                            mSlider               = new JSlider(encode(getMMin()),
                                                                            encode(getMMax()));
-    protected JSlider                            _dtSlider             = new JSlider(encode(getDtMin()),
+    protected JSlider                            dtSlider              = new JSlider(encode(getDtMin()),
                                                                            encode(getDtMax()));
     public JSlider                               stepsSlider           = new JSlider(getStepsMin(), getStepsMax());
 
-    protected JRadioButton                       _scalarButton         = new JRadioButton("Scalars");
-    protected JRadioButton                       _fermionButton        = new JRadioButton("Fermions");
-    protected JRadioButton                       _bothButton           = new JRadioButton("Both");
+    protected JRadioButton                       scalarButton          = new JRadioButton("Scalars");
+    protected JRadioButton                       fermionButton         = new JRadioButton("Fermions");
+    protected JRadioButton                       bothButton            = new JRadioButton("Both");
 
     // Buttons
-    protected JButton                            _calculateButton      = new JButton(BUTTON_CALCULATE);
-    protected JButton                            _playButton           = new JButton(BUTTON_PLAY);
-    protected JButton                            _resetButton          = new JButton(BUTTON_RESET);
-    protected JButton                            _groundStateButton    = new JButton(BUTTON_GROUNDSTATE);
+    protected JButton                            calculateButton       = new JButton(BUTTON_CALCULATE);
+    protected JButton                            playButton            = new JButton(BUTTON_PLAY);
+    protected JButton                            resetButton           = new JButton(BUTTON_RESET);
+    protected JButton                            groundStateButton     = new JButton(BUTTON_GROUNDSTATE);
 
     // Interaction sliders and checkboxes
-    protected static Map<Interaction, JCheckBox> _checkBoxes           = new HashMap<Interaction, JCheckBox>();
-    protected static Map<Interaction, JSlider>   _interactionSliders   = new HashMap<Interaction, JSlider>();
-    protected static Map<Interaction, String>    _interactionToolTips  = new HashMap<Interaction, String>();
-    protected static Map<Interaction, JCheckBox> _negativeCheckBoxes   = new HashMap<Interaction, JCheckBox>();
+    protected static Map<Interaction, JCheckBox> interactionCheckBoxes = new HashMap<Interaction, JCheckBox>();
+    protected static Map<Interaction, JSlider>   interactionSliders    = new HashMap<Interaction, JSlider>();
+    protected static Map<Interaction, String>    interactionToolTips   = new HashMap<Interaction, String>();
+    protected static Map<Interaction, JCheckBox> negativeCheckBoxes    = new HashMap<Interaction, JCheckBox>();
 
     /**** ABSTRACT METHODS ****/
 
@@ -131,28 +131,23 @@ public abstract class SimulatorFrame extends JFrame {
     }
 
     protected void setupInteractions() {
-        _checkBoxes.put(Interaction.PHI_SQUARED, new JCheckBox("<html>&Phi;<sup>2</sup></html>"));
-        _checkBoxes.put(Interaction.PHI_CUBED, new JCheckBox("<html>&Phi;<sup>3</sup></html>"));
-        _checkBoxes.put(Interaction.PHI_FOURTH, new JCheckBox("<html>&Phi;<sup>4</sup></html>"));
+        setupInteraction(Interaction.PHI_SQUARED, "<html>&Phi;<sup>2</sup></html>", "2-vertex interaction strength");
+        setupInteraction(Interaction.PHI_CUBED, "<html>&Phi;<sup>3</sup></html>", "3-vertex interaction strength");
+        setupInteraction(Interaction.PHI_FOURTH, "<html>&Phi;<sup>4</sup></html>", "4-vertex interaction strength");
+    }
 
-        _interactionSliders.put(Interaction.PHI_SQUARED, new JSlider(encode(getLambdaMin()), encode(getLambdaMax())));
-        _interactionSliders.put(Interaction.PHI_CUBED, new JSlider(encode(getLambdaMin()), encode(getLambdaMax())));
-        _interactionSliders.put(Interaction.PHI_FOURTH, new JSlider(encode(getLambdaMin()), encode(getLambdaMax())));
-
-        _interactionToolTips.put(Interaction.PHI_SQUARED, "2-vertex interaction strength");
-        _interactionToolTips.put(Interaction.PHI_CUBED, "3-vertex interaction strength");
-        _interactionToolTips.put(Interaction.PHI_FOURTH, "4-vertex interaction strength");
-
-        _negativeCheckBoxes.put(Interaction.PHI_SQUARED, new JCheckBox());
-        _negativeCheckBoxes.put(Interaction.PHI_CUBED, new JCheckBox());
-        _negativeCheckBoxes.put(Interaction.PHI_FOURTH, new JCheckBox());
+    private void setupInteraction(Interaction interaction, String title, String toolTip) {
+        interactionCheckBoxes.put(interaction, new JCheckBox(title));
+        interactionSliders.put(interaction, new JSlider(encode(getLambdaMin()), encode(getLambdaMax())));
+        interactionToolTips.put(interaction, toolTip);
+        negativeCheckBoxes.put(interaction, new JCheckBox());
     }
 
     protected void setupFrame() {
         setTitle(getFrameTitle());
         setBounds(0, 0, getFrameWidth(), getFrameHeight());
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        
+
         getContentPane().removeAll();
         getContentPane().setLayout(new BorderLayout(0, 0));
         setupControlPanel();
@@ -160,9 +155,9 @@ public abstract class SimulatorFrame extends JFrame {
     }
 
     protected void setupDisplayPanel() {
-        if (_scalarButton.isSelected())
+        if (scalarButton.isSelected())
             displayPanel = new ScalarDisplayPanel(this);
-        else if (_fermionButton.isSelected())
+        else if (fermionButton.isSelected())
             displayPanel = new FermionDisplayPanel(this);
         getContentPane().add(displayPanel, BorderLayout.CENTER);
     }
@@ -217,27 +212,27 @@ public abstract class SimulatorFrame extends JFrame {
     protected void setupScalarFermionRadioButtions() {
         // make button group
         ButtonGroup group = new ButtonGroup();
-        group.add(_scalarButton);
-        group.add(_fermionButton);
-        group.add(_bothButton);
+        group.add(scalarButton);
+        group.add(fermionButton);
+        group.add(bothButton);
 
         // set default
-        _scalarButton.setSelected(true);
-        _bothButton.setEnabled(false); // disable the "both"-button for the moment
+        scalarButton.setSelected(true);
+        bothButton.setEnabled(false); // disable the "both"-button for the moment
 
         // add change listener
         ChangeListener cl = new ChangeListener() {
             public void stateChanged(ChangeEvent e) {
-                _calculateButton.setEnabled(true);
+                calculateButton.setEnabled(true);
             }
         };
-        _scalarButton.addChangeListener(cl);
-        _fermionButton.addChangeListener(cl);
-        _bothButton.addChangeListener(cl);
+        scalarButton.addChangeListener(cl);
+        fermionButton.addChangeListener(cl);
+        bothButton.addChangeListener(cl);
 
-        controlPanel.add(_scalarButton, "1, " + (_controlPanelRowAdder) + ", 3, 1, left, center");
-        controlPanel.add(_fermionButton, "1, " + (_controlPanelRowAdder) + ", 3, 1, center, center");
-        controlPanel.add(_bothButton, "1, " + (_controlPanelRowAdder++) + ", 3, 1, right, center");
+        controlPanel.add(scalarButton, "1, " + (_controlPanelRowAdder) + ", 3, 1, left, center");
+        controlPanel.add(fermionButton, "1, " + (_controlPanelRowAdder) + ", 3, 1, center, center");
+        controlPanel.add(bothButton, "1, " + (_controlPanelRowAdder++) + ", 3, 1, right, center");
     }
 
     protected void setupPresetSelector() {
@@ -262,51 +257,51 @@ public abstract class SimulatorFrame extends JFrame {
     }
 
     private void applyPreset(Preset preset) {
-        _NSlider.setValue(preset.N);
-        _PmaxSlider.setValue(preset.Pmax);
-        _dxSlider.setValue(encode(preset.dx));
-        _mSlider.setValue(encode(preset.m));
-        _dtSlider.setValue(encode(preset.dt));
+        NSlider.setValue(preset.N);
+        PmaxSlider.setValue(preset.Pmax);
+        dxSlider.setValue(encode(preset.dx));
+        mSlider.setValue(encode(preset.m));
+        dtSlider.setValue(encode(preset.dt));
         stepsSlider.setValue(preset.steps);
 
-        _checkBoxes.get(Interaction.PHI_SQUARED).setSelected(preset.lambda2 != null);
+        interactionCheckBoxes.get(Interaction.PHI_SQUARED).setSelected(preset.lambda2 != null);
         if (preset.lambda2 != null)
-            _interactionSliders.get(Interaction.PHI_SQUARED).setValue(encode(preset.lambda2));
+            interactionSliders.get(Interaction.PHI_SQUARED).setValue(encode(preset.lambda2));
 
-        _checkBoxes.get(Interaction.PHI_CUBED).setSelected(preset.lambda3 != null);
+        interactionCheckBoxes.get(Interaction.PHI_CUBED).setSelected(preset.lambda3 != null);
         if (preset.lambda3 != null)
-            _interactionSliders.get(Interaction.PHI_CUBED).setValue(encode(preset.lambda3));
+            interactionSliders.get(Interaction.PHI_CUBED).setValue(encode(preset.lambda3));
 
-        _checkBoxes.get(Interaction.PHI_FOURTH).setSelected(preset.lambda4 != null);
+        interactionCheckBoxes.get(Interaction.PHI_FOURTH).setSelected(preset.lambda4 != null);
         if (preset.lambda4 != null)
-            _interactionSliders.get(Interaction.PHI_FOURTH).setValue(encode(preset.lambda4));
+            interactionSliders.get(Interaction.PHI_FOURTH).setValue(encode(preset.lambda4));
 
         calculate(preset.wavepacket);
     }
 
     protected void setupSlidersAndButtons() {
         // add calculate sliders
-        setupGeneralSlider(_NSlider, getNMin(), getNMax(), int.class, null, "Number of lattice points");
-        setupGeneralSlider(_PmaxSlider, getPmaxMin(), getPmaxMax(), int.class, null, "Number of particles considered");
-        setupGeneralSlider(_dxSlider, encode(getDxMin()), encode(getDxMax()), double.class, null,
+        setupGeneralSlider(NSlider, getNMin(), getNMax(), int.class, null, "Number of lattice points");
+        setupGeneralSlider(PmaxSlider, getPmaxMin(), getPmaxMax(), int.class, null, "Number of particles considered");
+        setupGeneralSlider(dxSlider, encode(getDxMin()), encode(getDxMax()), double.class, null,
                            "Lattice point separation");
-        setupGeneralSlider(_mSlider, encode(getMMin()), encode(getMMax()), double.class, null, "Particle mass");
+        setupGeneralSlider(mSlider, encode(getMMin()), encode(getMMax()), double.class, null, "Particle mass");
 
         setupCheckboxes();
         _recalculateBeforeRow = _controlPanelRowAdder++;
 
         // add buttons to control panel
-        controlPanel.add(_calculateButton, "2, " + (_controlPanelRowAdder++));
+        controlPanel.add(calculateButton, "2, " + (_controlPanelRowAdder++));
         controlPanel.add(Box.createVerticalStrut(20), "2, " + (_controlPanelRowAdder++));
 
         // add real time sliders...
-        setupGeneralSlider(_dtSlider, encode(getDtMin()), encode(getDtMax()), double.class, null, "Time step");
+        setupGeneralSlider(dtSlider, encode(getDtMin()), encode(getDtMax()), double.class, null, "Time step");
 
         // ... with a real time update listener...
-        _dtSlider.addChangeListener(new ChangeListener() { // update time step
+        dtSlider.addChangeListener(new ChangeListener() { // update time step
             public void stateChanged(ChangeEvent e) {
                 if (state != null)
-                    state.setTimeStep(decode(_dtSlider.getValue()));
+                    state.setTimeStep(decode(dtSlider.getValue()));
             }
         });
         setupGeneralSlider(stepsSlider, getStepsMin(), getStepsMax(), int.class, null, "Steps calculated per frame");
@@ -315,29 +310,32 @@ public abstract class SimulatorFrame extends JFrame {
         Interaction[] interactionsInOrder = new Interaction[] { Interaction.PHI_SQUARED, Interaction.PHI_CUBED,
             Interaction.PHI_FOURTH };
         for (final Interaction interaction : interactionsInOrder)
-            setupGeneralSlider(_interactionSliders.get(interaction), encode(getLambdaMin()), encode(getLambdaMax()),
-                               double.class, interaction, _interactionToolTips.get(interaction));
+            setupGeneralSlider(interactionSliders.get(interaction), encode(getLambdaMin()), encode(getLambdaMax()),
+                               double.class, interaction, interactionToolTips.get(interaction));
 
         // separator
         controlPanel.add(Box.createVerticalStrut(20), "2, " + _controlPanelRowAdder++);
 
         // play and reset buttons
-        controlPanel.add(_playButton, "2, " + _controlPanelRowAdder++);
-        controlPanel.add(_resetButton, "2, " + _controlPanelRowAdder++);
-        controlPanel.add(_groundStateButton, "2, " + _controlPanelRowAdder++);
+        controlPanel.add(playButton, "2, " + _controlPanelRowAdder++);
+        controlPanel.add(resetButton, "2, " + _controlPanelRowAdder++);
+        controlPanel.add(groundStateButton, "2, " + _controlPanelRowAdder++);
 
     }
 
     private void setupCheckboxes() {
-        controlPanel.add(_checkBoxes.get(Interaction.PHI_SQUARED), "2, " + _controlPanelRowAdder + ", left, top");
-        controlPanel.add(_checkBoxes.get(Interaction.PHI_CUBED), "2, " + _controlPanelRowAdder + ", center, top");
-        controlPanel.add(_checkBoxes.get(Interaction.PHI_FOURTH), "2, " + _controlPanelRowAdder + ", right, top");
+        controlPanel.add(interactionCheckBoxes.get(Interaction.PHI_SQUARED), "2, " + _controlPanelRowAdder +
+                                                                             ", left, top");
+        controlPanel.add(interactionCheckBoxes.get(Interaction.PHI_CUBED), "2, " + _controlPanelRowAdder +
+                                                                           ", center, top");
+        controlPanel.add(interactionCheckBoxes.get(Interaction.PHI_FOURTH), "2, " + _controlPanelRowAdder +
+                                                                            ", right, top");
         ChangeListener calculateButtonEnabler = new ChangeListener() {
             public void stateChanged(ChangeEvent e) {
-                _calculateButton.setEnabled(true);
+                calculateButton.setEnabled(true);
             }
         };
-        for (JCheckBox checkBox : _checkBoxes.values())
+        for (JCheckBox checkBox : interactionCheckBoxes.values())
             checkBox.addChangeListener(calculateButtonEnabler);
     }
 
@@ -363,7 +361,7 @@ public abstract class SimulatorFrame extends JFrame {
 
         // add negative value checkboxes
         if (interaction != null)
-            controlPanel.add(_negativeCheckBoxes.get(interaction), "1, " + row + ", left, top");
+            controlPanel.add(negativeCheckBoxes.get(interaction), "1, " + row + ", left, top");
 
         controlPanel.add(icon, "1, " + row + ", center, center");
         controlPanel.add(slider, "2, " + row + ", left, top");
@@ -372,14 +370,14 @@ public abstract class SimulatorFrame extends JFrame {
         slider.addChangeListener(new ChangeListener() {
             public void stateChanged(ChangeEvent e) {
                 if (interaction != null) {
-                    final JCheckBox checkbox = _negativeCheckBoxes.get(interaction);
+                    final JCheckBox checkbox = negativeCheckBoxes.get(interaction);
                     ChangeListener cl = new ChangeListener() { // update interaction strength
                         public void stateChanged(ChangeEvent e) {
                             if (state != null) {
                                 int negativeFactor = checkbox.isSelected() ? -1 : 1;
                                 state.setInteractionStrength(interaction, negativeFactor * decode(slider.getValue()));
                             }
-                            boolean negative = _negativeCheckBoxes.get(interaction).isSelected();
+                            boolean negative = negativeCheckBoxes.get(interaction).isSelected();
                             value.setText(decodeText(slider.getValue(), negative));
                         }
                     };
@@ -395,7 +393,7 @@ public abstract class SimulatorFrame extends JFrame {
 
                 // if the slider necessitates recalculation, enable the calculate button (if not already)
                 if (row < _recalculateBeforeRow)
-                    _calculateButton.setEnabled(true);
+                    calculateButton.setEnabled(true);
             }
         });
 
@@ -409,20 +407,20 @@ public abstract class SimulatorFrame extends JFrame {
 
     // add buttons to the control panel
     protected void setupButtons() {
-        _resetButton.addActionListener(new ActionListener() {
+        resetButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 reset();
             }
         });
-        _playButton.addActionListener(new ActionListener() {
+        playButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                if (_playButton.getText() == BUTTON_PLAY)
+                if (playButton.getText() == BUTTON_PLAY)
                     start();
-                else if (_playButton.getText() == BUTTON_STOP)
+                else if (playButton.getText() == BUTTON_STOP)
                     stop();
             }
         });
-        _groundStateButton.addActionListener(new ActionListener() {
+        groundStateButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 stop();
                 state.setToGroundState();
@@ -430,22 +428,22 @@ public abstract class SimulatorFrame extends JFrame {
             }
         });
         // add appropriate action listeners
-        _calculateButton.addActionListener(new ActionListener() {
+        calculateButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                calculate(new MomentumWavePacket(_NSlider.getValue()));
+                calculate(new MomentumWavePacket(NSlider.getValue()));
             }
         });
 
         // initially disable the play and reset buttons
-        _playButton.setEnabled(false);
-        _resetButton.setEnabled(false);
+        playButton.setEnabled(false);
+        resetButton.setEnabled(false);
     }
 
     protected void calculate(WavePacket wavePacket) {
         // stop animation and update buttons
-        _animator.stopAnimation();
-        _playButton.setEnabled(false);
-        _playButton.setText(BUTTON_PLAY);
+        animator.stopAnimation();
+        playButton.setEnabled(false);
+        playButton.setText(BUTTON_PLAY);
 
         // set up the requested quantum state
         setupQuantumState(wavePacket);
@@ -456,35 +454,35 @@ public abstract class SimulatorFrame extends JFrame {
         displayPanel.drawPlotsAndLabels();
 
         // update interaction sliders
-        for (Interaction interaction : _interactionSliders.keySet()) {
-            _interactionSliders.get(interaction).setEnabled(_checkBoxes.get(interaction).isSelected());
-            _negativeCheckBoxes.get(interaction).setEnabled(_checkBoxes.get(interaction).isSelected());
+        for (Interaction interaction : interactionSliders.keySet()) {
+            interactionSliders.get(interaction).setEnabled(interactionCheckBoxes.get(interaction).isSelected());
+            negativeCheckBoxes.get(interaction).setEnabled(interactionCheckBoxes.get(interaction).isSelected());
         }
 
         // update buttons and start animation
-        _playButton.setEnabled(true);
-        _resetButton.setEnabled(false);
-        _calculateButton.setEnabled(false);
+        playButton.setEnabled(true);
+        resetButton.setEnabled(false);
+        calculateButton.setEnabled(false);
         start();
     }
 
     protected void start() {
-        _animator.startAnimation();
-        _playButton.setText(BUTTON_STOP);
-        _resetButton.setEnabled(true);
+        animator.startAnimation();
+        playButton.setText(BUTTON_STOP);
+        resetButton.setEnabled(true);
         displayPanel.frameUpdate();
     }
 
     protected void stop() {
-        _animator.stopAnimation();
-        _playButton.setText(BUTTON_PLAY);
+        animator.stopAnimation();
+        playButton.setText(BUTTON_PLAY);
         displayPanel.frameUpdate();
     }
 
     protected void reset() {
-        _resetButton.setEnabled(false);
-        _animator.stopAnimation();
-        _playButton.setText(BUTTON_PLAY);
+        resetButton.setEnabled(false);
+        animator.stopAnimation();
+        playButton.setText(BUTTON_PLAY);
         if (state != null)
             state.reset(); // reset quantum state
         displayPanel.frameUpdate();
@@ -520,7 +518,7 @@ public abstract class SimulatorFrame extends JFrame {
         // takes care of animation
         private Timer   _timer;
         private boolean _frozen = true;
-        private int     delay   = (int) (1000.0 / _framerate);
+        private int     delay   = (int) (1000.0 / framerate);
 
         public Animator() {
             _timer = new Timer(delay, this);

@@ -69,5 +69,23 @@ public class ComplexTest {
         assertTrue(z.equals(new Complex(-1, -2)));
         assertTrue(w.equals(new Complex(-4, 2)));
     }
+    
+    @Test
+    public void testDotProduct() {
+        Complex[] a = new Complex[]{Complex.zero(), Complex.one(), Complex.one().times(2)};
+        Complex[] b = new Complex[]{Complex.one(), Complex.i(), Complex.one()};
+        
+        assertTrue(Complex.dotProduct(a,b).equals(new Complex(2,1)));
+        assertTrue(Complex.dotProduct(b,a).equals(new Complex(2,-1)));
+    }
+    
+    @Test
+    public void testNorm() {
+        Complex[] a = new Complex[]{Complex.zero(), Complex.one(), Complex.one().times(2)};
+        Complex[] b = new Complex[]{Complex.one(), Complex.i(), Complex.one()};
+        
+        assertEquals(Complex.norm(a), Math.sqrt(5), 1e-9);
+        assertEquals(Complex.norm(b), Math.sqrt(3), 1e-9);
+    }
 
 }

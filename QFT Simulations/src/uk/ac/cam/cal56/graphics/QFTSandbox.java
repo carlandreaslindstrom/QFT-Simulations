@@ -42,23 +42,23 @@ public class QFTSandbox extends SimulatorFrame {
 
         // set up interaction strengths from sliders
         Map<Interaction, Double> lambdas = new HashMap<Interaction, Double>();
-        for (Entry<Interaction, JSlider> entry : _interactionSliders.entrySet()) {
+        for (Entry<Interaction, JSlider> entry : interactionSliders.entrySet()) {
             Interaction interaction = entry.getKey();
             JSlider slider = entry.getValue();
-            JCheckBox checkBox = _checkBoxes.get(interaction);
+            JCheckBox checkBox = interactionCheckBoxes.get(interaction);
             if (checkBox.isSelected())
                 lambdas.put(interaction, decode(slider.getValue()));
         }
 
         // make scalar quantum state
-        if (_scalarButton.isSelected())
-            state = new ScalarState(_NSlider.getValue(), _PmaxSlider.getValue(), decode(_mSlider.getValue()),
-                decode(_dxSlider.getValue()), decode(_dtSlider.getValue()), lambdas, wavePacket);
+        if (scalarButton.isSelected())
+            state = new ScalarState(NSlider.getValue(), PmaxSlider.getValue(), decode(mSlider.getValue()),
+                decode(dxSlider.getValue()), decode(dtSlider.getValue()), lambdas, wavePacket);
 
         // or a fermion quantum state
-        else if (_fermionButton.isSelected())
-            state = new FermionState(_NSlider.getValue(), _PmaxSlider.getValue(), decode(_mSlider.getValue()),
-                decode(_dxSlider.getValue()), decode(_dtSlider.getValue()), lambdas, wavePacket);
+        else if (fermionButton.isSelected())
+            state = new FermionState(NSlider.getValue(), PmaxSlider.getValue(), decode(mSlider.getValue()),
+                decode(dxSlider.getValue()), decode(dtSlider.getValue()), lambdas, wavePacket);
     }
 
     /**** MAIN RUN FUNCTION ****/

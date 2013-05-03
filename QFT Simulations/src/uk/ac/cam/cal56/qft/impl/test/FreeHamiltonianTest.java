@@ -1,4 +1,4 @@
-package uk.ac.cam.cal56.qft.scalars.test;
+package uk.ac.cam.cal56.qft.impl.test;
 
 import static org.junit.Assert.assertEquals;
 

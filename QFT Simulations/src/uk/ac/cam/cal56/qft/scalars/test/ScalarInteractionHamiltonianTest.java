@@ -57,6 +57,7 @@ public class ScalarInteractionHamiltonianTest {
                 Double value = _ih.get(n, m);
                 Double diag = _ih.get(m, n);
                 if (value != null && diag != null) {
+                    if(value<0) System.out.println(value);
                     // System.out.println((diag / value) + " : " + value + " = " + diag);
                     assertEquals(value, diag, EPSILON);
                 }

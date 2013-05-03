@@ -12,6 +12,7 @@ import uk.ac.cam.cal56.qft.fockspace.FockState;
 public class FreeHamiltonian implements Hamiltonian {
 
     private FockState _fockstate;
+    private double    _max = Double.MIN_VALUE;
 
     private double[]  _energies;
 
@@ -32,8 +33,13 @@ public class FreeHamiltonian implements Hamiltonian {
     public void calculateElements() {
         // calculate and store energies
         _fockstate.remove();
-        for (int n : _fockstate)
-            _energies[n] = _fockstate.getEnergy();
+        for (int n : _fockstate) {
+            double energy = _fockstate.getEnergy();
+            _energies[n] = energy;
+            if (energy > _max)
+                _max = energy;
+        }
+
     }
 
     @Override
@@ -49,6 +55,10 @@ public class FreeHamiltonian implements Hamiltonian {
         Map<Integer, Double> map = new HashMap<Integer, Double>(1);
         map.put(n, _energies[n]);
         return map;
+    }
+
+    public double getMaxEnergy() {
+        return _max;
     }
 
     public double getEnergy(int n) {
