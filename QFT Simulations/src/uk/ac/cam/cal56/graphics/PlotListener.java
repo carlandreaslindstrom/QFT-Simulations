@@ -29,6 +29,9 @@ public abstract class PlotListener extends MouseAdapter {
     }
 
     public void mousePressed(MouseEvent e) {
+        if (isManualRescaling(e)) // to not interfere with manual rescaling
+            return;
+
         _sandbox.stop();
 
         // remember parameters
@@ -42,16 +45,21 @@ public abstract class PlotListener extends MouseAdapter {
 
         setWavePacket(e);
         _sandbox.state.setWavePacket(wavePacket);
-        _sandbox.displayPanel.frameUpdate();
+        _sandbox.tabbedDisplayPanel.frameUpdate();
     }
 
     public void mouseDragged(MouseEvent e) {
+        if (isManualRescaling(e)) // to not interfere with manual rescaling
+            return;
         setWavePacket(e);
         _sandbox.state.setWavePacket(wavePacket);
-        _sandbox.displayPanel.frameUpdate();
+        _sandbox.tabbedDisplayPanel.frameUpdate();
     }
 
     public void mouseReleased(MouseEvent e) {
+        if (isManualRescaling(e)) // to not interfere with manual rescaling
+            return;
+
         // delete memory of inital parameters
         x_init = null;
         y_init = null;
@@ -60,6 +68,10 @@ public abstract class PlotListener extends MouseAdapter {
         peakProb_init = null;
 
         _sandbox.start();
+    }
+
+    private boolean isManualRescaling(MouseEvent e) {
+        return e.isAltDown() || e.isAltGraphDown();
     }
 
     public abstract void setWavePacket(MouseEvent e);

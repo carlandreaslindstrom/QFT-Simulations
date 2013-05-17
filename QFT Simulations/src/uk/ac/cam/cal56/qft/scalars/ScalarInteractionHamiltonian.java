@@ -3,6 +3,7 @@ package uk.ac.cam.cal56.qft.scalars;
 import java.util.Map.Entry;
 
 import uk.ac.cam.cal56.qft.Interaction;
+import uk.ac.cam.cal56.qft.fockspace.FockState;
 import uk.ac.cam.cal56.qft.fockspace.impl.ScalarFockState;
 import uk.ac.cam.cal56.qft.fockspace.labelling.ScalarLabelling;
 import uk.ac.cam.cal56.qft.impl.InteractionHamiltonian;
@@ -106,86 +107,90 @@ public class ScalarInteractionHamiltonian extends InteractionHamiltonian {
     // Looks very lengthy because it represents the ladder operators written out normal ordered.
     // This is done in order to make use of the fast add() function [requires normal ordering].
     private void calculatePhiFourth() {
-        double divisor = 4 * L * L * L;
-        double f;
+        double divisor = 16 * L * L * L;
+        double f, L2E;
 
         for (int j = 0; j < _N; j++) {
             for (int k = 0; k < _N; k++) {
                 for (int l = 0; l < _N; l++) {
-                    double commonEnergyDivisor = Math.sqrt(_E[j] * _E[k] * _E[l]);
+                    double commonEnergyDivisor = divisor * _E[j] * _E[k] * _E[l];
 
                     // first quarter
-                    f = 1.0 / (divisor * commonEnergyDivisor * Math.sqrt(_E[mod(j + k + l)]));
+                    f = 1.0 / (commonEnergyDivisor * _E[mod(j + k + l)]);
+                    L2E = L * 2 * _E[mod(j + k + l)];
                     add(f, new int[] {}, j, k, l, mod(-j - k - l));
                     add(f, new int[] { mod(j + k + l) }, j, k, l);
                     if (delta(j + k))
-                        add(f * L, new int[] {}, j, k);
+                        add(f * L2E, new int[] {}, j, k);
                     if (delta(k + l))
-                        add(f * L, new int[] {}, k, l);
+                        add(f * L2E, new int[] {}, k, l);
                     if (delta(j + l))
-                        add(f * L, new int[] {}, j, l);
+                        add(f * L2E, new int[] {}, j, l);
                     add(f, new int[] { j, k, l }, mod(j + k + l));
                     add(f, new int[] { j, k, l, mod(-j - k - l) });
 
                     // second quarter
-                    f = 1.0 / (divisor * commonEnergyDivisor * Math.sqrt(_E[mod(j + k - l)]));
+                    f = 1.0 / (commonEnergyDivisor * _E[mod(j + k - l)]);
+                    L2E = L * 2 * _E[mod(j + k - l)];
                     add(f, new int[] { l }, j, k, mod(-j - k + l));
                     if (k == l)
-                        add(f * L, new int[] {}, j, mod(-j));
+                        add(f * L2E, new int[] {}, j, mod(-j));
                     if (j == l)
-                        add(f * L, new int[] {}, k, mod(-k));
+                        add(f * L2E, new int[] {}, k, mod(-k));
                     add(f, new int[] { l, mod(j + k - l) }, j, k);
                     if (k == l) {
-                        add(f * L, new int[] { k }, k);
-                        add(f * L, new int[] { j }, j);
-                        add(f * L * L, new int[] {});
+                        add(f * L2E, new int[] { k }, k);
+                        add(f * L2E, new int[] { j }, j);
+                        add(f * L2E * L2E, new int[] {});
                     }
                     if (j == l) {
-                        add(f * L, new int[] { j }, j);
-                        add(f * L, new int[] { k }, k);
-                        add(f * L * L, new int[] {});
+                        add(f * L2E, new int[] { j }, j);
+                        add(f * L2E, new int[] { k }, k);
+                        add(f * L2E * L2E, new int[] {});
                     }
                     add(f, new int[] { j, k }, l, mod(j + k - l));
                     add(f, new int[] { j, k, mod(-j - k + l) }, l);
                     if (delta(j + k))
-                        add(f * L, new int[] { j, k });
+                        add(f * L2E, new int[] { j, k });
 
                     // third quarter
-                    f = 1.0 / (divisor * commonEnergyDivisor * Math.sqrt(_E[mod(j - k + l)]));
+                    f = 1.0 / (commonEnergyDivisor * _E[mod(j - k + l)]);
+                    L2E = L * 2 * _E[mod(j - k + l)];
                     add(f, new int[] { k }, j, l, mod(-j + k - l));
                     if (j == k) {
-                        add(f * L, new int[] {}, l, mod(-l));
-                        add(f * L, new int[] { l }, l);
-                        add(f * L, new int[] { k }, k);
-                        add(f * L * L, new int[] {});
+                        add(f * L2E, new int[] {}, l, mod(-l));
+                        add(f * L2E, new int[] { l }, l);
+                        add(f * L2E, new int[] { k }, k);
+                        add(f * L2E * L2E, new int[] {});
                     }
                     add(f, new int[] { k, mod(j - k + l) }, j, l);
                     if (k == l) {
-                        add(f * L, new int[] { k }, k);
-                        add(f * L, new int[] { j }, j);
-                        add(f * L, new int[] { j, mod(-j) });
+                        add(f * L2E, new int[] { k }, k);
+                        add(f * L2E, new int[] { j }, j);
+                        add(f * L2E, new int[] { j, mod(-j) });
                     }
                     add(f, new int[] { j, l }, k, mod(j - k + l));
                     add(f, new int[] { j, l, mod(-j + k - l) }, k);
                     if (delta(j + l))
-                        add(f * L, new int[] { j, l });
+                        add(f * L2E, new int[] { j, l });
 
                     // fourth quarter
-                    f = 1.0 / (divisor * commonEnergyDivisor * Math.sqrt(_E[mod(j - k - l)]));
+                    f = 1.0 / (commonEnergyDivisor * _E[mod(j - k - l)]);
+                    L2E = L * 2 * _E[mod(j - k - l)];
                     add(f, new int[] { k, l }, j, mod(-j + k + l));
                     if (j == l) {
-                        add(f * L, new int[] { k }, k);
-                        add(f * L, new int[] { k, mod(-k) });
-                        add(f * L, new int[] { j }, j);
+                        add(f * L2E, new int[] { k }, k);
+                        add(f * L2E, new int[] { k, mod(-k) });
+                        add(f * L2E, new int[] { j }, j);
                     }
                     if (j == k) {
-                        add(f * L, new int[] { l }, l);
-                        add(f * L, new int[] { l, mod(-l) });
-                        add(f * L, new int[] { j }, j);
+                        add(f * L2E, new int[] { l }, l);
+                        add(f * L2E, new int[] { l, mod(-l) });
+                        add(f * L2E, new int[] { j }, j);
                     }
                     add(f, new int[] { k, l, mod(j - k - l) }, j);
                     if (delta(k + l))
-                        add(f * L, new int[] { k, l });
+                        add(f * L2E, new int[] { k, l });
                     add(f, new int[] { j }, k, l, mod(j - k - l));
                     add(f, new int[] { j, mod(-j + k + l) }, k, l);
                 }
@@ -220,7 +225,7 @@ public class ScalarInteractionHamiltonian extends InteractionHamiltonian {
             int l_p = ((ScalarFockState) _ket).l_p(p);
             int n_p = op.getValue()[0];
             int m_p = op.getValue()[1];
-            factor *= ScalarFockState.F_p(l_p, n_p, m_p, L);
+            factor *= ScalarFockState.F_p(l_p, n_p, m_p, L * 2 * FockState.E_p(p, _N, _m, _dx));
         }
 
         // if not 0, save value in the Hamiltonian matrix

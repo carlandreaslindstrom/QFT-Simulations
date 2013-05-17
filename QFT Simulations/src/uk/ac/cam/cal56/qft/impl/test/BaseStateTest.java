@@ -24,7 +24,7 @@ public class BaseStateTest {
     @Test
     public void testGetTotalEnergy() {
         _lambdas.put(Interaction.PHI_CUBED, _lambda);
-        State state = new ScalarState(_N, _Pmax, _m, _dx, _dt, _lambdas, new MomentumWavePacket(_N));
+        State state = new ScalarState(_N, _Pmax, _dt, _dx, _m, _lambdas, new MomentumWavePacket(_N));
         
         state.setToGroundState();
         System.out.println(state.getTotalEnergy());

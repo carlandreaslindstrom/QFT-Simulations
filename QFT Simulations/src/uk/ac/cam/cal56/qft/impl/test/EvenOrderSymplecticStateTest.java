@@ -34,7 +34,7 @@ public class EvenOrderSymplecticStateTest {
     @Test
     public void testConstructor() {
         _lambdas.put(Interaction.PHI_CUBED, _lambda);
-        State state = new ScalarState(_N, _Pmax, _m, _dx, _dt, _lambdas, new MomentumWavePacket(_N));
+        State state = new ScalarState(_N, _Pmax, _dt, _dx, _m, _lambdas, new MomentumWavePacket(_N));
         assertEquals(state.getTime(), 0.0, EPSILON);
         assertEquals(state.getVacuum().modSquared(), 1.0, EPSILON);
     }
@@ -42,12 +42,12 @@ public class EvenOrderSymplecticStateTest {
     @Test
     public void testStep() {
         WavePacket wp = new MomentumWavePacket(_N, new int[] { 0 }, new double[] { 0 });
-        State state = new ScalarState(_N, _Pmax, _m, _dx, _dt, _lambdas, wp);
+        State state = new ScalarState(_N, _Pmax, _dt, _dx, _m, _lambdas, wp);
         assertEquals(state.getTime(), 0.0, EPSILON);
         assertEquals(state.getVacuum().modSquared(), 1.0, EPSILON);
         Map<Interaction, Double> lambdas = new HashMap<Interaction, Double>();
         lambdas.put(Interaction.PHI_CUBED, _lambda);
-        State otherState = new ScalarState(_N, _Pmax, _m, _dx, _dt, lambdas, wp);
+        State otherState = new ScalarState(_N, _Pmax, _dt, _dx, _m, lambdas, wp);
 
         state.setWavePacket(wp);
         otherState.setWavePacket(wp);
@@ -66,7 +66,7 @@ public class EvenOrderSymplecticStateTest {
     @Test
     public void testSymplecticity() {
         WavePacket wp = new MomentumWavePacket(_N, new int[] { 0 }, new double[] { 0 });
-        State _state = new ScalarState(_N, _Pmax, _m, _dx, _dt, _lambdas, wp); // recalculate
+        State _state = new ScalarState(_N, _Pmax, _dt, _dx, _m, _lambdas, wp); // recalculate
 
         try {
             // Create file
@@ -97,7 +97,7 @@ public class EvenOrderSymplecticStateTest {
     public void testExactComparison() {
         _lambdas.put(Interaction.PHI_CUBED, 0.0);
         WavePacket wp = new MomentumWavePacket(_N, new int[] { 0 }, new double[] { 0 });
-        State state = new ScalarState(_N, _Pmax, _m, _dx, _dt, _lambdas, wp);
+        State state = new ScalarState(_N, _Pmax, _dt, _dx, _m, _lambdas, wp);
 
         try {
             // Create file

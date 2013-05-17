@@ -133,19 +133,35 @@ public class Complex {
         DecimalFormat df = new DecimalFormat("#.###");
         return "(" + df.format(_real) + "," + df.format(_imag) + ")";
     }
-    
+
     // static dot product of two complex vectors
     public static Complex dotProduct(Complex[] a, Complex[] b) {
-        if(a.length!=b.length) return null;
+        if (a.length != b.length)
+            return null;
         Complex sum = Complex.zero();
-        for(int n = 0; n < a.length; n++)
+        for (int n = 0; n < a.length; n++)
             sum = sum.plus(a[n].conj().times(b[n]));
         return sum;
     }
-    
+
+    // norm squared of complex vector
+    public static double normSquared(Complex[] a) {
+        double sum = 0;
+        for (int n = 0; n < a.length; n++)
+            sum += a[n].modSquared();
+        return sum;
+    }
+
     // norm of complex vector
     public static double norm(Complex[] a) {
-        return Math.sqrt(dotProduct(a,a).mod());
+        return Math.sqrt(normSquared(a));
+    }
+
+    // normalise complex vector
+    public static void normalise(Complex[] a) {
+        double norm = Complex.norm(a);
+        for (int n = 0; n < a.length; n++)
+            a[n] = a[n].divide(norm);
     }
 
 }

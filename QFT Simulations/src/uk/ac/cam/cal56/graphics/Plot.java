@@ -5,6 +5,8 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Rectangle;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.text.DecimalFormat;
 
 import uk.ac.cam.cal56.graphics.impl.DensityPlot;
@@ -40,6 +42,7 @@ public abstract class Plot extends Canvas {
     protected double              _max                   = Double.MIN_VALUE;
 
     protected int                 _rescaleScore          = 0;
+    protected boolean             _rescalingEnabled      = true;
 
     protected abstract void plot(Graphics g);
 
@@ -50,6 +53,46 @@ public abstract class Plot extends Canvas {
     protected abstract void setPointSizeAndSampling(int width, int height);
 
     protected abstract void setMinAndMax(Double min, Double max);
+
+    public Plot() {
+        // sets up manual rescaling listener
+        MouseAdapter ma = new MouseAdapter() {
+            private Integer y_init;
+            private Double  scale_init;
+
+            public void mousePressed(MouseEvent e) {
+                if (e.isAltGraphDown())
+                    _rescalingEnabled = true;
+                else if (y_init == null && e.isAltDown()) {
+                    y_init = e.getY();
+                    scale_init = _max - _min;
+                }
+            }
+
+            public void mouseReleased(MouseEvent e) {
+                y_init = null;
+                scale_init = null;
+            }
+
+            public void mouseDragged(MouseEvent e) {
+                double extra = 1e2;
+                if (e.isAltDown()) {
+                    _rescalingEnabled = false;
+                    double scale = scale_init;
+                    double factor = (1 + 3.0 * Math.abs(y_init - e.getY()) / _height);
+                    if (y_init < e.getY())
+                        scale *= factor;
+                    else if (y_init > e.getY())
+                        scale /= factor;
+                    setMinAndMax(0.0, Math.min(Math.max(RESCALE_LOWER_ABS_LIM / extra, scale), extra *
+                                                                                               RESCALE_UPPER_ABS_LIM));
+                }
+            }
+
+        };
+        this.addMouseListener(ma);
+        this.addMouseMotionListener(ma);
+    }
 
     public void paint(Graphics g) {
         super.paint(g);
@@ -103,25 +146,26 @@ public abstract class Plot extends Canvas {
     }
 
     // shaded lemon-lime color scheme
-    protected static Color toDensityColor(double mod, double arg) {
+    public static Color toDensityColor(double mod, double arg) {
         if (mod > 1.0)
             return OVERFLOW_COLOUR;
         double phase = 2.0;
-        int offset = 128; // lower offset => stronger color
+        int offset = 64; // lower offset => stronger color
         int scale = 127 - offset / 2;
         int red = (int) (mod * (offset + scale * (1.0 + Math.sin(arg + (phase + 2.0) * Math.PI / 3))));
         int green = (int) (mod * (offset + scale * (1.0 + Math.sin(arg + (phase + 4.0) * Math.PI / 3))));
         int blue = (int) (mod * (offset + scale * (1.0 + Math.sin(arg + (phase) * Math.PI / 3))));
-        return new Color(red, green, blue);
+        if(DisplayPanel.DISPLAY_BG_COLOR==Color.WHITE) return new Color(255-red, 255-green, 255-blue);
+        else return new Color(red, green, blue);
         // return new Color((int) ((191 + 64 * num) * num), (int) ((255 - 45 * num) * num), (int) (48 * num));
     }
 
     // bright lemon-lime color scheme
-    protected static Color toFunctionColor(double mod, double arg) {
+    public static Color toFunctionColor(double mod, double arg) {
         if (mod > 1.0)
             return OVERFLOW_COLOUR;
         double phase = 2.0;
-        int offset = 128; // lower offset => stronger color
+        int offset = 64; // lower offset => stronger color
         int scale = 127 - offset / 2;
         int red = offset + (int) (scale * (1.0 + Math.sin(arg + (phase + 2.0) * Math.PI / 3)));
         int green = offset + (int) (scale * (1.0 + Math.sin(arg + (phase + 4.0) * Math.PI / 3)));
@@ -154,6 +198,8 @@ public abstract class Plot extends Canvas {
 
     // rescales the plot dynamically to avoid tiny bars and dark densities
     protected void rescale(double highest) {
+        if (!_rescalingEnabled)
+            return;
 
         // don't rescale if 1D plot
         if (_width <= FunctionPlot.PLOT_1D_WIDTH)

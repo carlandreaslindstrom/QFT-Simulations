@@ -9,31 +9,28 @@ import uk.ac.cam.cal56.qft.Hamiltonian;
 import uk.ac.cam.cal56.qft.Interaction;
 import uk.ac.cam.cal56.qft.State;
 import uk.ac.cam.cal56.qft.WavePacket;
-import uk.ac.cam.cal56.qft.fockspace.impl.ScalarFockState;
 
 public abstract class BaseState implements State {
 
-    protected final int                     _N;                                                     // number of
-                                                                                                     // lattice points
+    protected final int                     _N;                                                     // # lattice points
     protected double                        _dt;                                                    // time step
-    protected int                           _S;                                                     // S(N, Pmax) =
-    // number of
-    // coefficients
-    protected FreeHamiltonian               _Hfree;                                                 // free theory
-                                                                                                     // Hamiltonian
-    protected Map<Interaction, Hamiltonian> _hamiltonians = new HashMap<Interaction, Hamiltonian>(); // interaction
-                                                                                                     // Hamiltonians
-    protected Map<Interaction, Double>      _lambdas;                                               // interaction
-    // strength
+    protected double                        _dx;                                                    // time step
+    protected double                        _m;                                                     // time step
+    protected int                           _S;                                                     // # coefficients
+    protected FreeHamiltonian               _Hfree;                                                 // free theory H
+    protected Map<Interaction, Hamiltonian> _hamiltonians = new HashMap<Interaction, Hamiltonian>(); // interaction H
+    protected Map<Interaction, Double>      _lambdas;                                               // int. strengths
 
     protected double                        _time;
-    protected Complex[]                     _c;                                                     // {c_n(t)}
+    protected Complex[]                     _c;                                                     // coeffs
 
     private WavePacket                      _wavePacket;
 
-    protected BaseState(int N, int Pmax, double m, double dx, double dt, Map<Interaction, Double> lambdas, WavePacket wp) {
+    protected BaseState(int N, double dt, double dx, double m, Map<Interaction, Double> lambdas) {
         _N = N;
         _dt = dt;
+        _dx = dx;
+        _m = m;
         _lambdas = lambdas;
     }
 
@@ -73,26 +70,12 @@ public abstract class BaseState implements State {
 
     @Override
     public double getModSquared() {
-        double sum = 0.0;
-        for (int n = 0; n < _S; n++)
-            sum += _c[n].modSquared();
-        return sum;
+        return Complex.normSquared(_c);
     }
 
     @Override
     public Complex getVacuum() {
         return _c[0];
-    }
-
-    @Override
-    public Double getRemainingProbability() {
-        int S2 = ScalarFockState.S(_N, 2);
-        if (S2 >= _S)
-            return null; // if only 2 particles, return null
-        double probSquared = 0;
-        for (int n = S2; n < _S; n++)
-            probSquared += _c[n].modSquared(); // add up remaining probabilities
-        return probSquared;
     }
 
     @Override
@@ -107,61 +90,81 @@ public abstract class BaseState implements State {
         firstStep();
     }
 
+    @Override
     public void setToGroundState() {
-        _wavePacket = WavePacket.getVacuum(_N); // set to vacuum
-        _c = _wavePacket.getCoefficients(_S);
+        setToEigenState(0);
+    }
 
-        Complex[] groundc = new Complex[_S];
+    @Override
+    public void setToFirstState() {
+        setToEigenState(1);
+    }
+
+    @Override
+    public void setToSecondState() {
+        setToEigenState(2);
+    }
+
+    public void setToEigenState(int eigennumber) {
+        // _wavePacket = WavePacket.getVacuum(_N); // set to vacuum
+        // _c = _wavePacket.getCoefficients(_S);
+        for (int n = 0; n < _S; n++)
+            _c[n] = Complex.one().times(1.0 / _S);
+
+        Complex[][] eigencs = new Complex[eigennumber + 1][_S];
 
         // power iteration parameters
-        double multfactor = 3;
-        double energyMax = multfactor*_Hfree.getMaxEnergy();
-        for(double lambda : _lambdas.values()) energyMax += multfactor*Math.abs(lambda)*_Hfree.getMaxEnergy();
+        double multfactor = 5;
+        double energyMax = multfactor * _Hfree.getMaxEnergy(); // TODO: find instead the actual largest eigenvalue
+        for (double lambda : _lambdas.values())
+            energyMax += multfactor * Math.abs(lambda) * _Hfree.getMaxEnergy();
         double tolerance = 1e-16;
         int maxcount = 100000;
 
-        double energy = getTotalEnergy();
-        double error = 1;
+        for (int eig = 0; eig <= eigennumber; eig++) {
+            double energy = getTotalEnergy();
+            double error = 1;
 
-        for (int i = 0; i < maxcount && error > tolerance; i++) {
+            for (int step = 0; step < maxcount && error > tolerance; step++) {
 
-            double lastEnergy = energy;
+                double lastEnergy = energy;
 
-            for (int n = 0; n < _c.length; n++) {
+                for (int n = 0; n < _S; n++) {
 
-                // first add free theory
-                Complex H = _c[n].times(_Hfree.getEnergy(n));
+                    // first add free theory
+                    Complex H = _c[n].times(_Hfree.getEnergy(n));
 
-                // then interactions
-                for (Entry<Interaction, Hamiltonian> h : _hamiltonians.entrySet()) {
-                    Complex subsum = Complex.zero();
-                    for (Entry<Integer, Double> h_mn : h.getValue().getRow(n).entrySet())
-                        subsum = subsum.plus(_c[h_mn.getKey()].times(h_mn.getValue()));
-                    H = H.plus(subsum.times(_lambdas.get(h.getKey())));
+                    // then interactions
+                    for (Entry<Interaction, Hamiltonian> h : _hamiltonians.entrySet()) {
+                        Complex subsum = Complex.zero();
+                        for (Entry<Integer, Double> h_mn : h.getValue().getRow(n).entrySet())
+                            subsum = subsum.plus(_c[h_mn.getKey()].times(h_mn.getValue()));
+                        H = H.plus(subsum.times(_lambdas.get(h.getKey())));
+                    }
+
+                    // |c> -> (1-e*H)|c>
+                    eigencs[eig][n] = _c[n].minus(H.divide(energyMax));
                 }
 
-                // |c> -> (1-e*H)|c>
-                groundc[n] = _c[n].minus(H.divide(energyMax));
+                // remove lower eigenstates by orthogonality
+                for (int i = 0; i < eig; i++) {
+                    Complex overlap = Complex.dotProduct(eigencs[i], eigencs[eig]);
+                    // System.out.println(overlap.mod());
+                    for (int n = 0; n < _S; n++)
+                        eigencs[eig][n] = eigencs[eig][n].minus(eigencs[i][n].times(overlap));
+                }
+                Complex.normalise(eigencs[eig]); // normalise
+                _c = eigencs[eig]; // set coefficients
+
+                energy = getTotalEnergy();
+                error = Math.abs((lastEnergy - energy) / energy);
+
+                // System.out.println(error);
             }
-
-            _c = groundc;
-            normalise();
-
-            energy = getTotalEnergy();
-
-            error = Math.abs((lastEnergy - energy) / energy);
-            //System.out.println(error);
         }
 
         _time = 0.0;
         firstStep();
-    }
-
-    // normalise coefficients
-    private void normalise() {
-        double norm = Math.sqrt(getModSquared());
-        for (int n = 0; n < _c.length; n++)
-            _c[n] = _c[n].divide(norm);
     }
 
     public double getTotalEnergy() {

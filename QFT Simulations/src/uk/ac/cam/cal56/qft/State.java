@@ -13,6 +13,10 @@ public interface State {
     public void setWavePacket(WavePacket wavepacket);
     
     public void setToGroundState();
+    
+    public void setToFirstState();
+    
+    public void setToSecondState();
 
     public int getN();
 

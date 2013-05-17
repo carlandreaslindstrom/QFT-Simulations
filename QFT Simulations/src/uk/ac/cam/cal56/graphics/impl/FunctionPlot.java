@@ -125,7 +125,7 @@ public class FunctionPlot extends Plot {
         Complex[] data = new Complex[N];
         for (int i = 0; i < N; i++) {
             double z1 = 5.0 * (i - N / 2) / N;
-            data[i] = Complex.one().times(Math.exp(-z1 * z1)).timesexpi(2*Math.PI*i/N);
+            data[i] = Complex.one().times(Math.exp(-z1 * z1)).timesexpi(2 * Math.PI * i / N);
         }
 
         // make plot

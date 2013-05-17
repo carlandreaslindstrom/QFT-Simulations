@@ -18,8 +18,8 @@ public class QFTSandbox extends SimulatorFrame {
 
     // @formatter:off
     protected String getFrameTitle()    { return "Quantum Field Theory on a Ring"; }
-    protected int getFrameWidth()       { return 1110; }
-    protected int getFrameHeight()      { return 790; }
+    protected int getFrameWidth()       { return 1120; }
+    protected int getFrameHeight()      { return 820; }
     protected int getNMin()             { return 2; }
     protected int getNMax()             { return 128; }
     protected int getPmaxMin()          { return 1; }
@@ -34,7 +34,7 @@ public class QFTSandbox extends SimulatorFrame {
     protected int getStepsMax()         { return 256; }
     protected double getLambdaMin()     { return 1.0e-7; }
     protected double getLambdaMax()     { return 1.0e2; }
-    protected Preset getDefaultPreset() { return Preset.INT_2P_FAST; }
+    protected Preset getDefaultPreset() { return Preset.INT_2P_3VERTEX; }
     // @formatter:on
 
     // quantum state and plots representing it
@@ -52,13 +52,13 @@ public class QFTSandbox extends SimulatorFrame {
 
         // make scalar quantum state
         if (scalarButton.isSelected())
-            state = new ScalarState(NSlider.getValue(), PmaxSlider.getValue(), decode(mSlider.getValue()),
-                decode(dxSlider.getValue()), decode(dtSlider.getValue()), lambdas, wavePacket);
+            state = new ScalarState(NSlider.getValue(), PmaxSlider.getValue(), decode(dtSlider.getValue()),
+                decode(dxSlider.getValue()), decode(mSlider.getValue()), lambdas, wavePacket);
 
         // or a fermion quantum state
         else if (fermionButton.isSelected())
-            state = new FermionState(NSlider.getValue(), PmaxSlider.getValue(), decode(mSlider.getValue()),
-                decode(dxSlider.getValue()), decode(dtSlider.getValue()), lambdas, wavePacket);
+            state = new FermionState(NSlider.getValue(), PmaxSlider.getValue(), decode(dtSlider.getValue()),
+                decode(dxSlider.getValue()), decode(mSlider.getValue()), lambdas, wavePacket);
     }
 
     /**** MAIN RUN FUNCTION ****/

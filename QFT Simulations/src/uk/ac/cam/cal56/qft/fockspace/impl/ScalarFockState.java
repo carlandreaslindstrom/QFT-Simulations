@@ -9,6 +9,12 @@ public class ScalarFockState extends SingleFieldFockState {
         super(N, m, dx);
         _S = S(N, Pmax);
     }
+    
+    // alternative constructor if Pmax not known
+    public ScalarFockState(int N, double m, double dx, int S) {
+        super(N, m, dx);
+        _S = S;
+    }
 
     // recursive function used in incrementing particle entries
     @Override
@@ -55,14 +61,14 @@ public class ScalarFockState extends SingleFieldFockState {
     // in that momentum with n creation operators and m annihilation operators. Complete
     // combinatoric factor is obtained by the product these for all momenta.
     // F_p(l,n,m) = sqrt( (Product[a=1->n](l-m+a)) * (Product[b=1->m](l+1-b) )
-    public static double F_p(int l_p, int n_p, int m_p, double L) {
+    public static double F_p(int l_p, int n_p, int m_p, double L2Ep) {
         if (m_p > l_p)
             return 0;
         double squaredProduct = 1;
         for (int a = 1; a <= n_p; a++)
-            squaredProduct *= L * (l_p - m_p + a);
+            squaredProduct *= L2Ep * (l_p - m_p + a);
         for (int b = 1; b <= m_p; b++)
-            squaredProduct *= L * (l_p + 1 - b);
+            squaredProduct *= L2Ep * (l_p + 1 - b);
         return Math.sqrt(squaredProduct);
     }
 

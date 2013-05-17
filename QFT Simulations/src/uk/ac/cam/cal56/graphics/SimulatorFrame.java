@@ -25,8 +25,9 @@ import javax.swing.border.LineBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import uk.ac.cam.cal56.graphics.impl.FermionDisplayPanel;
-import uk.ac.cam.cal56.graphics.impl.ScalarDisplayPanel;
+import uk.ac.cam.cal56.graphics.impl.FermionCoefficientPanel;
+import uk.ac.cam.cal56.graphics.impl.ScalarCoefficientPanel;
+import uk.ac.cam.cal56.graphics.impl.ScalarFieldPanel;
 import uk.ac.cam.cal56.qft.Interaction;
 import uk.ac.cam.cal56.qft.State;
 import uk.ac.cam.cal56.qft.WavePacket;
@@ -50,6 +51,8 @@ public abstract class SimulatorFrame extends JFrame {
     protected static final String                BUTTON_STOP           = "Stop";
     protected static final String                BUTTON_RESET          = "Reset";
     protected static final String                BUTTON_GROUNDSTATE    = "Set to ground state";
+    protected static final String                BUTTON_FIRSTSTATE    = "Set to first state";
+    protected static final String                BUTTON_SECONDSTATE    = "Set to second state";
 
     protected static int                         _recalculateBeforeRow;
     private int                                  _controlPanelRowAdder = 1;
@@ -66,7 +69,7 @@ public abstract class SimulatorFrame extends JFrame {
     /* FRAME SETUP VARIABLES */
     // Panels
     protected JPanel                             controlPanel          = new JPanel();
-    protected DisplayPanel                       displayPanel;
+    protected TabbedDisplayPanel                 tabbedDisplayPanel    = new TabbedDisplayPanel();
 
     // Sliders
     protected JSlider                            NSlider               = new JSlider(getNMin(), getNMax());
@@ -81,13 +84,14 @@ public abstract class SimulatorFrame extends JFrame {
 
     protected JRadioButton                       scalarButton          = new JRadioButton("Scalars");
     protected JRadioButton                       fermionButton         = new JRadioButton("Fermions");
-    protected JRadioButton                       bothButton            = new JRadioButton("Both");
 
     // Buttons
     protected JButton                            calculateButton       = new JButton(BUTTON_CALCULATE);
     protected JButton                            playButton            = new JButton(BUTTON_PLAY);
     protected JButton                            resetButton           = new JButton(BUTTON_RESET);
     protected JButton                            groundStateButton     = new JButton(BUTTON_GROUNDSTATE);
+    protected JButton                            firstStateButton     = new JButton(BUTTON_FIRSTSTATE);
+    protected JButton                            secondStateButton     = new JButton(BUTTON_SECONDSTATE);
 
     // Interaction sliders and checkboxes
     protected static Map<Interaction, JCheckBox> interactionCheckBoxes = new HashMap<Interaction, JCheckBox>();
@@ -151,15 +155,26 @@ public abstract class SimulatorFrame extends JFrame {
         getContentPane().removeAll();
         getContentPane().setLayout(new BorderLayout(0, 0));
         setupControlPanel();
-        setupDisplayPanel();
     }
 
     protected void setupDisplayPanel() {
-        if (scalarButton.isSelected())
-            displayPanel = new ScalarDisplayPanel(this);
+        int selectedIndex = tabbedDisplayPanel.getSelectedIndex();
+        tabbedDisplayPanel.removeAll();
+        if (scalarButton.isSelected()) {
+            DisplayPanel tab1 = new ScalarFieldPanel(this);
+            DisplayPanel tab2 = new ScalarCoefficientPanel(this);
+
+            tab1.drawPlotsAndLabels();
+            if(selectedIndex==1) tab2.drawPlotsAndLabels();
+
+            tabbedDisplayPanel.addTab("Fock State Coefficients", null, tab2, "Displays coefficients of Fock states");
+            tabbedDisplayPanel.addTab("Fields", null, tab1, "Displays fields");
+        }
         else if (fermionButton.isSelected())
-            displayPanel = new FermionDisplayPanel(this);
-        getContentPane().add(displayPanel, BorderLayout.CENTER);
+            tabbedDisplayPanel.addTab("Fock State Coefficients", null, new FermionCoefficientPanel(this),
+                                      "Displays coefficients of Fock states");
+        getContentPane().add(tabbedDisplayPanel, BorderLayout.CENTER);
+        if(selectedIndex>=0) tabbedDisplayPanel.setSelectedIndex(selectedIndex);
     }
 
     protected void setupControlPanel() {
@@ -174,6 +189,8 @@ public abstract class SimulatorFrame extends JFrame {
                 ColumnSpec.decode("74px"),
                 FormFactory.LABEL_COMPONENT_GAP_COLSPEC,},
             new RowSpec[] {
+                FormFactory.MIN_ROWSPEC,
+                FormFactory.MIN_ROWSPEC,
                 FormFactory.MIN_ROWSPEC,
                 FormFactory.MIN_ROWSPEC,
                 FormFactory.MIN_ROWSPEC,
@@ -214,11 +231,9 @@ public abstract class SimulatorFrame extends JFrame {
         ButtonGroup group = new ButtonGroup();
         group.add(scalarButton);
         group.add(fermionButton);
-        group.add(bothButton);
 
         // set default
         scalarButton.setSelected(true);
-        bothButton.setEnabled(false); // disable the "both"-button for the moment
 
         // add change listener
         ChangeListener cl = new ChangeListener() {
@@ -228,11 +243,9 @@ public abstract class SimulatorFrame extends JFrame {
         };
         scalarButton.addChangeListener(cl);
         fermionButton.addChangeListener(cl);
-        bothButton.addChangeListener(cl);
 
         controlPanel.add(scalarButton, "1, " + (_controlPanelRowAdder) + ", 3, 1, left, center");
-        controlPanel.add(fermionButton, "1, " + (_controlPanelRowAdder) + ", 3, 1, center, center");
-        controlPanel.add(bothButton, "1, " + (_controlPanelRowAdder++) + ", 3, 1, right, center");
+        controlPanel.add(fermionButton, "1, " + (_controlPanelRowAdder++) + ", 3, 1, center, center");
     }
 
     protected void setupPresetSelector() {
@@ -292,7 +305,7 @@ public abstract class SimulatorFrame extends JFrame {
 
         // add buttons to control panel
         controlPanel.add(calculateButton, "2, " + (_controlPanelRowAdder++));
-        controlPanel.add(Box.createVerticalStrut(20), "2, " + (_controlPanelRowAdder++));
+        controlPanel.add(Box.createVerticalStrut(10), "2, " + (_controlPanelRowAdder++));
 
         // add real time sliders...
         setupGeneralSlider(dtSlider, encode(getDtMin()), encode(getDtMax()), double.class, null, "Time step");
@@ -314,12 +327,14 @@ public abstract class SimulatorFrame extends JFrame {
                                double.class, interaction, interactionToolTips.get(interaction));
 
         // separator
-        controlPanel.add(Box.createVerticalStrut(20), "2, " + _controlPanelRowAdder++);
+        controlPanel.add(Box.createVerticalStrut(10), "2, " + _controlPanelRowAdder++);
 
         // play and reset buttons
         controlPanel.add(playButton, "2, " + _controlPanelRowAdder++);
         controlPanel.add(resetButton, "2, " + _controlPanelRowAdder++);
         controlPanel.add(groundStateButton, "2, " + _controlPanelRowAdder++);
+        controlPanel.add(firstStateButton, "2, " + _controlPanelRowAdder++);
+        controlPanel.add(secondStateButton, "2, " + _controlPanelRowAdder++);
 
     }
 
@@ -427,6 +442,20 @@ public abstract class SimulatorFrame extends JFrame {
                 start();
             }
         });
+        firstStateButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                stop();
+                state.setToFirstState();
+                start();
+            }
+        });
+        secondStateButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                stop();
+                state.setToSecondState();
+                start();
+            }
+        });
         // add appropriate action listeners
         calculateButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -449,9 +478,9 @@ public abstract class SimulatorFrame extends JFrame {
         setupQuantumState(wavePacket);
 
         // redraw plots and labels
-        getContentPane().remove(displayPanel);
+        getContentPane().remove(tabbedDisplayPanel);
         setupDisplayPanel();
-        displayPanel.drawPlotsAndLabels();
+        tabbedDisplayPanel.drawPlotsAndLabels();
 
         // update interaction sliders
         for (Interaction interaction : interactionSliders.keySet()) {
@@ -470,13 +499,13 @@ public abstract class SimulatorFrame extends JFrame {
         animator.startAnimation();
         playButton.setText(BUTTON_STOP);
         resetButton.setEnabled(true);
-        displayPanel.frameUpdate();
+        tabbedDisplayPanel.frameUpdate();
     }
 
     protected void stop() {
         animator.stopAnimation();
         playButton.setText(BUTTON_PLAY);
-        displayPanel.frameUpdate();
+        tabbedDisplayPanel.frameUpdate();
     }
 
     protected void reset() {
@@ -485,7 +514,7 @@ public abstract class SimulatorFrame extends JFrame {
         playButton.setText(BUTTON_PLAY);
         if (state != null)
             state.reset(); // reset quantum state
-        displayPanel.frameUpdate();
+        tabbedDisplayPanel.frameUpdate();
     }
 
     /**** functions to encode doubles as slider values (integers) ****/
@@ -538,7 +567,7 @@ public abstract class SimulatorFrame extends JFrame {
         // fired by timer
         public void actionPerformed(ActionEvent e) {
             if (!_frozen)
-                displayPanel.frameUpdate();
+                tabbedDisplayPanel.frameUpdate();
         }
     }
 }

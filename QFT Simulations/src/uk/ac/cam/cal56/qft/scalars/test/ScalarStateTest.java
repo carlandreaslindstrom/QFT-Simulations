@@ -27,7 +27,7 @@ public class ScalarStateTest {
         double _dt = 0.01;
         Map<Interaction, Double> lambdas = new HashMap<Interaction, Double>();
         lambdas.put(Interaction.PHI_CUBED, 1.0);
-        State _state = new ScalarState(_N, _Pmax, _m, _dx, _dt, lambdas, new MomentumWavePacket(_N)); // recalculate
+        State _state = new ScalarState(_N, _Pmax, _dt, _dx, _m, lambdas, new MomentumWavePacket(_N)); // recalculate
 
         try {
             // Create file
@@ -63,7 +63,7 @@ public class ScalarStateTest {
         double dtInitial = 0.01;
         Map<Interaction, Double> lambdas = new HashMap<Interaction, Double>();
         lambdas.put(Interaction.PHI_CUBED, 0.0);
-        State state = new ScalarState(N, Pmax, m, dx, dtInitial, lambdas, new MomentumWavePacket(N)); // recalculate
+        State state = new ScalarState(N, Pmax, dtInitial, dx, m, lambdas, new MomentumWavePacket(N)); // recalculate
 
         try {
             // Create file
@@ -103,7 +103,7 @@ public class ScalarStateTest {
         double dt = 0.01;
         Map<Interaction, Double> lambdas = new HashMap<Interaction, Double>();
         lambdas.put(Interaction.PHI_CUBED, 0.1);
-        State state = new ScalarState(N, Pmax, m, dx, dt, lambdas, new MomentumWavePacket(N)); // recalculate
+        State state = new ScalarState(N, Pmax, dt, dx, m, lambdas, new MomentumWavePacket(N)); // recalculate
 
         double tfinal = 1.0;
         while (state.getTime() < tfinal) {
@@ -123,6 +123,87 @@ public class ScalarStateTest {
 
             assertEquals(calc, exact, EPSILON);
         }
-
     }
+
+    @Test
+    public void testEigenEnergyDifference() {
+        int N = 1;
+        int Pmax = 32;
+        double mass = 1.0;
+        double dx = 0.1;
+        double dt = 0.01;
+        Map<Interaction, Double> lambdas = new HashMap<Interaction, Double>();
+        for (double lambda = 1e-6; lambda < 20; lambda *= Math.sqrt(10)) {
+            lambdas.clear();
+            lambdas.put(Interaction.PHI_SQUARED, lambda);
+            State state = new ScalarState(N, Pmax, dt, dx, mass, lambdas, new MomentumWavePacket(N));
+
+            state.setToGroundState();
+            double groundStateEnergy = state.getTotalEnergy();
+            state.setToFirstState();
+            double firstStateEnergy = state.getTotalEnergy();
+
+            double measuredEffectiveMass = firstStateEnergy - groundStateEnergy;
+
+            double predictedEffectiveMass = Math.sqrt(mass * mass + 2 * lambda);
+
+            System.out.println(lambda + " " + Math.abs(measuredEffectiveMass - predictedEffectiveMass) + " " +
+                               measuredEffectiveMass);
+        }
+    }
+
+    @Test
+    public void testEigenEnergyDifferencePmaxAndNDependence() {
+        int N = 4;
+        double mass = 1.0;
+        double dx = 0.1;
+        double dt = 0.01;
+        double lambda = 1e-3;
+        Map<Interaction, Double> lambdas = new HashMap<Interaction, Double>();
+        for (int Pmax = 1; Pmax < 100; Pmax++) {
+            lambdas.clear();
+            lambdas.put(Interaction.PHI_SQUARED, lambda);
+            State state = new ScalarState(N, Pmax, dt, dx, mass, lambdas, new MomentumWavePacket(N));
+
+            state.setToGroundState();
+            double groundStateEnergy = state.getTotalEnergy();
+            state.setToFirstState();
+            double firstStateEnergy = state.getTotalEnergy();
+
+            double measuredEffectiveMass = firstStateEnergy - groundStateEnergy;
+
+            double predictedEffectiveMass = Math.sqrt(mass * mass + 2 * lambda);
+
+            System.out.println(Pmax + " " + Math.abs(measuredEffectiveMass - predictedEffectiveMass) + " " +
+                               measuredEffectiveMass);
+        }
+    }
+    
+    @Test
+    public void testEigenEnergyDifferenceNDependence() {
+        int Pmax = 2;
+        double mass = 1.0;
+        double dx = 1.0;
+        double dt = 0.01;
+        double lambda = 1e-3;
+        Map<Interaction, Double> lambdas = new HashMap<Interaction, Double>();
+        for (int N = 1; N < 100; N++) {
+            lambdas.clear();
+            lambdas.put(Interaction.PHI_SQUARED, lambda);
+            State state = new ScalarState(N, Pmax, dt, dx, mass, lambdas, new MomentumWavePacket(N));
+
+            state.setToGroundState();
+            double groundStateEnergy = state.getTotalEnergy();
+            state.setToFirstState();
+            double firstStateEnergy = state.getTotalEnergy();
+
+            double measuredEffectiveMass = firstStateEnergy - groundStateEnergy;
+
+            double predictedEffectiveMass = Math.sqrt(mass * mass + 2 * lambda);
+
+            System.out.println(N + " " + Math.abs(measuredEffectiveMass - predictedEffectiveMass) + " " +
+                               measuredEffectiveMass);
+        }
+    }
+
 }

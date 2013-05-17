@@ -2,11 +2,10 @@ package uk.ac.cam.cal56.graphics.impl;
 
 import java.awt.Color;
 import java.awt.event.MouseEvent;
-import java.text.DecimalFormat;
 
 import javax.swing.JLabel;
 
-import uk.ac.cam.cal56.graphics.DisplayPanel;
+import uk.ac.cam.cal56.graphics.CoefficientPanel;
 import uk.ac.cam.cal56.graphics.Plot;
 import uk.ac.cam.cal56.graphics.PlotListener;
 import uk.ac.cam.cal56.graphics.SimulatorFrame;
@@ -20,9 +19,9 @@ import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 
 @SuppressWarnings("serial")
-public class ScalarDisplayPanel extends DisplayPanel {
+public class ScalarCoefficientPanel extends CoefficientPanel {
 
-    public ScalarDisplayPanel(SimulatorFrame frame) {
+    public ScalarCoefficientPanel(SimulatorFrame frame) {
         super(frame);
     }
 
@@ -128,28 +127,28 @@ public class ScalarDisplayPanel extends DisplayPanel {
 
         // set font color on labels
         JLabel[] labels = new JLabel[] { prob0Pmom, prob0Ppos, prob1Pmom, plbl, prob1Ppos, xlbl, p2lbl, p1lbl, x2lbl,
-            x1lbl, prob3Pmom, prob3Ppos, _timeLabel, lblTime, _totalProbLabel, _totalEnergyLabel, lblMomentumSpace,
-            lblMom1P, lblMom2P, lblMomRest, lblMomVacuum, lblPositionSpace, lblPos1P, lblPos2P, lblPosRest,
-            lblPosVacuum };
+            x1lbl, prob3Pmom, prob3Ppos, timeLabel, totalProbLabel, totalEnergyLabel, lblMomentumSpace, lblMom1P,
+            lblMom2P, lblMomRest, lblMomVacuum, lblPositionSpace, lblPos1P, lblPos2P, lblPosRest, lblPosVacuum };
         for (JLabel label : labels)
             label.setForeground(DISPLAY_LABEL_COLOR);
         lblClickAndDrag.setForeground(Color.DARK_GRAY); // tips are darker
-
+        rescalingInfoLabel.setForeground(Color.DARK_GRAY);
+        
         // time label
-        _timeLabel.setText("");
-        add(lblTime, "7, 10, right, top");
-        add(_timeLabel, "8, 10, 2, 1, left, top");
+        timeLabel.setText("");
+        add(timeLabel, "8, 10, 2, 1, right, top");
 
         // total probability label
-        _totalProbLabel.setText("");
-        add(_totalProbLabel, "7, 10, 2, 1, left, top");
+        totalProbLabel.setText("");
+        add(totalProbLabel, "7, 10, 2, 1, left, top");
 
         // total energy label
-        _totalEnergyLabel.setText("");
-        add(_totalEnergyLabel, "3, 10, 3, 1, right, top");
+        totalEnergyLabel.setText("");
+        add(totalEnergyLabel, "3, 10, 3, 1, right, top");
 
         // tip labels
         add(lblClickAndDrag, "2, 10, 3, 1, left, top");
+        add(rescalingInfoLabel, "7, 2, 3, 1, right, top");
 
         // PLOT LABELS
         // titles
@@ -291,12 +290,7 @@ public class ScalarDisplayPanel extends DisplayPanel {
         if (frame.state == null)
             return;
 
-        // update time, total probability, total energy
-        _totalEnergyLabel.setText(LABEL_TOTAL_ENERGY +
-                                  new DecimalFormat("#.#E0 GeV").format(frame.state.getTotalEnergy()));
-        _totalProbLabel.setText(LABEL_TOTAL_PROB + new DecimalFormat("##0%").format(frame.state.getModSquared()));
-        _timeLabel.setText("<html>" + new DecimalFormat("0.000").format(frame.state.getTime()) +
-                           " GeV<sup>-1</sup></html>");
+        updateStateStats();
 
         // get coefficients
         Complex c0p = frame.state.getVacuum();

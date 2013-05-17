@@ -16,6 +16,18 @@ import uk.ac.cam.cal56.qft.fockspace.labelling.ScalarLabelling;
 public class StateLabellingTest {
 
     @Test
+    public void scalarIndexVerification() {
+        int[] Nmax = new int[]{0/*1000000000*/,0/*10000*/,0/*1000*/,0/*200*/,0/*100*/,0/*60*/,0/*40*/,0/*20*/,0/*20*/,0/*20*/}; // limit for 0P, 1P, etc...
+        for (int Pmax = 0; Pmax < Nmax.length; Pmax++) {
+            for (int N = 1; N <= Nmax[Pmax]; N++) {
+                ScalarFockState ket = new ScalarFockState(N, Pmax, 0.0, 0.0);
+                for (int i_S : ket)
+                    assertEquals(i_S, ScalarLabelling.label(ket.getParticles(), N));
+            }
+        }
+    }
+
+    @Test
     public void testIndexFromEntries() {
         int N = 130;
         double m = 1.0, dx = 0.1;

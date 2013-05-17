@@ -2,6 +2,7 @@ package uk.ac.cam.cal56.qft.fermions;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -16,9 +17,9 @@ import uk.ac.cam.cal56.qft.impl.SecondOrderSymplecticState;
 
 public class FermionState extends SecondOrderSymplecticState {
 
-    public FermionState(int N, int Pmax, double m, double dx, double dt, Map<Interaction, Double> lambdas,
+    public FermionState(int N, int Pmax, double dt, double dx, double m, Map<Interaction, Double> lambdas,
             WavePacket wavepacket) {
-        super(N, Pmax, m, dx, dt, lambdas, wavepacket);
+        super(N, dt, dx, m, lambdas);
         _S = FermionFockState.S(N, Pmax);
 
         // set coefficients
@@ -28,6 +29,8 @@ public class FermionState extends SecondOrderSymplecticState {
         _Hfree = new FreeHamiltonian(N, Pmax, m, dx, FermionFockState.class);
 
         // add interaction Hamiltonians
+        if (lambdas == null)
+            lambdas = new HashMap<Interaction, Double>();
         for (Entry<Interaction, Double> lambda : lambdas.entrySet())
             _hamiltonians.put(lambda.getKey(), new FermionInteractionHamiltonian(N, Pmax, m, dx, lambda.getKey()));
 
@@ -107,5 +110,9 @@ public class FermionState extends SecondOrderSymplecticState {
         for (int n = S2; n < _S; n++)
             probSquared += _c[n].modSquared(); // add up remaining probabilities
         return probSquared;
+    }
+
+    public Complex[] getCoefficients() {
+        return _c;
     }
 }

@@ -3,6 +3,7 @@ package uk.ac.cam.cal56.qft.fermions;
 import java.util.Map.Entry;
 
 import uk.ac.cam.cal56.qft.Interaction;
+import uk.ac.cam.cal56.qft.fockspace.FockState;
 import uk.ac.cam.cal56.qft.fockspace.impl.FermionFockState;
 import uk.ac.cam.cal56.qft.fockspace.labelling.FermionLabelling;
 import uk.ac.cam.cal56.qft.fockspace.labelling.ScalarLabelling;
@@ -25,11 +26,11 @@ public class FermionInteractionHamiltonian extends InteractionHamiltonian {
     private void calculatePsiSquared() {
         double constantTerm = 0.0;
         for (int p = 0; p < _N; p++) {
-            double emterm = (1 + _m / _E[p]) / (2 * L); // ((E+m)/E) / 2L
-            double epterm = (2.0 * Math.sin(_dx * p / 2.0) / _dx) / (_E[p] + _m); // p/(E+m)
+            double emterm = (_E[p] + _m) / (8 * _E[p] * _E[p] * L); // ((E+m)/E) / 2L
+            double epterm = 2.0 * Math.sin(_dx * p / 2.0) / (_dx * (_E[p] + _m)); // p/(E+m)
             double diffterm = 2 * epterm * emterm;
             double sameterm = (1 - epterm * epterm) * emterm;
-            constantTerm -= sameterm * L;
+            constantTerm -= sameterm * L * 2 * _E[p];
             add(sameterm, new int[] { p }, new int[] {}, new int[] {}, p);
             add(sameterm, new int[] {}, new int[] { p }, new int[] { p });
             add(diffterm, new int[] {}, new int[] {}, new int[] { -p }, p);
@@ -65,7 +66,7 @@ public class FermionInteractionHamiltonian extends InteractionHamiltonian {
             int l_p = ((FermionFockState) _ket).getAntiParticles().contains((Integer) p) ? 1 : 0;
             int n_p = op.getValue()[0];
             int m_p = op.getValue()[1];
-            factor *= FermionFockState.F_p(l_p, n_p, m_p, L);
+            factor *= FermionFockState.F_p(l_p, n_p, m_p, L * 2 * FockState.E_p(p, _N, _m, _dx));
         }
 
         // if not 0, save value in the Hamiltonian matrix
